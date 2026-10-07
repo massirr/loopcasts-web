@@ -15,7 +15,7 @@
   `docs/specs/_template.md` **before** coding non-trivial features.
 - One issue = one branch `feat/<issue>-<slug>` = one PR. CI (build + test) must be green before merge.
 - Log every finished issue in `docs/agent-log.md` (skill `agent-log`).
-- Skills in `.claude/skills/`: `user-story`, `razor-page`, `ef-migration`, `unit-test`, `security-check`, `agent-log`.
+- Skills in `.claude/skills/`: `user-story`, `razor-page`, `ef-migration`, `unit-test`, `security-check`, `agent-log`, `loopcasts-ui` (read before any UI work).
   Run `security-check` before every commit.
 - Tests: `dotnet test tests/LoopCastsWeb.Tests` (xUnit, SQLite in-memory). Don't run `dotnet test` in the
   repo root (two project files → MSB1011).
@@ -31,7 +31,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 - Ask before big changes (architecture, new packages, deleting files or migrations).
 
 ## Stack
-- .NET 10, ASP.NET Core **Razor Pages**, Bootstrap 5 (from the template)
+- .NET 10, ASP.NET Core **Razor Pages**; UI follows the `loopcasts-ui` skill (Bootstrap 5 from the template is being phased out)
 - EF Core 10 + **SQLite** (`loopcasts.db`, connection string "Default" in appsettings.json)
 - ASP.NET **Identity** (default UI) with an **Admin** role
 - macOS, VS Code. Run with `dotnet watch` (port 5180). Exit code 134 = port still used by another run.
