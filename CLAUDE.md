@@ -1,5 +1,25 @@
 # LoopCastsWeb — notes for Claude Code
 
+## HARD RULES (never break, no exceptions)
+1. **No secrets** in code, appsettings*.json, commits, issues, PRs or logs. Never print password/API-key values.
+2. **Secrets only via `dotnet user-secrets`** (dev) or environment variables / App Service settings (server).
+3. **Never commit `*.db`, `*.db-shm`, `*.db-wal`**, `bin/`, `obj/`, `._*`, `.DS_Store`, or anything from the old
+   LoopCasts Dropbox copy (`../LoopCasts`: passwords, customer e-mails). Check `git status` before every commit.
+4. **Never edit a committed migration** (`Migrations/*`). Change the model → `dotnet ef migrations add <Name>`.
+   Only a migration that is not yet on `main` may be removed (`dotnet ef migrations remove`).
+5. **The GitHub repo stays private** (`massirr/loopcasts-web`). Never change visibility, never force-push `main`.
+6. Never trust the browser: prices from `Plans`, plan/country/ownership checked server-side.
+
+## Workflow (spec-driven, one outcome per session)
+- Work comes from a GitHub issue (user story). Write/update `docs/specs/<issue>-<slug>.md` from
+  `docs/specs/_template.md` **before** coding non-trivial features.
+- One issue = one branch `feat/<issue>-<slug>` = one PR. CI (build + test) must be green before merge.
+- Log every finished issue in `docs/agent-log.md` (skill `agent-log`).
+- Skills in `.claude/skills/`: `user-story`, `razor-page`, `ef-migration`, `unit-test`, `security-check`, `agent-log`.
+  Run `security-check` before every commit.
+- Tests: `dotnet test tests/LoopCastsWeb.Tests` (xUnit, SQLite in-memory). Don't run `dotnet test` in the
+  repo root (two project files → MSB1011).
+
 School prototype (Automation Tools, Thomas More) for the fictional company **LoopCasts BV**
 (video training subscriptions). Goal: **remove manual steps** from their order → invoice → account
 process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
@@ -27,6 +47,9 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
+| `tests/LoopCastsWeb.Tests/` | xUnit tests; `TestDb.Create()` = SQLite in-memory `AppDbContext` |
+| `.github/workflows/ci.yml` | build + test on every push/PR |
+| `docs/specs/`, `docs/agent-log.md` | specs per issue, log of agent work |
 | `Pages/Admin/` | Orders (mark paid = fallback for bank transfers), Invoices & accounts. Folder locked by `AdminOnly` policy |
 
 ## Flow
