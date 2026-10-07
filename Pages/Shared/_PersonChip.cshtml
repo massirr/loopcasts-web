@@ -1,0 +1,6 @@
+@model string
+@* A real person as initials of the first two words: "Marieke De Smet" → MD. ViewData["Small"] = true → 24px. *@
+@{
+    var initials = string.Concat(Model.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(w => char.ToUpperInvariant(w[0])));
+}
+<span class="chip @(ViewData["Small"] is true ? "chip-sm" : "")" title="@Model" aria-hidden="true">@initials</span>

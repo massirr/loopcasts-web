@@ -1,0 +1,14 @@
+.invoice-page { width: min(100%, 760px); margin-inline: auto; display: grid; gap: 16px; padding-block: 32px 64px; }
+.invoice-actions { justify-content: flex-end; }
+.invoice { padding: 32px; gap: 24px; }
+@media (max-width: 480px) { .invoice { padding: 16px; } }
+.invoice-head { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.invoice-no { text-align: right; justify-items: end; gap: 2px; }
+.invoice-no h1 { font-size: 1.5rem; }
+.logo-line { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 1.2rem; }
+.pre { white-space: pre-line; }
+.total td { font-weight: 700; font-size: 1.1rem; }
+@media print {
+    .invoice-page { padding: 0; width: 100%; }
+    .invoice { padding: 0; }
+}

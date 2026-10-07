@@ -5,102 +5,112 @@
     var today = DateOnly.FromDateTime(DateTime.UtcNow);
 }
 
-<h1 class="mb-1">My LoopCasts</h1>
-<p class="text-muted mb-4">@Model.Email</p>
+<div class="page">
+    <header class="page-head">
+        <h1>My LoopCasts</h1>
+        <p class="wrap-any">@Model.Email</p>
+    </header>
 
-@if (Model.Message is not null) { <div class="alert alert-success">@Model.Message</div> }
-@if (Model.Error is not null) { <div class="alert alert-danger">@Model.Error</div> }
-@if (Model.SetupUrl is not null)
-{
-    <div class="alert alert-info">
-        Send this link to your colleague so they can choose a password (valid 24 hours, shown only once):
-        <input class="form-control form-control-sm mt-2" readonly value="@Model.SetupUrl" onclick="this.select()" />
-    </div>
-}
-
-@foreach (var l in Model.Licences)
-{
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h5">Team licence · order #@l.Order.Id <span class="badge text-bg-light">@l.Used / @l.Seats seats</span></h2>
-            <table class="table table-sm align-middle mb-3">
-                @foreach (var a in l.Accounts.Where(a => a.IsActive))
-                {
-                    var mine = string.Equals(a.Email, l.Order.Email, StringComparison.OrdinalIgnoreCase);
-                    <tr>
-                        <td>@a.Email @if (mine) { <span class="badge text-bg-secondary">you</span> }</td>
-                        <td class="text-end">
-                            @if (!mine)
-                            {
-                                <form method="post" asp-page-handler="RemoveSeat" asp-route-orderId="@l.Order.Id" asp-route-accountId="@a.Id">
-                                    <button class="btn btn-sm btn-outline-danger">Remove</button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
-            </table>
-            @if (l.Used < l.Seats)
-            {
-                <form method="post" asp-page-handler="AddSeat" asp-route-orderId="@l.Order.Id" class="d-flex gap-2" style="max-width:420px">
-                    <input name="email" type="email" required class="form-control form-control-sm" placeholder="colleague@company.com" />
-                    <button class="btn btn-sm btn-primary text-nowrap">Add colleague</button>
-                </form>
-            }
+    @if (Model.Message is not null) { <p class="flash flash-ok" role="status"><span>@Model.Message</span></p> }
+    @if (Model.Error is not null) { <p class="flash flash-error" role="alert"><span>@Model.Error</span></p> }
+    @if (Model.SetupUrl is not null)
+    {
+        <div class="flash flash-info stack">
+            <label for="setup-url">Send this link to your colleague so they can choose a password. It works for 24 hours and is shown only once.</label>
+            <input id="setup-url" readonly value="@Model.SetupUrl" onclick="this.select()" />
         </div>
-    </div>
-}
+    }
 
-<h2 class="h4">Subscriptions</h2>
-@if (Model.Subscriptions.Count == 0)
-{
-    <p>No subscriptions yet. See <a asp-page="/Pricing">Pricing</a>.</p>
-}
-else
-{
-    <div class="table-responsive mb-5">
-        <table class="table align-middle">
-            <thead><tr><th>Product</th><th>Start</th><th>Access until</th><th>Status</th></tr></thead>
-            <tbody>
+    <section class="section" aria-labelledby="subs-title">
+        <h2 id="subs-title">Your plans</h2>
+        @if (Model.Subscriptions.Count == 0)
+        {
+            <p>No plans yet. <a asp-page="/Pricing">See plans</a> to get started.</p>
+        }
+        else
+        {
+            <div class="grid">
                 @foreach (var s in Model.Subscriptions)
                 {
                     var a = s.Account;
-                    <tr>
-                        <td>@s.PlanName</td>
-                        <td>@a.StartsOn.ToString("dd/MM/yyyy")</td>
-                        <td>@(a.EndsOn?.ToString("dd/MM/yyyy") ?? "lifetime")</td>
-                        <td>
-                            @if (a.IsActive && (a.EndsOn is null || a.EndsOn >= today)) { <span class="badge text-bg-success">active</span> }
-                            else { <span class="badge text-bg-secondary">ended</span> }
-                        </td>
-                    </tr>
+                    var active = a.IsActive && (a.EndsOn is null || a.EndsOn >= today);
+                    <article class="card">
+                        <h3>@s.PlanName</h3>
+                        <p class="status @(active ? "status-ok" : "status-off")">@(active ? "Active" : "Ended")</p>
+                        <dl class="facts">
+                            <dt>Since</dt><dd>@a.StartsOn.ToString("dd/MM/yyyy")</dd>
+                            <dt>Access until</dt><dd>@(a.EndsOn?.ToString("dd/MM/yyyy") ?? "lifetime")</dd>
+                        </dl>
+                    </article>
                 }
-            </tbody>
-        </table>
-    </div>
-}
+            </div>
+        }
+    </section>
 
-<h2 class="h4">Invoices</h2>
-@if (Model.Invoices.Count == 0)
-{
-    <p>No invoices.</p>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead><tr><th>Number</th><th>Date</th><th class="text-end">Total</th><th></th></tr></thead>
-            <tbody>
-                @foreach (var i in Model.Invoices)
-                {
-                    <tr>
-                        <td>@i.Number</td>
-                        <td>@i.IssuedOn.ToString("dd/MM/yyyy")</td>
-                        <td class="text-end">@($"€{i.Total:0.00}")</td>
-                        <td class="text-end"><a asp-page="/Invoice" asp-route-number="@i.Number">View / print</a></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}
+    @foreach (var l in Model.Licences)
+    {
+        <section class="section" aria-labelledby="team-@l.Order.Id">
+            <div class="section-head">
+                <h2 id="team-@l.Order.Id">Your team</h2>
+                <p class="muted num">@l.Used of @l.Seats seats used · team licence, order @l.Order.Id</p>
+            </div>
+            <div class="table-scroll">
+                <table class="table">
+                    <thead><tr><th>Who</th><th class="end"><span class="visually-hidden">Actions</span></th></tr></thead>
+                    <tbody>
+                        @foreach (var a in l.Accounts.Where(a => a.IsActive))
+                        {
+                            var mine = string.Equals(a.Email, l.Order.Email, StringComparison.OrdinalIgnoreCase);
+                            <tr>
+                                <td class="wrap-any">@a.Email @if (mine) { <span class="muted">(you)</span> }</td>
+                                <td class="end">
+                                    @if (!mine)
+                                    {
+                                        <form method="post" asp-page-handler="RemoveSeat" asp-route-orderId="@l.Order.Id" asp-route-accountId="@a.Id">
+                                            <button class="btn-quiet btn-small btn-danger-quiet" aria-label="Remove @a.Email">Remove</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (l.Used < l.Seats)
+            {
+                <form method="post" asp-page-handler="AddSeat" asp-route-orderId="@l.Order.Id" class="add-seat">
+                    <label for="seat-@l.Order.Id" class="visually-hidden">Colleague's e-mail</label>
+                    <input id="seat-@l.Order.Id" name="email" type="email" required placeholder="colleague@company.com" />
+                    <button class="btn-ink">Add colleague</button>
+                </form>
+            }
+        </section>
+    }
+
+    <section class="section" aria-labelledby="inv-title">
+        <h2 id="inv-title">Invoices</h2>
+        @if (Model.Invoices.Count == 0)
+        {
+            <p class="muted">No invoices yet. They appear here as soon as you pay.</p>
+        }
+        else
+        {
+            <div class="table-scroll">
+                <table class="table">
+                    <thead><tr><th>Number</th><th>Date</th><th class="end">Total</th><th class="end"><span class="visually-hidden">Open</span></th></tr></thead>
+                    <tbody>
+                        @foreach (var i in Model.Invoices)
+                        {
+                            <tr>
+                                <td>@i.Number</td>
+                                <td>@i.IssuedOn.ToString("dd/MM/yyyy")</td>
+                                <td class="end">@($"€{i.Total:0.00}")</td>
+                                <td class="end"><a asp-page="/Invoice" asp-route-number="@i.Number" aria-label="View or print invoice @i.Number">View / print</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>

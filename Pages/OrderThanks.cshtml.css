@@ -1,0 +1,2 @@
+.thanks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; align-items: start; }
+.h-small { font-size: 1.05rem; }

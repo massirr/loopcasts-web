@@ -1,0 +1,6 @@
+.plans { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
+.plan { display: flex; flex-direction: column; gap: 12px; }
+.plan .btn-sign { margin-top: auto; }   /* buttons line up, whatever the text above */
+.plan h2 { font-size: 1.15rem; }
+.price { font: 800 2.4rem/1 var(--font-display); }
+.price span { font-family: var(--font-body); font-weight: 400; }

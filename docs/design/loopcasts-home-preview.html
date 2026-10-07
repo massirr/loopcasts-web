@@ -1,0 +1,267 @@
+<title>LoopCasts Homepage Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500;62..125,800&family=Public+Sans:wght@400;600;700&family=Gochi+Hand&display=swap">
+<style>
+/* Layout: left-aligned page on a workflow-canvas dot grid; hero = slogan left, the site's own order workflow right; course grid below.
+   Deliberately single (light) look: the brand is a canvas you draw workflows on. */
+:root{
+  --canvas:#f6f7f4; --dot:#d9ddd6; --surface:#ffffff; --thumb:#eef1ec;
+  --ink:#17202a; --ink-2:#5a6573; --line:#d4d9d2; --edge:#9aa59a;
+  --sign:#f2c230; --enamel:#1f5f8b;
+  --beginner:#3f9d7a; --intermediate:#e0a030; --advanced:#d4513c;
+  --display:"Archivo",system-ui,sans-serif; --body:"Public Sans",system-ui,sans-serif; --hand:"Gochi Hand","Comic Sans MS",cursive;
+  --gutter:24px;
+}
+@media (max-width:720px){:root{--gutter:16px}}
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--ink);font:16px/1.55 var(--body);
+  background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:16px 16px}
+.container{width:min(100%,1320px);margin-inline:auto;padding-inline:var(--gutter)}
+a{color:var(--enamel)}
+:focus-visible{outline:2px solid var(--enamel);outline-offset:2px}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgb(255 255 255 / .55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav .container{display:flex;align-items:center;gap:24px;min-height:60px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font:800 1.15rem var(--display);color:var(--ink);text-decoration:none;margin-right:auto}
+.nav a.link{color:var(--ink);text-decoration:none;font-weight:600;font-size:.95rem}
+.nav a.link:hover{color:var(--enamel)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;min-height:42px;padding:0 18px;border-radius:6px;font:600 .95rem var(--body);border:0;cursor:pointer;text-decoration:none;color:var(--ink);transition:transform .12s ease,box-shadow .12s ease}
+.btn-sign{background:var(--sign);box-shadow:inset 0 -3px 0 rgb(0 0 0 / .18)}
+.btn-sign:active{transform:translateY(1px);box-shadow:inset 0 -1px 0 rgb(0 0 0 / .18)}
+.btn-outline{background:var(--surface);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn-outline:active{transform:translateY(1px)}
+.btn-small{min-height:34px;padding:0 12px;font-size:.85rem}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;align-items:center;padding-block:56px 48px}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);gap:32px;padding-block:32px}}
+.hero h1{margin:0;font:800 clamp(2rem,5vw,3.6rem)/.96 var(--display);font-stretch:118%;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
+.note{font:1.2rem/1.3 var(--hand);color:var(--enamel);transform:rotate(-2deg);transform-origin:left;margin:18px 0 22px;display:block}
+.hero p.sub{margin:0 0 24px;color:var(--ink-2);max-width:46ch}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.team{display:flex;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap;color:var(--ink-2);font-size:.92rem}
+.faces{display:flex}
+.chip{width:30px;height:30px;border-radius:50%;background:var(--enamel);color:#fff;font:700 .7rem var(--body);display:grid;place-items:center;border:2px solid var(--canvas);flex:none}
+.faces .chip+.chip{margin-left:-7px}
+
+.flow-panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:grid;gap:12px;min-width:0}
+.flow-panel .head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.flow-panel h2{margin:0;font:800 1rem var(--display)}
+.flow-panel p{margin:0;font-size:.88rem;color:var(--ink-2)}
+.hero-svg{width:100%;height:auto;display:block;max-width:100%}
+.hero-svg text{font:600 11px var(--body);fill:var(--ink-2)}
+
+/* courses */
+.section{padding-block:24px 56px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.section-head h2{margin:0;font:800 clamp(1.4rem,2.6vw,2rem)/1.1 var(--display)}
+.section-head p{margin:0;color:var(--ink-2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:10px;align-content:start;min-width:0;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--ink)}
+.thumb{background:var(--thumb);border-radius:5px;aspect-ratio:16/7;display:flex;align-items:center;padding:4px 8px;max-width:100%}
+.thumb svg{width:100%;height:auto;display:block}
+.card h3{margin:0;font:800 1.02rem/1.2 var(--display);overflow-wrap:anywhere}
+.meta{display:flex;gap:12px;flex-wrap:wrap;font-size:.84rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.lvl{font-weight:700}
+.lvl.beginner{color:#2e7a5e}.lvl.intermediate{color:#8a5d0c}.lvl.advanced{color:#b23e2b}
+.by{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--ink-2);border-top:1px solid var(--line);padding-top:10px}
+.by .chip{width:24px;height:24px;font-size:.6rem;border:0}
+
+.wf-edge{fill:none;stroke:var(--edge);stroke-width:2}
+.wf-step{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.wf-end{fill:var(--ink)}
+.wf-icon{fill:#fff;stroke:#fff}
+
+/* order-complete demo */
+.paid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:24px}
+@media (max-width:900px){.paid{grid-template-columns:minmax(0,1fr)}}
+.paid h2{margin:0 0 8px;font:800 1.5rem/1.1 var(--display)}
+.paid p{margin:0 0 16px;color:var(--ink-2);max-width:48ch}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:480px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.step{border:2px solid var(--ink);border-radius:8px;padding:12px;display:grid;gap:4px;min-width:0;background:var(--surface);transition:background .18s ease,color .18s ease}
+.step b{font:800 .95rem var(--display);overflow-wrap:anywhere}
+.step span{font-size:.8rem;color:var(--ink-2)}
+.step.on{background:var(--ink);color:#fff}
+.step.on span{color:#c9d1d9}
+
+footer{border-top:1px solid var(--line);background:var(--surface)}
+footer .container{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:20px;font-size:.9rem;color:var(--ink-2)}
+footer .support{display:flex;align-items:center;gap:8px}
+
+.review{padding-block:8px 48px}
+.review .box{border:1px dashed var(--edge);border-radius:8px;padding:20px;background:var(--surface);display:grid;gap:8px}
+.review h2{margin:0;font:800 1.1rem var(--display)}
+.review ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.92rem;max-width:80ch}
+
+/* motion: one orchestrated hero moment + responses to the user */
+@media (prefers-reduced-motion:no-preference){
+  .draw .hero-edge{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw .5s ease forwards;animation-delay:var(--d)}
+  .draw .hero-node{opacity:.001;animation:pop .25s ease forwards;animation-delay:var(--d)}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes pop{from{opacity:.001;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+  .hero-node{transform-box:fill-box;transform-origin:center}
+  .card:hover .wf-edge,.card:focus-visible .wf-edge{stroke:var(--ink);stroke-dasharray:4 5;animation:flow .9s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-18}}
+}
+</style>
+
+<header class="nav">
+  <div class="container">
+    <a class="logo" href="#top" aria-label="LoopCasts home">
+      <svg width="24" height="18" viewBox="0 0 24 18" aria-hidden="true"><rect x="1" y="4" width="8" height="10" rx="2.5" fill="none" stroke="#17202a" stroke-width="2"/><path d="M9 9h6" stroke="#17202a" stroke-width="2"/><rect x="15" y="4" width="8" height="10" rx="2.5" fill="#17202a"/></svg>
+      LoopCasts
+    </a>
+    <a class="link" href="#courses">Courses</a>
+    <a class="link" href="#pricing">Pricing</a>
+    <a class="btn btn-outline btn-small" href="#login">Log in</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="container hero">
+    <div>
+      <h1>Learn automation. Stop doing boring work.</h1>
+      <span class="note">↳ made by five people above a bike shop in Ghent</span>
+      <p class="sub">Video courses on n8n, webhooks, APIs, shell scripting and AI agents. Two new videos every week, since 2019.</p>
+      <div class="actions"><a class="btn btn-sign" href="#pricing">See plans</a><a class="btn btn-outline" href="#courses">Browse courses</a></div>
+      <div class="team">
+        <div class="faces"><span class="chip" title="Marieke">MD</span><span class="chip" title="Lotte">LJ</span><span class="chip" title="Yasmine">YE</span><span class="chip" title="Pieter">PC</span><span class="chip" title="Tom">TV</span></div>
+        <span>Questions? Lotte answers, not a bot.</span>
+      </div>
+    </div>
+
+    <div class="flow-panel">
+      <div class="head"><h2>What happens when you order</h2><button class="btn btn-outline btn-small" id="replay-hero" type="button">Play again</button></div>
+      <svg class="hero-svg draw" id="hero-svg" viewBox="0 0 440 150" role="img" aria-label="Order, payment, invoice and access, connected as a workflow"></svg>
+      <p>This site runs the same kind of workflow we teach: no one types your invoice by hand.</p>
+    </div>
+  </section>
+
+  <section class="container section" id="courses">
+    <div class="section-head">
+      <h2>Courses</h2>
+      <p>Hover a course to see its workflow run.</p>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="container section">
+    <div class="paid">
+      <div>
+        <h2>Thanks, you're in.</h2>
+        <p>On the order confirmation page the steps light up as they finish, so the customer sees their payment turn into an invoice and access.</p>
+        <button class="btn btn-sign" id="run-paid" type="button">Show it</button>
+      </div>
+      <div class="steps" id="steps">
+        <div class="step"><b>Paid</b><span>€149, yearly</span></div>
+        <div class="step"><b>Invoice</b><span>2026-0042</span></div>
+        <div class="step"><b>Account</b><span>until 07/10/2027</span></div>
+        <div class="step"><b>E-mail</b><span>sent to you</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container review">
+    <div class="box">
+      <h2>Changes after the frontend-design review</h2>
+      <ul>
+        <li>Two typefaces plus the handwriting: the monospace meta font is gone; numbers use the body font with even digit widths.</li>
+        <li>No middle dots or uppercase labels in course meta: "Beginner, 12 videos, 1 h 20 min" reads as plain text.</li>
+        <li>One animation that plays by itself (the hero workflow draws once). Everything else answers you: hover a card, press a button, finish an order.</li>
+        <li>Removed the card lift and the staggered fade-in, which are the most common generated-site effects.</li>
+        <li>The hero shows the site's own order workflow instead of a stock picture, so the slogan has proof next to it.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <span>© LoopCasts BV, Ghent</span>
+    <span class="support"><span class="chip" style="width:24px;height:24px;font-size:.6rem;border:0">LJ</span>Questions? Lotte answers, not a bot.</span>
+  </div>
+</footer>
+
+<script>
+const NS="http://www.w3.org/2000/svg";
+const el=(n,a={})=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e};
+const COL={beginner:"#3f9d7a",intermediate:"#e0a030",advanced:"#d4513c"};
+// Real seed catalogue (live courses only), Id = row number in course-catalogue.csv
+const courses=[
+ [1,"n8n basics","beginner",12,80],[2,"Webhooks from zero","beginner",9,55],[3,"REST APIs for data people","beginner",14,105],
+ [4,"Shell scripting that saves your week","intermediate",11,70],[5,"Cron and schedulers","intermediate",7,48],
+ [6,"GitHub Actions in practice","intermediate",10,65],[7,"n8n error handling","intermediate",8,52],
+ [9,"Prompt engineering for workflows","beginner",10,75],[10,"AI agents with n8n","advanced",13,110],
+ [11,"RAG on your own documents","advanced",9,72],[15,"Self-hosting n8n with Docker","intermediate",9,62]];
+const dur=m=>m>=60?`${Math.floor(m/60)} h ${m%60?m%60+" min":""}`.trim():`${m} min`;
+function icon(g,level){
+  if(level==="beginner")g.append(el("path",{d:"M16 29l9 6-9 6z",class:"wf-icon"}));
+  else if(level==="intermediate")g.append(el("path",{d:"M14 35h12M20 29v12",class:"wf-icon","stroke-width":"2.5"}));
+  else g.append(el("path",{d:"M22 27l-7 9h5l-2 8 7-10h-5z",class:"wf-icon","stroke-width":"0"}));
+}
+// Same rules as the loopcasts-ui skill: steps = clamp(ceil(videos/4),2,4); branch if id%3==0 or title has error/if/routing/human
+function thumb(id,title,level,videos){
+  const s=el("svg",{viewBox:"0 0 160 70","aria-hidden":"true"});
+  const n=Math.min(4,Math.max(2,Math.ceil((videos||0)/4)));
+  const branch=id%3===0||/\b(error|if|routing|human)\b/i.test(title);
+  const edges=el("g"),nodes=el("g");s.append(edges,nodes);
+  const trig=el("g");trig.append(el("circle",{cx:20,cy:35,r:13,fill:COL[level]}));icon(trig,level);nodes.append(trig);
+  const sz=n===4?18:22,endX=140,startX=33;
+  if(!branch){
+    const gap=(endX-startX-n*sz)/(n+1);let x=startX;
+    for(let i=0;i<n;i++){const nx=x+gap;edges.append(el("path",{d:`M${x} 35H${nx}`,class:"wf-edge"}));nodes.append(el("rect",{x:nx,y:35-sz/2,width:sz,height:sz,rx:sz/4,class:"wf-step"}));x=nx+sz}
+    edges.append(el("path",{d:`M${x} 35H${endX}`,class:"wf-edge"}));
+  }else{
+    const x1=48;edges.append(el("path",{d:`M${startX} 35H${x1}`,class:"wf-edge"}));nodes.append(el("rect",{x:x1,y:24,width:sz,height:sz,rx:6,class:"wf-step"}));
+    const bx=92,a=x1+sz;
+    edges.append(el("path",{d:`M${a} 35C${a+12} 35 ${bx-12} 16 ${bx} 16`,class:"wf-edge"}),el("path",{d:`M${a} 35C${a+12} 35 ${bx-12} 54 ${bx} 54`,class:"wf-edge"}));
+    nodes.append(el("rect",{x:bx,y:6,width:sz,height:20,rx:6,class:"wf-step"}),el("rect",{x:bx,y:44,width:sz,height:20,rx:6,class:"wf-step"}));
+    const b2=bx+sz;edges.append(el("path",{d:`M${b2} 16C${b2+10} 16 ${endX-10} 35 ${endX} 35`,class:"wf-edge"}),el("path",{d:`M${b2} 54C${b2+10} 54 ${endX-10} 35 ${endX} 35`,class:"wf-edge"}));
+  }
+  nodes.append(el("rect",{x:endX,y:26,width:18,height:18,rx:5,class:"wf-end"}));
+  return s;
+}
+const grid=document.getElementById("grid");
+courses.forEach(([id,title,level,videos,mins])=>{
+  const a=document.createElement("a");a.className="card";a.href="#courses";
+  const t=document.createElement("div");t.className="thumb";t.append(thumb(id,title,level,videos));
+  a.append(t);
+  a.insertAdjacentHTML("beforeend",`<h3>${title}</h3><div class="meta"><span class="lvl ${level}">${level[0].toUpperCase()+level.slice(1)}</span><span>${videos} videos</span><span>${dur(mins)}</span></div><div class="by"><span class="chip">MD</span>Recorded by Marieke</div>`);
+  grid.append(a);
+});
+
+// Hero: the site's own workflow, drawn once on load
+const hs=document.getElementById("hero-svg");
+function buildHero(){
+  hs.innerHTML="";
+  const steps=[["New order",""],["Payment",""],["Invoice",""],["Access",""]];
+  const y=60,x0=58,gap=96;
+  const t=el("g",{class:"hero-node",style:"--d:0s"});t.append(el("circle",{cx:30,cy:y,r:22,fill:"#3f9d7a"}),el("path",{d:`M23 ${y-10}l16 10-16 10z`,fill:"#fff"}));hs.append(t);
+  const ct=el("text",{x:30,y:y+44,"text-anchor":"middle"});ct.textContent="Customer";hs.append(ct);
+  steps.forEach(([label],i)=>{
+    const x=x0+gap*i+38,prev=i===0?52:x-gap+38;
+    const len=x-prev;
+    hs.append(el("path",{d:`M${prev} ${y}H${x}`,class:"wf-edge hero-edge",style:`--len:${len};--d:${0.15+i*0.35}s`}));
+    const last=i===steps.length-1;
+    const g=el("g",{class:"hero-node",style:`--d:${0.4+i*0.35}s`});
+    g.append(el("rect",{x:x,y:y-20,width:40,height:40,rx:9,class:last?"wf-end":"wf-step"}));
+    hs.append(g);
+    const tx=el("text",{x:x+20,y:y+44,"text-anchor":"middle"});tx.textContent=label;hs.append(tx);
+  });
+}
+buildHero();
+document.getElementById("replay-hero").addEventListener("click",()=>{hs.classList.remove("draw");buildHero();void hs.getBoundingClientRect();hs.classList.add("draw")});
+
+// Order-complete: steps light up as they finish
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.getElementById("run-paid").addEventListener("click",()=>{
+  const s=[...document.querySelectorAll("#steps .step")];s.forEach(x=>x.classList.remove("on"));
+  s.forEach((x,i)=>setTimeout(()=>x.classList.add("on"),reduce?0:250+i*350));
+});
+</script>

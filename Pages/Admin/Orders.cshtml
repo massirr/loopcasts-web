@@ -5,77 +5,64 @@
     var open = Model.Orders.Count(o => !o.IsPaid);
 }
 
-<ul class="nav nav-tabs mb-3">
-    <li class="nav-item"><a class="nav-link active" asp-page="/Admin/Orders">Orders</a></li>
-    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Invoices">Invoices &amp; accounts</a></li>
-    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Import">Import</a></li>
-</ul>
+<div class="page admin">
+    <partial name="_AdminNav" />
+    <header class="page-head">
+        <h1>Orders</h1>
+        <p class="num">@Model.Orders.Count orders · @open waiting for payment</p>
+    </header>
 
-<div class="d-flex justify-content-between align-items-end mb-3">
-    <div>
-        <h1 class="mb-1">Orders</h1>
-        <p class="text-muted mb-0">@Model.Orders.Count orders · @open waiting for payment</p>
-    </div>
+    @if (Model.Orders.Count == 0)
+    {
+        <p>No orders yet. Place one on the <a asp-page="/Pricing">Pricing</a> page.</p>
+    }
+    else
+    {
+        <div class="table-scroll">
+            <table class="table table-dense">
+                <thead>
+                    <tr><th>#</th><th>Date</th><th>Customer</th><th>Product</th><th class="end">Price</th><th>Status</th><th><span class="visually-hidden">Actions</span></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.Orders)
+                    {
+                        <tr>
+                            <td>@o.Id</td>
+                            <td>@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="wrap-any">
+                                @o.Name<br />
+                                <span class="muted small">@o.Email</span>
+                                @if (o.IsCompany)
+                                {
+                                    <br /><span class="small">@o.Company · @o.VatNumber</span>
+                                }
+                            </td>
+                            <td>@(Plans.Find(o.PlanCode)?.Name ?? o.PlanCode)</td>
+                            <td class="end">@($"€{o.Price:0.00}")</td>
+                            <td>
+                                @if (o.IsPaid)
+                                {
+                                    <span class="status status-ok">Paid</span>
+                                    <div class="muted small">@o.PaidAt?.ToLocalTime().ToString("dd/MM HH:mm")</div>
+                                }
+                                else
+                                {
+                                    <span class="status status-warn">Waiting</span>
+                                }
+                            </td>
+                            <td class="end">
+                                @if (!o.IsPaid)
+                                {
+                                    @* Fallback for bank transfers: asp-page-handler="MarkPaid" → OnPostMarkPaidAsync *@
+                                    <form method="post" asp-page-handler="MarkPaid" asp-route-id="@o.Id">
+                                        <button type="submit" class="btn-outline btn-small" aria-label="Mark order @o.Id as paid">Mark as paid</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
-
-@if (Model.Orders.Count == 0)
-{
-    <p>No orders yet. Place one on the <a asp-page="/Pricing">Pricing</a> page.</p>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>Product</th>
-                    <th class="text-end">Price</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var o in Model.Orders)
-                {
-                    <tr>
-                        <td>@o.Id</td>
-                        <td>@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>
-                            @o.Name<br />
-                            <span class="small text-muted">@o.Email</span>
-                            @if (o.IsCompany)
-                            {
-                                <br /><span class="small">@o.Company · @o.VatNumber</span>
-                            }
-                        </td>
-                        <td>@(Plans.Find(o.PlanCode)?.Name ?? o.PlanCode)</td>
-                        <td class="text-end">@($"€{o.Price:0.00}")</td>
-                        <td>
-                            @if (o.IsPaid)
-                            {
-                                <span class="badge text-bg-success">Paid</span>
-                                <div class="small text-muted">@o.PaidAt?.ToLocalTime().ToString("dd/MM HH:mm")</div>
-                            }
-                            else
-                            {
-                                <span class="badge text-bg-warning">Waiting</span>
-                            }
-                        </td>
-                        <td class="text-end">
-                            @if (!o.IsPaid)
-                            {
-                                @* asp-page-handler="MarkPaid" → calls OnPostMarkPaidAsync; asp-route-id → passes the order id *@
-                                <form method="post" asp-page-handler="MarkPaid" asp-route-id="@o.Id">
-                                    <button type="submit" class="btn btn-sm btn-outline-success">Mark as paid</button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}

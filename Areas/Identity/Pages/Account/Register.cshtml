@@ -1,0 +1,36 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "New staff account";
+}
+
+<div class="narrow">
+    <partial name="_AccountLogo" />
+    <section class="card">
+        <h1>New staff account</h1>
+        <p class="muted">Only admins can open this page. Customers get their login automatically when they pay.</p>
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form" novalidate>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+            <div class="field">
+                <label asp-for="Input.Email">E-mail</label>
+                <input asp-for="Input.Email" autocomplete="username" />
+                <span asp-validation-for="Input.Email"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.Password">Password</label>
+                <input asp-for="Input.Password" autocomplete="new-password" />
+                <span asp-validation-for="Input.Password"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.ConfirmPassword">Type it again</label>
+                <input asp-for="Input.ConfirmPassword" autocomplete="new-password" />
+                <span asp-validation-for="Input.ConfirmPassword"></span>
+            </div>
+            <button id="registerSubmit" type="submit" class="btn-sign btn-wide">Create account</button>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}

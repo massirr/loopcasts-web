@@ -122,3 +122,28 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Learn:** the page does two POSTs (Preview, Import) with the same data in hidden fields — like a WPF wizard
   that keeps state in the ViewModel between steps; here the "ViewModel" is rebuilt from the form each request,
   so the server parses again instead of trusting the preview.
+
+## 2026-10-07 — #16 Redesign the site with the loopcasts-ui style
+- **What:** every page ported from Bootstrap to the `loopcasts-ui` style (reference `docs/design/loopcasts-home-preview.html`):
+  sticky translucent nav + logo, footer with Lotte's support line, Home hero drawing the site's own order workflow,
+  course cards with workflow thumbnails, Pricing/Order/Pay/OrderThanks (step sequence)/My/Invoice/Admin/Privacy/Error,
+  and our own views for the Identity account pages. `Services/WorkflowThumb.cs` (pure, 26 tests), `Course.Instructor`
+  (migration `AddCourseInstructor`, default "Marieke De Smet"), `Course.DurationText` ("1 h 20 min").
+  Bootstrap CSS/JS removed from the layout; jQuery only with form validation. No monospace font.
+- **Why / decisions:** thumbnails are server-rendered SVG from a tested C# function instead of the reference's JS
+  (same picture, no script needed). Course cards are not links: there is no course page yet and a single-course
+  order does not record the course. "E-mail" step on OrderThanks only lights up when n8n is configured (no false
+  claims). Support line only in the footer (+ home hero), not twice per page.
+  `Account/Manage/*` keeps the Identity package layout (follow-up).
+- **Seller details:** handbook ch. 1–6 do not state LoopCasts' address or VAT number (ch. 3 only mentions the
+  invoice template "NEW.docx"; ch. 7 = passwords, not opened) → `Seller:Address`/`Seller:VatNumber` left empty.
+  Added `Seller:SupportEmail` = support@loopcasts.example (ch. 6).
+- **Checks:** 109 tests. Headless Chrome script (DevTools protocol, no packages; Playwright MCP was disconnected):
+  18 pages × 360/720/1320 px → no sideways scroll, focus outline on real Tab presses. Found and fixed: hidden company
+  fields shown (`display:grid` beat `[hidden]`), `.visually-hidden` escaping `.table-scroll` (+14 px at 360),
+  invoice numbers wrapping, sticky summary over the form on phones, hero labels outside CSS isolation, initials MS→MD.
+  Before/after screenshots: `docs/design/screenshots/` (before = old `main` in a temporary worktree).
+- **Manual steps for Koze:** fill `Seller:Address` / `Seller:VatNumber` when known (invoice template NEW.docx).
+- **Learn:** CSS isolation (`Page.cshtml.css`) adds a `b-xxxx` attribute to the page's own tags; markup written with
+  `Html.Raw` or by a partial doesn't get it, so its styles must live in `site.css` — like a WPF style defined in a
+  UserControl's resources that doesn't reach controls created somewhere else.

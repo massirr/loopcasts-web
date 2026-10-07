@@ -14,6 +14,7 @@ public class CoursesModel : PageModel
     public CoursesModel(AppDbContext db) => _db = db;
 
     public List<Course> Courses { get; set; } = [];
+    public decimal SinglePrice => Plans.Find("single")?.Price ?? 0;
 
     public async Task OnGetAsync()
     {
@@ -29,12 +30,4 @@ public class CoursesModel : PageModel
             .ThenBy(c => c.Title)
             .ToList();
     }
-
-    // Helper used by the view: 80 -> "1h 20m", 55 -> "55 min"
-    public static string FormatDuration(int? minutes) => minutes switch
-    {
-        null => "–",
-        < 60 => $"{minutes} min",
-        _ => $"{minutes / 60}h {minutes % 60:00}m",
-    };
 }

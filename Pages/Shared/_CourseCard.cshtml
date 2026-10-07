@@ -1,0 +1,15 @@
+@model Course
+@* Same order on every card: thumbnail → title → meta → who recorded it *@
+<article class="course">
+    <partial name="_WorkflowThumb" model="Model" />
+    <h3>@Model.Title</h3>
+    <p class="meta">
+        <span class="lvl lvl-@Model.Level.ToString().ToLowerInvariant()">@Model.Level</span>
+        @if (Model.VideoCount is int videos) { <span>@videos videos</span> }
+        @if (Model.DurationText is string duration) { <span>@duration</span> }
+    </p>
+    <p class="by">
+        <partial name="_PersonChip" model="Model.Instructor" view-data="@(new ViewDataDictionary(ViewData) { ["Small"] = true })" />
+        <span>Recorded by @Model.Instructor.Split(' ')[0]</span>
+    </p>
+</article>

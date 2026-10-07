@@ -53,6 +53,10 @@ namespace LoopCastsWeb.Migrations
                     b.Property<int?>("DurationMinutes")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Instructor")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("TEXT");

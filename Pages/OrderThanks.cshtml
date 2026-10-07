@@ -3,50 +3,72 @@
 @{
     ViewData["Title"] = "Thank you";
     var o = Model.Order!;
+    var firstName = o.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? o.Name;
 }
 
-<h1 class="mb-1">Thank you, @o.Name</h1>
-<p class="text-muted mb-4">Your order is saved. Nobody had to retype anything.</p>
+<div class="page">
+    <header class="page-head">
+        <h1>@(o.IsPaid ? $"Thanks, {firstName}. You're in." : $"Thanks, {firstName}. We're waiting for your payment.")</h1>
+        <p>Everything below happened by itself the moment you paid. Nobody had to retype anything.</p>
+    </header>
 
-<div class="card" style="max-width:560px">
-    <div class="card-body">
-        <h2 class="h5">Order #@o.Id</h2>
-        <dl class="row mb-0">
-            <dt class="col-sm-4">Product</dt><dd class="col-sm-8">@(Model.Plan?.Name ?? o.PlanCode)</dd>
-            <dt class="col-sm-4">Price</dt><dd class="col-sm-8">@($"€{o.Price:0.00}") excl. VAT</dd>
-            @if (!string.IsNullOrWhiteSpace(o.Company))
-            {
-                <dt class="col-sm-4">Company</dt><dd class="col-sm-8">@o.Company (@o.VatNumber)</dd>
-            }
-            <dt class="col-sm-4">E-mail</dt><dd class="col-sm-8">@o.Email</dd>
-            <dt class="col-sm-4">Ordered</dt><dd class="col-sm-8">@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
-            <dt class="col-sm-4">Status</dt><dd class="col-sm-8">@(o.IsPaid ? "Paid" : "Waiting for payment")</dd>
-            @if (Model.Invoice is { } inv)
-            {
-                <dt class="col-sm-4">Invoice</dt>
-                <dd class="col-sm-8">
-                    @inv.Number · @($"€{inv.Total:0.00}") incl. @($"{inv.VatRate * 100:0}")% VAT
-                    @if (inv.ReverseCharge) { <span class="badge text-bg-secondary">VAT reverse charged</span> }
-                </dd>
-            }
-            @if (Model.Account is { } acc)
-            {
-                <dt class="col-sm-4">Access</dt>
-                <dd class="col-sm-8">@(acc.EndsOn is { } end ? $"until {end:dd/MM/yyyy}" : "lifetime")</dd>
-            }
-        </dl>
+    @* What really happened on the server; site.js only lights the finished steps up one by one *@
+    <ol class="steps" data-sequence aria-label="What happened">
+        <li class="step @(o.IsPaid ? "on" : "off")">
+            <b>Paid</b>
+            <span>@(o.IsPaid ? $"€{(Model.Invoice?.Total ?? o.Price):0.00}, {Model.Plan?.Name ?? o.PlanCode}" : "waiting")</span>
+        </li>
+        <li class="step @(Model.Invoice is null ? "off" : "on")">
+            <b>Invoice</b>
+            <span class="num">@(Model.Invoice?.Number ?? "after payment")</span>
+        </li>
+        <li class="step @(Model.Account is null ? "off" : "on")">
+            <b>Account</b>
+            <span>@(Model.Account is null ? "after payment" : Model.Account.EndsOn is { } end ? $"until {end:dd/MM/yyyy}" : "lifetime access")</span>
+        </li>
+        <li class="step @(Model.EmailSent ? "on" : "off")">
+            <b>E-mail</b>
+            <span>@(Model.EmailSent ? "sent to you" : "not set up yet")</span>
+        </li>
+    </ol>
+
+    <div class="thanks-grid">
+        <section class="card" aria-labelledby="order-title">
+            <h2 id="order-title" class="h-small">Order @o.Id</h2>
+            <dl class="facts">
+                <dt>Product</dt><dd>@(Model.Plan?.Name ?? o.PlanCode)</dd>
+                <dt>Price</dt><dd>@($"€{o.Price:0.00}") excl. VAT</dd>
+                @if (!string.IsNullOrWhiteSpace(o.Company))
+                {
+                    <dt>Company</dt><dd>@o.Company (@o.VatNumber)</dd>
+                }
+                <dt>E-mail</dt><dd>@o.Email</dd>
+                <dt>Ordered</dt><dd>@o.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                @if (Model.Invoice is { } inv)
+                {
+                    <dt>Invoice</dt>
+                    <dd>
+                        @inv.Number · @($"€{inv.Total:0.00}") incl. @($"{inv.VatRate * 100:0}")% VAT
+                        @if (inv.ReverseCharge) { <br /><span class="muted small">VAT reverse charged</span> }
+                    </dd>
+                }
+            </dl>
+        </section>
+
+        @if (Model.PasswordSetupUrl is not null)
+        {
+            <section class="card" aria-labelledby="login-title">
+                <h2 id="login-title" class="h-small">Your login is ready</h2>
+                <p>Log in with <strong class="wrap-any">@o.Email</strong>. Choose your password first; the link works for 24 hours.</p>
+                <div><a class="btn-sign" href="@Model.PasswordSetupUrl">Set your password</a></div>
+            </section>
+        }
+        else if (Model.HasLogin)
+        {
+            <section class="card">
+                <h2 class="h-small">Start watching</h2>
+                <p><a asp-area="Identity" asp-page="/Account/Login">Log in</a> with @o.Email to see your courses.</p>
+            </section>
+        }
     </div>
 </div>
-
-@if (Model.PasswordSetupUrl is not null)
-{
-    <div class="alert alert-success mt-4" style="max-width:560px">
-        <h2 class="h5">Your LoopCasts login is ready</h2>
-        <p class="mb-2">Log in with <strong>@o.Email</strong>. Choose your password first (link valid for 24 hours):</p>
-        <a class="btn btn-success" href="@Model.PasswordSetupUrl">Set your password</a>
-    </div>
-}
-else if (Model.HasLogin)
-{
-    <p class="mt-4">You can <a asp-area="Identity" asp-page="/Account/Login">log in</a> with @o.Email to see your courses.</p>
-}

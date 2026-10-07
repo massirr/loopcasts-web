@@ -37,7 +37,7 @@ public class OrderModel : PageModel
         if (SelectedPlan is null) return RedirectToPage("/Pricing");
 
         if (Countries.Find(Order.Country) is null)               // never trust the browser: only codes from our list
-            ModelState.AddModelError("Order.Country", "Choose a country from the list.");
+            ModelState.AddModelError("Order.Country", "Choose your country from the list.");
 
         if (SelectedPlan.CompanyOnly)
             Order.IsCompany = true;                      // team licence is always a company, whatever the browser sent
@@ -45,13 +45,13 @@ public class OrderModel : PageModel
         if (Order.IsCompany)
         {
             if (string.IsNullOrWhiteSpace(Order.Company))
-                ModelState.AddModelError("Order.Company", "Company name is required for companies.");
+                ModelState.AddModelError("Order.Company", "Enter your company name.");
 
             if (string.IsNullOrWhiteSpace(Order.VatNumber))
-                ModelState.AddModelError("Order.VatNumber", "VAT number is required for companies.");
+                ModelState.AddModelError("Order.VatNumber", "Enter your company's VAT number, like BE0123456789.");
 
             if (string.IsNullOrWhiteSpace(Order.Address))
-                ModelState.AddModelError("Order.Address", "Address is required for companies.");
+                ModelState.AddModelError("Order.Address", "Enter the company address for the invoice.");
         }
         else
         {

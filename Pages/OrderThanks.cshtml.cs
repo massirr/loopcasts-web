@@ -14,12 +14,14 @@ public class OrderThanksModel : PageModel
     private readonly AppDbContext _db;
     private readonly UserManager<IdentityUser> _users;
     private readonly MemberService _members;
+    private readonly IConfiguration _config;
 
-    public OrderThanksModel(AppDbContext db, UserManager<IdentityUser> users, MemberService members)
+    public OrderThanksModel(AppDbContext db, UserManager<IdentityUser> users, MemberService members, IConfiguration config)
     {
         _db = db;
         _users = users;
         _members = members;
+        _config = config;
     }
 
     public Order? Order { get; set; }
@@ -28,6 +30,9 @@ public class OrderThanksModel : PageModel
     public Account? Account { get; set; }
     public string? PasswordSetupUrl { get; set; }   // first order: "choose your password"
     public bool HasLogin { get; set; }              // returning customer: "log in"
+
+    // The invoice e-mail only goes out when the n8n webhook is configured (#5): don't claim it otherwise
+    public bool EmailSent => Invoice is not null && !string.IsNullOrEmpty(_config["N8n:WebhookUrl"]);
 
     public async Task<IActionResult> OnGetAsync(int id, string? key)
     {

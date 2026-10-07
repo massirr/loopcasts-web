@@ -2,77 +2,86 @@
 @model OrderModel
 @{
     ViewData["Title"] = "Order";
+    var plan = Model.SelectedPlan!;
 }
 
-<h1 class="mb-1">Order: @Model.SelectedPlan!.Name</h1>
-<p class="text-muted mb-4">@($"€{Model.SelectedPlan.Price:0}") excl. VAT · @Model.SelectedPlan.Detail</p>
+<div class="page">
+    <header class="page-head">
+        <h1>Your order</h1>
+        <p>We need a few details for your invoice and your login. Takes a minute.</p>
+    </header>
 
-<form method="post" class="row g-3" style="max-width:720px">
-    <input type="hidden" asp-for="Order.PlanCode" />
+    <div class="order-layout">
+        <form method="post" class="form" novalidate>
+            <input type="hidden" asp-for="Order.PlanCode" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
-    <div class="col-md-6">
-        <label asp-for="Order.Name" class="form-label"></label>
-        <input asp-for="Order.Name" class="form-control" />
-        <span asp-validation-for="Order.Name" class="text-danger small"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Order.Email" class="form-label"></label>
-        <input asp-for="Order.Email" class="form-control" />
-        <span asp-validation-for="Order.Email" class="text-danger small"></span>
-    </div>
-
-    <div class="col-md-6">
-        <label asp-for="Order.Country" class="form-label"></label>
-        <select asp-for="Order.Country" asp-items="Model.CountryOptions" class="form-select">
-            <option value="">Choose your country…</option>
-        </select>
-        <span asp-validation-for="Order.Country" class="text-danger small"></span>
-    </div>
-
-    @if (Model.SelectedPlan.CompanyOnly)
-    {
-        @* Team licence: always a company, so no checkbox *@
-        <input type="hidden" asp-for="Order.IsCompany" value="true" />
-        <div class="col-12"><p class="small text-muted mb-0">The team licence is for companies, so we need your company details.</p></div>
-    }
-    else
-    {
-        <div class="col-12">
-            <div class="form-check">
-                <input asp-for="Order.IsCompany" class="form-check-input" />
-                <label asp-for="Order.IsCompany" class="form-check-label"></label>
-            </div>
-        </div>
-    }
-
-    @* Company fields: hidden for individuals, shown when the box is checked (or always for the team licence) *@
-    <div id="company-fields" class="col-12" hidden="@(!Model.Order.IsCompany)">
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label asp-for="Order.Company" class="form-label"></label>
-                <input asp-for="Order.Company" class="form-control" />
-                <span asp-validation-for="Order.Company" class="text-danger small"></span>
+            <div class="field">
+                <label asp-for="Order.Name">Name</label>
+                <input asp-for="Order.Name" autocomplete="name" />
+                <span asp-validation-for="Order.Name"></span>
             </div>
 
-            <div class="col-md-6">
-                <label asp-for="Order.VatNumber" class="form-label"></label>
-                <input asp-for="Order.VatNumber" class="form-control" placeholder="BE0123.456.789" />
-                <span asp-validation-for="Order.VatNumber" class="text-danger small"></span>
+            <div class="field">
+                <label asp-for="Order.Email">E-mail <span class="field-hint">your login and where the invoice goes</span></label>
+                <input asp-for="Order.Email" type="email" autocomplete="email" />
+                <span asp-validation-for="Order.Email"></span>
             </div>
 
-            <div class="col-12">
-                <label asp-for="Order.Address" class="form-label"></label>
-                <input asp-for="Order.Address" class="form-control" />
-                <span asp-validation-for="Order.Address" class="text-danger small"></span>
+            <div class="field">
+                <label asp-for="Order.Country">Country</label>
+                <select asp-for="Order.Country" asp-items="Model.CountryOptions" autocomplete="country">
+                    <option value="">Choose your country…</option>
+                </select>
+                <span asp-validation-for="Order.Country"></span>
             </div>
-        </div>
-    </div>
 
-    <div class="col-12">
-        <button type="submit" class="btn btn-primary">Place order</button>
+            @if (plan.CompanyOnly)
+            {
+                @* Team licence: always a company, so no checkbox *@
+                <input type="hidden" asp-for="Order.IsCompany" value="true" />
+                <p class="muted small">The team licence is for companies, so we need your company details.</p>
+            }
+            else
+            {
+                <label class="check">
+                    <input asp-for="Order.IsCompany" />
+                    I'm ordering for a company
+                </label>
+            }
+
+            @* Company fields: hidden for individuals, shown when the box is checked (or always for the team licence) *@
+            <fieldset id="company-fields" class="form company" hidden="@(!Model.Order.IsCompany)">
+                <legend class="visually-hidden">Company details</legend>
+                <div class="field">
+                    <label asp-for="Order.Company">Company name</label>
+                    <input asp-for="Order.Company" autocomplete="organization" />
+                    <span asp-validation-for="Order.Company"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Order.VatNumber">VAT number</label>
+                    <input asp-for="Order.VatNumber" placeholder="BE0123456789" />
+                    <span asp-validation-for="Order.VatNumber"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Order.Address">Address <span class="field-hint">street, number, postcode, city</span></label>
+                    <input asp-for="Order.Address" autocomplete="street-address" />
+                    <span asp-validation-for="Order.Address"></span>
+                </div>
+            </fieldset>
+
+            <div><button type="submit" class="btn-sign">Continue to payment</button></div>
+        </form>
+
+        <aside class="card summary" aria-label="Your plan">
+            <h2 class="h-small">@plan.Name</h2>
+            <p class="price num">@($"€{plan.Price:0}")</p>
+            <p class="muted small">excl. VAT · @plan.Detail</p>
+            <p class="small">VAT depends on your country and whether you order as a company. You see the total before you pay.</p>
+            <a class="small" asp-page="/Pricing">Choose another plan</a>
+        </aside>
     </div>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

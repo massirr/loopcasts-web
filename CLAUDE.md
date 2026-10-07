@@ -15,7 +15,7 @@
   `docs/specs/_template.md` **before** coding non-trivial features.
 - One issue = one branch `feat/<issue>-<slug>` = one PR. CI (build + test) must be green before merge.
 - Log every finished issue in `docs/agent-log.md` (skill `agent-log`).
-- Skills in `.claude/skills/`: `user-story`, `razor-page`, `ef-migration`, `unit-test`, `security-check`, `agent-log`.
+- Skills in `.claude/skills/`: `user-story`, `razor-page`, `ef-migration`, `unit-test`, `security-check`, `agent-log`, `loopcasts-ui` (read before any UI work).
   Run `security-check` before every commit.
 - Tests: `dotnet test tests/LoopCastsWeb.Tests` (xUnit, SQLite in-memory). Don't run `dotnet test` in the
   repo root (two project files → MSB1011).
@@ -31,7 +31,8 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 - Ask before big changes (architecture, new packages, deleting files or migrations).
 
 ## Stack
-- .NET 10, ASP.NET Core **Razor Pages**, Bootstrap 5 (from the template)
+- .NET 10, ASP.NET Core **Razor Pages**; UI follows the `loopcasts-ui` skill (own CSS in `wwwroot/css/site.css`, no Bootstrap;
+  jQuery only for form validation via `_ValidationScriptsPartial`)
 - EF Core 10 + **SQLite** (`loopcasts.db`, connection string "Default" in appsettings.json)
 - ASP.NET **Identity** (default UI) with an **Admin** role
 - macOS, VS Code. Run with `dotnet watch` (port 5180). Exit code 134 = port still used by another run.
@@ -51,6 +52,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
 | `Services/TeamSeats.cs` | Team licence: buyer adds/removes colleagues on /My (`Plan.Seats`), seat = Account on the team order |
 | `Services/OldDataImport.cs` | One-time import of the old orders sheet + invoice register (clean, report, idempotent); UI `/Admin/Import` |
+| `Services/WorkflowThumb.cs` | Course → workflow thumbnail geometry (pure, unit-tested); drawn by `Pages/Shared/_WorkflowThumb` |
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
 | `tests/LoopCastsWeb.Tests/` | xUnit tests; `TestDb.Create()` = SQLite in-memory `AppDbContext` |
@@ -58,6 +60,8 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `.github/workflows/deploy.yml` | after green CI on main → Azure App Service (inactive until set up, `docs/deploy-azure.md`) |
 | `docs/specs/`, `docs/agent-log.md` | specs per issue, log of agent work |
 | `Pages/My`, `Pages/Invoice` | Logged-in customer: subscriptions + invoices; printable invoice (own only, Admin all) |
+| `Pages/Shared/` | `_Layout`, `_Logo`, `_CourseCard`, `_WorkflowThumb`, `_PersonChip`, `_SupportLine`, `_LoginPartial` |
+| `Areas/Identity/Pages/Account/` | Our views for Login, Register, Forgot/Reset password, Access denied, Lockout (Identity package PageModels) |
 | `Pages/Admin/` | Orders (mark paid = fallback for bank transfers), Invoices & accounts. Folder locked by `AdminOnly` policy |
 
 ## Flow
@@ -84,6 +88,8 @@ access end date, "Set your password" link on the e-mail's first paid order).
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
 - Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). Invoice e-mail + set-password link via n8n (#5, `N8n:WebhookUrl`); monthly re-billing not built.
 - Old data (#7): imported invoices keep their old numbers/amounts. Credit notes are not modelled yet (report only).
+- Redesign (#16): `Account/Manage/*` (2FA, personal data) still uses the Identity package layout (its own Bootstrap).
+  Seller address + VAT number are not in the handbook (ch. 1–6) → `Seller:Address`/`Seller:VatNumber` still empty.
 - Later in the semester: chatbot (AI component), n8n workflows/webhooks, newsletter unsubscribe.
 - Password manager (Bitwarden/Vaultwarden) for `paswoorden.xlsx` is a recommendation, not code.
 - Never commit the old LoopCasts Dropbox copy (passwords, customer e-mails) or `*.db` files.
