@@ -6,6 +6,7 @@ public class Invoice
     public int OrderId { get; set; }
     public string Number { get; set; } = "";
     public DateOnly IssuedOn { get; set; }
+    public string Description { get; set; } = "";   // snapshot of the product name at that moment
     public string BillingName { get; set; } = "";
     public string? BillingCompany { get; set; }
     public string? BillingVatNumber { get; set; }

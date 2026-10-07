@@ -105,6 +105,10 @@ namespace LoopCastsWeb.Migrations
                     b.Property<string>("BillingVatNumber")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateOnly>("IssuedOn")
                         .HasColumnType("TEXT");
 

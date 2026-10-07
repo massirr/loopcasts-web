@@ -24,7 +24,7 @@
             @foreach (var i in Model.Invoices)
             {
                 <tr>
-                    <td><strong>@i.Number</strong></td>
+                    <td><a asp-page="/Invoice" asp-route-number="@i.Number"><strong>@i.Number</strong></a></td>
                     <td>@i.IssuedOn.ToString("dd/MM/yyyy")</td>
                     <td>@(i.BillingCompany ?? i.BillingName) <span class="small text-muted">@i.BillingCountry</span></td>
                     <td class="text-end">@($"€{i.AmountExclVat:0.00}")</td>
