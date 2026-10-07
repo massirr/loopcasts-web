@@ -45,6 +45,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Data/AdminSeeder.cs` | Creates Admin role + admin users from config `SeedAdmins:N:Email/Password` (**user-secrets**) |
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
+| `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
 | `tests/LoopCastsWeb.Tests/` | xUnit tests; `TestDb.Create()` = SQLite in-memory `AppDbContext` |
@@ -54,7 +55,9 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 
 ## Flow
 Pricing → `/Order?plan=…` (validation, company fields only for companies, team licence = company only)
-→ `/Pay?id=` (mock payment) → `PaymentService.MarkPaidAsync` → `/OrderThanks` (invoice nr + access end date).
+→ `/Pay?id=&key=` (mock payment) → `PaymentService.MarkPaidAsync` → `/OrderThanks?id=&key=` (invoice nr,
+access end date, "Set your password" link on the e-mail's first paid order).
+`key` = `Order.AccessKey` (random): order ids are guessable, so Pay/OrderThanks always check `Order.Opens(key)`.
 
 ## Design rules (keep these)
 - **Never trust the browser**: price comes from `Plans`, plan/country are checked server-side.
@@ -66,11 +69,8 @@ Pricing → `/Order?plan=…` (validation, company fields only for companies, te
 - Post-Redirect-Get after every POST.
 
 ## Known limitations / next steps
-- **Customer login (planned right after the class demo):** payment creates an `Account` row but no
-  Identity user, so customers can't log in. Plan: in `PaymentService` also create an `IdentityUser`
-  with role "Member" and no password → password-setup link (`GeneratePasswordResetTokenAsync`), shown on
-  OrderThanks for now, later e-mailed via n8n → `/My` page (subscription, end date, invoices).
-  Staff already have `/Identity/Account/Manage` (linked from the e-mail in the navbar).
+- Customer login (#1, done): set-password link is shown on OrderThanks for the first paid order only; it is not
+  e-mailed yet (#5). "Forgot password" on the login page sends nothing until an e-mail sender exists.
 - Payment is a mock; real version = Mollie test mode + webhook (needs a public URL, e.g. a tunnel).
 - Team licence creates only the buyer's seat; the other 4 seats are not built yet.
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).

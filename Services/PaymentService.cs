@@ -16,11 +16,13 @@ namespace LoopCastsWeb.Services;
 public class PaymentService
 {
     private readonly AppDbContext _db;
+    private readonly MemberService _members;
     private readonly ILogger<PaymentService> _logger;
 
-    public PaymentService(AppDbContext db, ILogger<PaymentService> logger)
+    public PaymentService(AppDbContext db, MemberService members, ILogger<PaymentService> logger)
     {
         _db = db;
+        _members = members;
         _logger = logger;
     }
 
@@ -30,8 +32,24 @@ public class PaymentService
         var order = await _db.Orders.FindAsync(orderId);
         if (order is null) return false;
 
-        if (order.IsPaid) return true;          // paid twice (double click, webhook sent twice)? do nothing the 2nd time
+        if (!order.IsPaid)                      // paid twice (double click, webhook sent twice)? no 2nd invoice
+            await RecordPaymentAsync(order);
 
+        // 4. Login for the customer — AFTER the payment is safely saved: if this fails, the payment is not lost,
+        //    and the next call (webhook retry) tries again because EnsureMemberAsync is idempotent.
+        try
+        {
+            await _members.EnsureMemberAsync(order.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Order {OrderId} is paid, but creating the customer login failed", order.Id);
+        }
+        return true;
+    }
+
+    private async Task RecordPaymentAsync(Order order)
+    {
         var now = DateTime.UtcNow;
         var today = DateOnly.FromDateTime(now);
 
@@ -72,7 +90,6 @@ public class PaymentService
 
         await _db.SaveChangesAsync();           // one transaction for all three
         _logger.LogInformation("Order {OrderId} paid → invoice {Number}", order.Id, invoice.Number);
-        return true;
     }
 
     /// "2026-0001", "2026-0002", ... The database has a UNIQUE index on Number,

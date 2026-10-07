@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using LoopCastsWeb.Data;
 using LoopCastsWeb.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -66,10 +67,11 @@ public class OrderModel : PageModel
         Order.Price = SelectedPlan.Price;
         // TODO 2: set Order.CreatedAt to the current time (hint: DateTime.UtcNow)
         Order.CreatedAt = DateTime.UtcNow;
+        Order.AccessKey = Convert.ToHexString(RandomNumberGenerator.GetBytes(16));
         // TODO 3: add Order to _db.Orders and save (look at how the importer saves)
         _db.Orders.Add(Order);
         await _db.SaveChangesAsync();
 
-        return RedirectToPage("/Pay", new { id = Order.Id });   // next: pay (mock checkout)
+        return RedirectToPage("/Pay", new { id = Order.Id, key = Order.AccessKey });   // next: pay (mock checkout)
     }
 }

@@ -37,3 +37,16 @@
         </dl>
     </div>
 </div>
+
+@if (Model.PasswordSetupUrl is not null)
+{
+    <div class="alert alert-success mt-4" style="max-width:560px">
+        <h2 class="h5">Your LoopCasts login is ready</h2>
+        <p class="mb-2">Log in with <strong>@o.Email</strong>. Choose your password first (link valid for 24 hours):</p>
+        <a class="btn btn-success" href="@Model.PasswordSetupUrl">Set your password</a>
+    </div>
+}
+else if (Model.HasLogin)
+{
+    <p class="mt-4">You can <a asp-area="Identity" asp-page="/Account/Login">log in</a> with @o.Email to see your courses.</p>
+}

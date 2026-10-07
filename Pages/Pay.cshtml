@@ -17,7 +17,7 @@
             <p class="display-6 my-3">@($"€{o.Price:0.00}")</p>
             <p class="small text-muted">excl. VAT · @o.Email</p>
 
-            <form method="post" asp-route-id="@o.Id">
+            <form method="post" asp-route-id="@o.Id" asp-route-key="@o.AccessKey">
                 <button type="submit" class="btn btn-primary w-100">Pay @($"€{o.Price:0.00}") (test)</button>
             </form>
         </div>
