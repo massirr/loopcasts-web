@@ -42,3 +42,21 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Manual steps for Koze:** fill `Seller:Address` and `Seller:VatNumber` in `appsettings.json`.
 - **Learn:** `[Authorize]` on a PageModel = WPF's "you can't open this window unless logged in", but enforced by the
   server on every request.
+
+## 2026-10-07 — #3 Mollie payment + webhook
+- **What:** `MollieService` + `POST /webhooks/mollie`; `/Pay` redirects to Mollie when `Mollie:ApiKey` is set and
+  checks the status when the customer returns; `Order.MolliePaymentId` (migration `AddMolliePaymentId`).
+  Pay page now shows the total incl. VAT (what Mollie charges).
+- **Why / decisions:** no Mollie NuGet package: two REST calls with `HttpClient` + `System.Text.Json` are enough
+  and easier to read. The webhook trusts only Mollie's answer (status, own payment id, amount).
+  Return-check means it works on localhost without a tunnel; the webhook is the safety net when the customer
+  closes the tab.
+- **Bug found by manual test:** without an API key a fake `id=tr_…` returned 500 (Mollie 401) → `SyncAsync` now
+  does nothing when disabled (+ test).
+- **Tests:** 44 passing (11 Mollie). Not tested against the real Mollie API (no key available to the agent).
+- **Manual steps for Koze:** Mollie dashboard → test API key →
+  `dotnet user-secrets set "Mollie:ApiKey" "test_..."`; order → Pay → pick "Paid" on Mollie's test screen →
+  back on OrderThanks with invoice. Optional webhook: `cloudflared tunnel --url http://localhost:5180` →
+  `dotnet user-secrets set "Mollie:WebhookBaseUrl" "https://<tunnel>"`.
+- **Learn:** a typed HttpClient (`AddHttpClient<MollieService>`) is like injecting a pre-configured service in
+  WPF: base address + auth header set once in Program.cs; tests swap only the "network cable" (the handler).

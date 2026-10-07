@@ -175,6 +175,9 @@ namespace LoopCastsWeb.Migrations
                     b.Property<bool>("IsPaid")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("MolliePaymentId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
