@@ -1,6 +1,7 @@
 using LoopCastsWeb.Data;
 using LoopCastsWeb.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,9 @@ builder.Services.AddHttpClient<MollieService>(client =>
     if (builder.Configuration["Mollie:ApiKey"] is { Length: > 0 } key)
         client.DefaultRequestHeaders.Authorization = new("Bearer", key);
 });
+// n8n webhook for e-mails (N8n:WebhookUrl). Also Identity's e-mail sender, so "Forgot password" works.
+builder.Services.AddHttpClient<N8nNotifier>(client => client.Timeout = TimeSpan.FromSeconds(10));
+builder.Services.AddTransient<IEmailSender>(sp => sp.GetRequiredService<N8nNotifier>());
 builder.Services.AddHostedService<ExpireAccountsService>();   // nightly: switch off expired accounts
 
 var app = builder.Build();

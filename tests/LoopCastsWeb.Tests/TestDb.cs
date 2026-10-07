@@ -14,8 +14,10 @@ public static class TestDb
     public static AppDbContext Create() => Services().GetRequiredService<AppDbContext>();
 
     /// The app's services (Identity, PaymentService, ...) on an in-memory database, like Program.cs registers them.
-    /// mollie: fake Mollie API (null = no API key configured, like a dev machine without user-secrets).
-    public static ServiceProvider Services(HttpMessageHandler? mollie = null)
+    /// mollie / n8n: fake HTTP endpoints (null = not configured, like a dev machine without user-secrets).
+    /// config: extra settings, e.g. { ["N8n:WebhookUrl"] = "https://n8n.test/webhook/x" }.
+    public static ServiceProvider Services(HttpMessageHandler? mollie = null, HttpMessageHandler? n8n = null,
+        Dictionary<string, string?>? config = null)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();   // the in-memory db exists as long as this connection is open
@@ -31,7 +33,9 @@ public static class TestDb
         services.AddScoped<MemberService>();
         services.AddScoped<PaymentService>();
         services.AddScoped<TeamSeats>();
-        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(config ?? []).Build());
+        var n8nClient = services.AddHttpClient<N8nNotifier>();
+        if (n8n is not null) n8nClient.ConfigurePrimaryHttpMessageHandler(() => n8n);
         var client = services.AddHttpClient<MollieService>(c =>
         {
             c.BaseAddress = new Uri("https://api.mollie.com/v2/");

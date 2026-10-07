@@ -45,6 +45,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Data/AdminSeeder.cs` | Creates Admin role + admin users from config `SeedAdmins:N:Email/Password` (**user-secrets**) |
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
 | `Services/MollieService.cs` | Mollie REST (typed HttpClient): create payment, `SyncAsync` re-fetches status → `MarkPaidAsync`. Webhook `POST /webhooks/mollie` in Program.cs |
+| `Services/N8nNotifier.cs` | Events to the n8n webhook (`invoice.created`, `email`); also Identity's `IEmailSender`. Never throws. See `docs/n8n.md` |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
@@ -73,13 +74,13 @@ access end date, "Set your password" link on the e-mail's first paid order).
 - Post-Redirect-Get after every POST.
 
 ## Known limitations / next steps
-- Customer login (#1, done): set-password link is shown on OrderThanks for the first paid order only; it is not
-  e-mailed yet (#5). "Forgot password" on the login page sends nothing until an e-mail sender exists.
+- Customer login (#1, done): set-password link is shown on OrderThanks for the first paid order only; it is
+  also e-mailed via n8n (#5) when `N8n:WebhookUrl` is set; "Forgot password" goes through n8n too.
 - Mollie (#3): active only when user-secret `Mollie:ApiKey` (test_…) is set, otherwise /Pay is the mock.
   `Mollie:WebhookBaseUrl` = public URL (tunnel/Azure); without it the status is checked when the customer returns.
 - Team seats (#4): colleague setup link is shown to the buyer once, only for a NEW login (else takeover risk).
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
-- Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). No e-mail yet; monthly re-billing not built.
+- Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). Invoice e-mail + set-password link via n8n (#5, `N8n:WebhookUrl`); monthly re-billing not built.
 - Later in the semester: chatbot (AI component), n8n workflows/webhooks, newsletter unsubscribe.
 - Password manager (Bitwarden/Vaultwarden) for `paswoorden.xlsx` is a recommendation, not code.
 - Never commit the old LoopCasts Dropbox copy (passwords, customer e-mails) or `*.db` files.

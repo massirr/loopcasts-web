@@ -72,3 +72,17 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Manual steps for Koze:** none.
 - **Learn:** named handlers (`OnPostAddSeatAsync` + `asp-page-handler="AddSeat"`) are like separate ICommands on
   one ViewModel: one page, several buttons, each with its own method.
+
+## 2026-10-07 — #5 Invoice page + e-mail via n8n
+- **What:** `N8nNotifier` → events `invoice.created` and `email` to one n8n webhook; it is also Identity's
+  `IEmailSender`, so "Forgot password" now really sends. `docs/n8n.md` = workflow to build in n8n.
+- **Why / decisions:** one webhook + Switch node in n8n instead of one URL per e-mail. The e-mailed
+  set-password link is the safe version of the OrderThanks link (only the mailbox owner gets it).
+  No PDF library: the e-mail links to the printable invoice; n8n can add a PDF node later.
+- **Bug found by manual test:** `JsonContent` sends chunked (no Content-Length) → my test receiver saw an empty
+  body. Switched to `StringContent` (works with every receiver).
+- **Tests:** 56 passing. Manual: real app → fake n8n (python) got both events with secret; link works.
+- **Manual steps for Koze:** build the workflow from `docs/n8n.md`, then
+  `dotnet user-secrets set "N8n:WebhookUrl" "…"` and `"N8n:Secret" "…"`.
+- **Learn:** registering one class as two services (`N8nNotifier` and `IEmailSender`) = in WPF, one service
+  implementing two interfaces that different ViewModels ask for.

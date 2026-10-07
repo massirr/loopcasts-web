@@ -47,6 +47,10 @@ public class MemberService
         return (user, created);
     }
 
+    /// Setup code only for a login without password (a customer who already chose one gets no reset link).
+    public async Task<string?> SetupCodeIfNoPasswordAsync(IdentityUser user) =>
+        await _users.HasPasswordAsync(user) ? null : await PasswordSetupCodeAsync(user);
+
     /// The "code" for /Identity/Account/ResetPassword (that page expects the token base64url-encoded).
     public async Task<string> PasswordSetupCodeAsync(IdentityUser user)
     {
