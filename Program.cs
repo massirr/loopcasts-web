@@ -25,7 +25,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(AdminSeeder.AdminRole)));
 
 builder.Services.AddScoped<MemberService>();
-builder.Services.AddScoped<PaymentService>();   // one instance per request, like the DbContext
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<TeamSeats>();   // one instance per request, like the DbContext
 // Mollie REST API. The key comes from user-secrets (Mollie:ApiKey); without a key /Pay stays a mock.
 builder.Services.AddHttpClient<MollieService>(client =>
 {

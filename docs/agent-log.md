@@ -60,3 +60,15 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
   `dotnet user-secrets set "Mollie:WebhookBaseUrl" "https://<tunnel>"`.
 - **Learn:** a typed HttpClient (`AddHttpClient<MollieService>`) is like injecting a pre-configured service in
   WPF: base address + auth header set once in Program.cs; tests swap only the "network cable" (the handler).
+
+## 2026-10-07 — #4 Team licence: manage 5 seats
+- **What:** `TeamSeats` service + seat card on `/My` (add/remove colleagues); `Plan.Seats`;
+  `MemberService.EnsureMemberCreatedAsync` tells whether a login is new.
+- **Why / decisions:** a seat is just an `Account` on the team order, so OrderThanks, /My and the expiry job work
+  without changes. Setup link for a colleague only when their login is new, otherwise a buyer could "add" an
+  existing customer and set that customer's password.
+- **Tests:** 51 passing (7 seat rules). Manual e2e: add, duplicate, invalid e-mail, remove (2/5 → 1/5),
+  anonymous POST → login.
+- **Manual steps for Koze:** none.
+- **Learn:** named handlers (`OnPostAddSeatAsync` + `asp-page-handler="AddSeat"`) are like separate ICommands on
+  one ViewModel: one page, several buttons, each with its own method.
