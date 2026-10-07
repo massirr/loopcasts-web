@@ -1,0 +1,10 @@
+@* Staff sub-navigation, shared by all /Admin pages *@
+@{
+    var current = ViewContext.RouteData.Values["page"] as string;
+    string? Here(string page) => current == page ? "page" : null;
+}
+<nav class="subnav" aria-label="Admin">
+    <a asp-page="/Admin/Orders" aria-current="@Here("/Admin/Orders")">Orders</a>
+    <a asp-page="/Admin/Invoices" aria-current="@Here("/Admin/Invoices")">Invoices &amp; accounts</a>
+    <a asp-page="/Admin/Import" aria-current="@Here("/Admin/Import")">Import</a>
+</nav>

@@ -6,25 +6,20 @@
     var p = Model.Preview;
 }
 
-<ul class="nav nav-tabs mb-3">
-    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Orders">Orders</a></li>
-    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Invoices">Invoices &amp; accounts</a></li>
-    <li class="nav-item"><a class="nav-link active" asp-page="/Admin/Import">Import</a></li>
-</ul>
-
-<div class="import">
-    <header class="import-head">
+<div class="page admin import">
+    <partial name="_AdminNav" />
+    <header class="page-head">
         <h1>Import the old spreadsheets</h1>
-        <p class="muted">Once: the orders sheet and the invoice register (Excel → Save as → CSV UTF-8). First you see what
+        <p>Once: the orders sheet and the invoice register (Excel → Save as → CSV UTF-8). First you see what
             will happen; nothing is saved until you click Import. Customers are not e-mailed.</p>
     </header>
 
-    @if (Model.Message is not null) { <p class="flash ok" role="status">@Model.Message</p> }
-    @if (Model.Error is not null) { <p class="flash error" role="alert">@Model.Error</p> }
+    @if (Model.Message is not null) { <p class="flash flash-ok" role="status"><span>@Model.Message</span></p> }
+    @if (Model.Error is not null) { <p class="flash flash-error" role="alert"><span>@Model.Error</span></p> }
 
     @if (p is null)
     {
-        <form method="post" asp-page-handler="Preview" enctype="multipart/form-data" class="import-form">
+        <form method="post" asp-page-handler="Preview" enctype="multipart/form-data" class="card form import-form">
             <label class="field">
                 <span>Orders (orders-2026.csv)</span>
                 <input type="file" name="orders" accept=".csv,text/csv" required />
@@ -42,11 +37,11 @@
         var counts = p.Report.GroupBy(l => l.Level).ToDictionary(g => g.Key, g => g.Count());
 
         <section class="summary" aria-label="Summary">
-            <div><strong class="mono">@paid</strong><span>paid orders + invoices + accounts</span></div>
-            <div><strong class="mono">@(p.Rows.Count - paid)</strong><span>unpaid orders</span></div>
+            <div><strong class="num">@paid</strong><span>paid orders + invoices + accounts</span></div>
+            <div><strong class="num">@(p.Rows.Count - paid)</strong><span>unpaid orders</span></div>
             @foreach (var level in Enum.GetValues<OldDataImport.Level>())
             {
-                <div class="lvl-@level.ToString().ToLower()"><strong class="mono">@counts.GetValueOrDefault(level)</strong><span>@level</span></div>
+                <div class="lvl-@level.ToString().ToLower()"><strong class="num">@counts.GetValueOrDefault(level)</strong><span>@level</span></div>
             }
         </section>
 
@@ -58,14 +53,14 @@
         </form>
 
         <div class="table-scroll">
-            <table class="report">
+            <table class="table table-dense report">
                 <thead><tr><th>What</th><th>Where</th><th>Details</th></tr></thead>
                 <tbody>
                     @foreach (var l in p.Report.OrderByDescending(l => l.Level))
                     {
                         <tr>
                             <td><span class="tag lvl-@l.Level.ToString().ToLower()">@l.Level</span></td>
-                            <td class="mono nowrap">@l.Where</td>
+                            <td class="nowrap">@l.Where</td>
                             <td class="details">@l.Message</td>
                         </tr>
                     }

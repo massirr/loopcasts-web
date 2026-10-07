@@ -2,26 +2,29 @@
 @model PricingModel
 @{
     ViewData["Title"] = "Pricing";
+    static string Per(Plan p) => p.AccessMonths switch { 1 => "per month", 12 => "per year", null => "once, yours to keep", _ => $"per {p.AccessMonths} months" };
 }
 
-<h1 class="mb-1">Pricing</h1>
-<p class="text-muted mb-4">All prices excl. VAT.</p>
+<div class="page">
+    <header class="page-head">
+        <h1>Pricing</h1>
+        <p>All prices excl. VAT. You see the total with VAT before you pay.</p>
+    </header>
 
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
-    @foreach (var plan in Model.Plans)
-    {
-        <div class="col">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <h2 class="h5">@plan.Name</h2>
-                    <p class="display-6 my-3">@($"€{plan.Price:0}")</p>
-                    <p class="small text-muted">@plan.Detail</p>
-                </div>
-                <div class="card-footer bg-transparent">
-                    @* Before: a mailto: link. Now: our own order form, with the plan already chosen. *@
-                    <a class="btn btn-primary w-100" asp-page="/Order" asp-route-plan="@plan.Code">Order</a>
-                </div>
-            </div>
-        </div>
-    }
+    <div class="plans">
+        @foreach (var plan in Model.Plans)
+        {
+            <article class="card plan">
+                <h2>@plan.Name</h2>
+                <p class="price num">@($"€{plan.Price:0}") <span class="muted small">@Per(plan)</span></p>
+                <p class="muted">@plan.Detail</p>
+                @if (plan.Seats > 1)
+                {
+                    <p class="small"><strong>@plan.Seats seats</strong> · for companies</p>
+                }
+                @* Before: a mailto: link. Now: our own order form, with the plan already chosen. *@
+                <a class="btn-sign btn-wide" asp-page="/Order" asp-route-plan="@plan.Code" aria-label="Order @plan.Name">Order</a>
+            </article>
+        }
+    </div>
 </div>

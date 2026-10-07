@@ -8,12 +8,12 @@ public class Order
 {
     // [BindNever] = the form can never set this (no "IsPaid=true" sent by a crafted POST)
     [BindNever] public int Id { get; set; }
-    [Required]
+    [Required(ErrorMessage = "Enter your name.")]
     public string Name { get; set; } = "";
-    [Required]
-    [EmailAddress]
+    [Required(ErrorMessage = "Enter your e-mail address.")]
+    [EmailAddress(ErrorMessage = "Enter an e-mail address like name@company.com.")]
     public string Email { get; set; } = "";
-    [Required]
+    [Required(ErrorMessage = "Choose your country.")]
     public string Country { get; set; } = "";
 
     // Company details: only required when IsCompany is true (checked in Order.cshtml.cs)

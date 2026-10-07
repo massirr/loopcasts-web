@@ -1,0 +1,13 @@
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 48px; align-items: center; padding-block: 56px 48px; }
+@media (max-width: 900px) { .hero { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 32px; } }
+.hero-copy { display: grid; gap: 20px; justify-items: start; min-width: 0; }
+.hero-title {
+    font-size: clamp(1.9rem, 4.5vw, 3.4rem); font-stretch: 118%; line-height: .98; letter-spacing: -.01em;
+    text-transform: uppercase; overflow-wrap: anywhere;
+}
+.hero-copy .lead { max-width: 46ch; }
+.team { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--ink-2); font-size: .92rem; }
+.flow-panel { margin: 0; }
+.h-small { font-size: 1rem; }
+.hero-svg { width: 100%; height: auto; display: block; }
+.home-courses { padding-bottom: 64px; }

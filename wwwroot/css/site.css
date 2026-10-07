@@ -1,69 +1,243 @@
-/* LoopCasts tokens (loopcasts-ui skill). Pages still on Bootstrap are not affected. */
-:root{
-  --canvas:#f6f7f4; --dot:#d9ddd6; --surface:#ffffff; --thumb:#eef1ec;
-  --ink:#17202a; --ink-2:#5a6573; --line:#d4d9d2; --edge:#9aa59a;
-  --sign:#f2c230; --enamel:#1f5f8b;
-  --beginner:#3f9d7a; --intermediate:#e0a030; --advanced:#d4513c;
-  --ok:#2f8a5b; --warn:#b7791f; --error:#c0392b;
-  --font-display:"Archivo",system-ui,sans-serif;
-  --font-body:"Public Sans",system-ui,sans-serif;
-  --font-mono:"JetBrains Mono",ui-monospace,monospace;
-  --font-hand:"Gochi Hand","Comic Sans MS",cursive;
-  --r-card:8px; --r-btn:6px; --r-thumb:5px; --r-tag:4px;
-  --gutter:24px; --container:1320px;
-  --fast:.18s; --ease:ease;
-}
-@media (max-width:720px){ :root{ --gutter:12px } }
+/* LoopCasts — "Workflow Canvas + Above the Bike Shop" (loopcasts-ui skill).
+   Tokens → base → layout helpers → components → pages shared by several views → motion → print.
+   Page-only tweaks live next to the page in Pages/X.cshtml.css (CSS isolation). */
 
-/* loopcasts-ui buttons */
-.btn-sign, .btn-ink, .btn-outline {
-  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px;
-  border-radius: var(--r-btn); border: 0; font: 600 1rem var(--font-body); text-decoration: none; cursor: pointer;
-  transition: transform .12s var(--ease), box-shadow .12s var(--ease);
+/* ---------- 1. Tokens ---------- */
+:root {
+  --canvas: #f6f7f4; --dot: #d9ddd6; --surface: #ffffff; --thumb: #eef1ec;
+  --ink: #17202a; --ink-2: #5a6573; --line: #d4d9d2; --edge: #9aa59a;
+  --sign: #f2c230; --enamel: #1f5f8b;
+  --beginner: #3f9d7a; --intermediate: #e0a030; --advanced: #d4513c;
+  --beginner-text: #2e7a5e; --intermediate-text: #8a5d0c; --advanced-text: #b23e2b;   /* 4.5:1 on white */
+  --ok: #2f8a5b; --warn: #b7791f; --error: #c0392b;
+  --font-display: "Archivo", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, sans-serif;
+  --font-hand: "Gochi Hand", "Comic Sans MS", cursive;
+  --r-card: 8px; --r-btn: 6px; --r-thumb: 5px; --r-tag: 4px;
+  --gutter: 24px; --container: 1320px;
+  --fast: .18s; --ease: ease;
 }
-.btn-sign { background: var(--sign); color: var(--ink); box-shadow: inset 0 -3px 0 rgb(0 0 0 / .18); }
+@media (max-width: 720px) { :root { --gutter: 12px; } }
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+  background: var(--canvas); color: var(--ink); font: 16px/1.55 var(--font-body);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px); background-size: 16px 16px;
+}
+main { flex: 1; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+h2 { font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+a { color: var(--enamel); text-underline-offset: 2px; }
+a:hover { color: var(--ink); }
+img, svg { max-width: 100%; }
+[hidden] { display: none !important; }   /* the hidden attribute wins over display:grid/flex classes */
+:focus-visible { outline: 2px solid var(--enamel); outline-offset: 2px; }
+::selection { background: var(--sign); color: var(--ink); }
+
+/* forms: plain elements are styled, so even pages we did not write (Identity) look right */
+label { font-weight: 600; }
+input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]), select, textarea {
+  width: 100%; min-height: 42px; padding: 8px 12px; font: inherit; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-btn);
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--enamel); }
+input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--ink); margin: 0; flex: none; }
+input[readonly] { background: var(--thumb); }
+::placeholder { color: #8a939d; }
+.input-validation-error { border-color: var(--error) !important; }
+.field-validation-error, .validation-summary-errors, .text-danger { color: var(--error); font-size: .875rem; }
+.validation-summary-errors ul { margin: 0; padding-left: 18px; }
+.validation-summary-valid { display: none; }
+
+/* ---------- 3. Layout helpers ---------- */
+.container { width: min(100%, var(--container)); margin-inline: auto; padding-inline: var(--gutter); }
+.page { display: grid; gap: 32px; padding-block: 32px 64px; min-width: 0; }
+.page-head { display: grid; gap: 8px; }
+.page-head > p, .lead { color: var(--ink-2); max-width: 65ch; }
+.section { display: grid; gap: 20px; min-width: 0; }
+.section-head { display: flex; justify-content: space-between; align-items: end; gap: 12px 24px; flex-wrap: wrap; }
+.section-head > * { min-width: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 20px; }
+.stack { display: grid; gap: 12px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.muted { color: var(--ink-2); }
+.small { font-size: .875rem; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap-any { overflow-wrap: anywhere; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 4. Components ---------- */
+/* buttons */
+.btn-sign, .btn-ink, .btn-outline, .btn-quiet {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px;
+  border-radius: var(--r-btn); border: 0; font: 600 1rem var(--font-body); text-decoration: none; cursor: pointer;
+  color: var(--ink); transition: transform .12s var(--ease), box-shadow .12s var(--ease);
+}
+.btn-sign { background: var(--sign); box-shadow: inset 0 -3px 0 rgb(0 0 0 / .18); }
 .btn-ink { background: var(--ink); color: #fff; }
-.btn-outline { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
-.btn-sign:focus-visible, .btn-ink:focus-visible, .btn-outline:focus-visible { outline: 2px solid var(--enamel); outline-offset: 2px; }
+.btn-outline { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }
+.btn-quiet { background: transparent; color: var(--enamel); padding: 0 8px; text-decoration: underline; }
+.btn-danger-quiet { color: var(--error); }
+.btn-small { min-height: 34px; padding: 0 12px; font-size: .875rem; }
+.btn-sign:hover, .btn-ink:hover, .btn-outline:hover { color: inherit; }
+.btn-ink:hover { color: #fff; }
+.btn-wide { width: 100%; }
+button[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* cards */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card-tight { padding: 12px; gap: 10px; }
+
+/* definition list (order/invoice summaries) */
+.facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 20px; margin: 0; }
+.facts dt { color: var(--ink-2); }
+.facts dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .facts { grid-template-columns: minmax(0, 1fr); gap: 0; } .facts dd { margin-bottom: 8px; } }
+
+/* tables */
+.table-scroll { position: relative; overflow-x: auto;   /* relative: keeps .visually-hidden inside the scroll box */
+   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); }
+.table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.table th, .table td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
+.table td.wrap-any { white-space: normal; min-width: 180px; }   /* e-mails and names may wrap; numbers never */
+.table th { font-size: .875rem; color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+.table tr:last-child td { border-bottom: 0; }
+.table .end { text-align: right; }
+.table-dense th, .table-dense td { padding: 8px 12px; font-size: .9375rem; }
+
+/* status words (paid/unpaid, active/ended): coloured text with a dot, no pills */
+.status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.status-ok { color: var(--ok); }
+.status-warn { color: var(--warn); }
+.status-error { color: var(--error); }
+.status-off { color: var(--ink-2); }
+
+/* messages after an action */
+.flash { padding: 12px 16px; border-radius: var(--r-card); border: 1px solid currentColor; background: var(--surface); }
+.flash-ok { color: var(--ok); }
+.flash-error { color: var(--error); }
+.flash-info { color: var(--enamel); }
+.flash > * { color: var(--ink); }
+
+/* form layout */
+.form { display: grid; gap: 16px; max-width: 560px; min-width: 0; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field-hint { color: var(--ink-2); font-size: .875rem; font-weight: 400; }
+.check { display: flex; gap: 10px; align-items: center; font-weight: 600; }
+
+/* person chip + support line */
+.chip { width: 28px; height: 28px; border-radius: 50%; background: var(--enamel); color: #fff; font: 700 .68rem/1 var(--font-body); display: inline-grid; place-items: center; flex: none; letter-spacing: .02em; }
+.chip-sm { width: 24px; height: 24px; font-size: .6rem; }
+.faces { display: flex; }
+.faces .chip { border: 2px solid var(--canvas); }
+.faces .chip + .chip { margin-left: -7px; }
+.support { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--ink-2); }
+
+/* the one handwritten note per page */
+.note { display: block; font: 1.25rem/1.3 var(--font-hand); color: var(--enamel); transform: rotate(-2deg); transform-origin: left; }
+
+/* course level word */
+.lvl { font-weight: 700; }
+.lvl-beginner { color: var(--beginner-text); }
+.lvl-intermediate { color: var(--intermediate-text); }
+.lvl-advanced { color: var(--advanced-text); }
+
+/* course card */
+.course { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; transition: border-color var(--fast) var(--ease); }
+.course:hover, .course:focus-within { border-color: var(--ink); }
+.course h3 { font-size: 1.05rem; line-height: 1.2; overflow-wrap: anywhere; }
+.meta { display: flex; gap: 4px 12px; flex-wrap: wrap; font-size: .875rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.by { display: flex; align-items: center; gap: 8px; font-size: .875rem; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 10px; }
+
+/* workflow thumbnail */
+.thumb { background: var(--thumb); border-radius: var(--r-thumb); aspect-ratio: 16 / 7; display: flex; align-items: center; padding: 4px 8px; max-width: 100%; }
+.thumb svg { width: 100%; height: auto; display: block; }
+.wf-edge { fill: none; stroke: var(--edge); stroke-width: 2; }
+.wf-step { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.wf-end { fill: var(--ink); }
+.wf-icon { fill: #fff; stroke: #fff; }
+.wf-beginner { fill: var(--beginner); }
+.wf-intermediate { fill: var(--intermediate); }
+.wf-advanced { fill: var(--advanced); }
+
+/* home hero workflow labels (global: some labels are written as raw SVG, outside CSS isolation) */
+.hero-svg text { font: 600 11px var(--font-body); fill: var(--ink-2); }
+
+/* step sequence (OrderThanks): Paid → Invoice → Account → E-mail */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; list-style: none; margin: 0; padding: 0; }
+@media (max-width: 480px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.step { border: 2px solid var(--ink); border-radius: var(--r-card); padding: 12px; display: grid; gap: 4px; min-width: 0; background: var(--surface); }
+.step b { font: 800 .95rem var(--font-display); }
+.step span { font-size: .8125rem; color: var(--ink-2); overflow-wrap: anywhere; }
+.step.on { background: var(--ink); color: #fff; }
+.step.on span { color: #c9d1d9; }
+.step.off { border-style: dashed; border-color: var(--edge); }
+
+/* centered card pages (login, reset password, pay) */
+.narrow { width: min(100%, 440px); margin-inline: auto; display: grid; gap: 20px; padding-block: 48px 64px; }
+.narrow .card { padding: 24px; gap: 16px; }
+.narrow-logo { justify-self: center; }
+
+/* admin: quieter */
+.subnav { display: flex; gap: 4px 20px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.subnav a { padding: 8px 0; font-weight: 600; color: var(--ink-2); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.subnav a:hover { color: var(--ink); }
+.subnav a[aria-current=page] { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* ---------- 5. Motion (loopcasts-ui §7): only when the visitor did not ask for less motion ---------- */
 @media (prefers-reduced-motion: no-preference) {
   .btn-sign:active, .btn-ink:active, .btn-outline:active { transform: translateY(1px); }
   .btn-sign:active { box-shadow: inset 0 -1px 0 rgb(0 0 0 / .18); }
+
+  /* course card: data flows along the edges while you look at it */
+  .course:hover .wf-edge, .course:focus-within .wf-edge { stroke: var(--ink); stroke-dasharray: 4 5; animation: flow .9s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -18; } }
+
+  /* the one automatic moment: the home hero draws the site's own order workflow */
+  .draw .hero-edge { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw .5s var(--ease) forwards; animation-delay: var(--d); }
+  .draw .hero-node { opacity: .001; animation: pop .25s var(--ease) forwards; animation-delay: var(--d); }
+  .hero-node { transform-box: fill-box; transform-origin: center; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes pop { from { opacity: .001; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+
+  .step { transition: background var(--fast) var(--ease), color var(--fast) var(--ease); }
 }
 
+/* ---------- 6. Print (invoice) ---------- */
 @media print {
-  header, footer, .no-print {
-    display: none !important;
-  }
+  body { background: #fff; display: block; }
+  header, footer, .no-print { display: none !important; }
+  .card, .table-scroll { border: 0; }
+  a { color: inherit; text-decoration: none; }
 }
 
-html {
-  font-size: 14px;
+/* ---------- 7. Nav + footer (layout) ---------- */
+.skip { position: absolute; left: 12px; top: -48px; z-index: 20; background: var(--ink); color: #fff; padding: 8px 12px; border-radius: var(--r-btn); }
+.skip:focus { top: 8px; }
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; border-bottom: 1px solid var(--line);
+  background: rgb(255 255 255 / .55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
+.nav-inner { display: flex; align-items: center; gap: 8px 24px; min-height: 60px; flex-wrap: wrap; padding-block: 8px; }
+.logo { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; color: var(--ink); text-decoration: none; font: 800 1.15rem var(--font-display); }
+.logo:hover { color: var(--ink); }
+.nav-links { display: flex; align-items: center; gap: 4px 20px; flex-wrap: wrap; min-width: 0; }
+.nav-link { color: var(--ink); text-decoration: none; font-weight: 600; font-size: .95rem; padding-block: 4px; border-bottom: 2px solid transparent; }
+.nav-link:hover { color: var(--enamel); }
+.nav-link[aria-current=page] { border-bottom-color: var(--ink); }
+.nav-form { display: contents; }
+.nav-button { background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; font: 600 .95rem/1.55 var(--font-body); padding: 4px 0; }
+@media (max-width: 480px) { .nav-links { gap: 4px 14px; } .nav-link { font-size: .9rem; } }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
+.footer { border-top: 1px solid var(--line); background: var(--surface); }
+.footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; padding-block: 20px; font-size: .9rem; color: var(--ink-2); }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
-}
+/* running text in a card (privacy) */
+.prose { max-width: 65ch; }

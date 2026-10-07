@@ -1,11 +1,70 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    // the symbol infront of the Model converts the C# value into html.
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Learn automation";
+    // The site's own order workflow, drawn once on load (the one automatic animation, loopcasts-ui §7)
+    string[] steps = ["New order", "Payment", "Invoice", "Access"];
+    const int y = 60;
 }
 
-<div class="text-center">
-    <h1 class="display-4">LoopCasts</h1>
-    <p class="lead">@Model.Slogan</p>
-</div>
+<section class="hero">
+    <div class="hero-copy">
+        <h1 class="hero-title">Learn automation. Stop doing boring work.</h1>
+        <span class="note">↳ made by five people above a bike shop in Ghent</span>
+        <p class="lead">Video courses on n8n, webhooks, APIs, shell scripting and AI agents. Two new videos every week, since 2019.</p>
+        <div class="row">
+            <a class="btn-sign" asp-page="/Pricing">See plans</a>
+            <a class="btn-outline" asp-page="/Courses">Browse courses</a>
+        </div>
+        <div class="team">
+            <span class="faces">
+                @foreach (var person in new[] { "Marieke De Smet", "Lotte Janssens", "Yasmine El", "Pieter Claes", "Tom Verhaeghe" })
+                {
+                    <partial name="_PersonChip" model="person" />
+                }
+            </span>
+            <span>Questions? Lotte answers, not a bot.</span>
+        </div>
+    </div>
+
+    <figure class="card flow-panel">
+        <div class="section-head">
+            <h2 class="h-small">What happens when you order</h2>
+            <button class="btn-outline btn-small" type="button" data-replay="hero-svg">Play again</button>
+        </div>
+        <svg class="hero-svg draw" id="hero-svg" viewBox="0 0 440 150" role="img"
+             aria-label="Customer, new order, payment, invoice and access, connected as a workflow">
+            <g class="hero-node" style="--d:0s">
+                <circle cx="30" cy="@y" r="22" class="wf-beginner" />
+                <path d="M23 @(y - 10)l16 10-16 10z" fill="#fff" />
+            </g>
+            <text x="30" y="@(y + 44)" text-anchor="middle">Customer</text>
+            @for (var i = 0; i < steps.Length; i++)
+            {
+                var x = 58 + 96 * i + 38;
+                var from = i == 0 ? 52 : x - 96 + 40;
+                var last = i == steps.Length - 1;
+                <path class="wf-edge hero-edge" d="M@(from) @(y)H@(x)" style="--len:@(x - from);--d:@((0.15 + i * 0.35).ToString(System.Globalization.CultureInfo.InvariantCulture))s" />
+                <g class="hero-node" style="--d:@((0.4 + i * 0.35).ToString(System.Globalization.CultureInfo.InvariantCulture))s">
+                    <rect x="@x" y="@(y - 20)" width="40" height="40" rx="9" class="@(last ? "wf-end" : "wf-step")" />
+                </g>
+                @* <text> is a Razor keyword inside a C# block, so the SVG label is written as raw HTML *@
+                @Html.Raw($"<text x=\"{x + 20}\" y=\"{y + 44}\" text-anchor=\"middle\">{System.Net.WebUtility.HtmlEncode(steps[i])}</text>")
+            }
+        </svg>
+        <figcaption class="muted small">This site runs the same kind of workflow we teach: nobody types your invoice by hand.</figcaption>
+    </figure>
+</section>
+
+<section class="section home-courses" aria-labelledby="courses-title">
+    <div class="section-head">
+        <h2 id="courses-title">New courses</h2>
+        <a asp-page="/Courses">All courses</a>
+    </div>
+    <div class="grid">
+        @foreach (var course in Model.Courses)
+        {
+            <partial name="_CourseCard" model="course" />
+        }
+    </div>
+</section>

@@ -1,0 +1,14 @@
+@page
+@model LockoutModel
+@{
+    ViewData["Title"] = "Account locked";
+}
+
+<div class="narrow">
+    <partial name="_AccountLogo" />
+    <section class="card">
+        <h1>Too many attempts</h1>
+        <p>This account is locked for a few minutes to keep it safe. Try again later, or choose a new password.</p>
+        <a class="btn-sign btn-wide" asp-page="./ForgotPassword">Choose a new password</a>
+    </section>
+</div>

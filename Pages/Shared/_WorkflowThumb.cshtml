@@ -1,0 +1,35 @@
+@model Course
+@using LoopCastsWeb.Services
+@* The course as a small workflow; geometry from Services/WorkflowThumb.cs (unit-tested) *@
+@{
+    var t = WorkflowThumb.Build(Model);
+    var level = Model.Level.ToString().ToLowerInvariant();
+    string F(double v) => WorkflowThumb.F(v);
+}
+<div class="thumb">
+    <svg viewBox="0 0 160 70" aria-hidden="true" focusable="false">
+        @foreach (var d in t.Edges)
+        {
+            <path class="wf-edge" d="@d" />
+        }
+        @foreach (var n in t.Nodes)
+        {
+            switch (n.Kind)
+            {
+                case WorkflowThumb.Kind.Trigger:
+                    <circle cx="@F(n.X)" cy="@F(n.Y)" r="@F(n.W / 2)" class="wf-@level" />
+                    @* icon: beginner ▶ play, intermediate + plus, advanced ⚡ bolt *@
+                    if (Model.Level == CourseLevel.Beginner) { <path class="wf-icon" d="M16 29l9 6-9 6z" /> }
+                    else if (Model.Level == CourseLevel.Intermediate) { <path class="wf-icon" d="M14 35h12M20 29v12" stroke-width="2.5" /> }
+                    else { <path class="wf-icon" d="M22 27l-7 9h5l-2 8 7-10h-5z" stroke-width="0" /> }
+                    break;
+                case WorkflowThumb.Kind.Step:
+                    <rect class="wf-step" x="@F(n.X)" y="@F(n.Y)" width="@F(n.W)" height="@F(n.H)" rx="5" />
+                    break;
+                default:
+                    <rect class="wf-end" x="@F(n.X)" y="@F(n.Y)" width="@F(n.W)" height="@F(n.H)" rx="5" />
+                    break;
+            }
+        }
+    </svg>
+</div>
