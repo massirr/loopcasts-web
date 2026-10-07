@@ -22,12 +22,16 @@ public class MemberService
     }
 
     /// Finds or creates the login for this e-mail. Safe to call many times (returning customer, webhook retry).
-    public async Task<IdentityUser> EnsureMemberAsync(string email)
+    public async Task<IdentityUser> EnsureMemberAsync(string email) => (await EnsureMemberCreatedAsync(email)).User;
+
+    /// Same, and tells whether the login was created just now (only then may someone else see a setup link).
+    public async Task<(IdentityUser User, bool Created)> EnsureMemberCreatedAsync(string email)
     {
         if (!await _roles.RoleExistsAsync(MemberRole))
             await _roles.CreateAsync(new IdentityRole(MemberRole));
 
         var user = await _users.FindByEmailAsync(email);
+        var created = user is null;
         if (user is null)
         {
             // EmailConfirmed: they paid with this address; the setup link proves it again once it is e-mailed (#5)
@@ -40,7 +44,7 @@ public class MemberService
 
         if (!await _users.IsInRoleAsync(user, MemberRole))
             await _users.AddToRoleAsync(user, MemberRole);
-        return user;
+        return (user, created);
     }
 
     /// The "code" for /Identity/Account/ResetPassword (that page expects the token base64url-encoded).

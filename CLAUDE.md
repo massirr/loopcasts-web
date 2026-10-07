@@ -48,6 +48,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
+| `Services/TeamSeats.cs` | Team licence: buyer adds/removes colleagues on /My (`Plan.Seats`), seat = Account on the team order |
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
 | `tests/LoopCastsWeb.Tests/` | xUnit tests; `TestDb.Create()` = SQLite in-memory `AppDbContext` |
@@ -76,7 +77,7 @@ access end date, "Set your password" link on the e-mail's first paid order).
   e-mailed yet (#5). "Forgot password" on the login page sends nothing until an e-mail sender exists.
 - Mollie (#3): active only when user-secret `Mollie:ApiKey` (test_…) is set, otherwise /Pay is the mock.
   `Mollie:WebhookBaseUrl` = public URL (tunnel/Azure); without it the status is checked when the customer returns.
-- Team licence creates only the buyer's seat; the other 4 seats are not built yet.
+- Team seats (#4): colleague setup link is shown to the buyer once, only for a NEW login (else takeover risk).
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
 - Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). No e-mail yet; monthly re-billing not built.
 - Later in the semester: chatbot (AI component), n8n workflows/webhooks, newsletter unsubscribe.

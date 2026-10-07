@@ -30,6 +30,7 @@ public static class TestDb
             .AddDefaultTokenProviders();
         services.AddScoped<MemberService>();
         services.AddScoped<PaymentService>();
+        services.AddScoped<TeamSeats>();
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
         var client = services.AddHttpClient<MollieService>(c =>
         {
