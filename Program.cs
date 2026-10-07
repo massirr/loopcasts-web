@@ -2,6 +2,7 @@ using LoopCastsWeb.Data;
 using LoopCastsWeb.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +48,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    // SQLite creates the file but not its folder. On Azure the db lives in /home/data (survives restarts and deploys).
+    var dbFile = new SqliteConnectionStringBuilder(app.Configuration.GetConnectionString("Default")).DataSource;
+    Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(dbFile))!);
     await db.Database.MigrateAsync();
 
     var csvPath = Path.Combine(app.Environment.ContentRootPath, "Data", "Seed", "course-catalogue.csv");

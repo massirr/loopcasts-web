@@ -53,7 +53,8 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
 | `tests/LoopCastsWeb.Tests/` | xUnit tests; `TestDb.Create()` = SQLite in-memory `AppDbContext` |
-| `.github/workflows/ci.yml` | build + test on every push/PR |
+| `.github/workflows/ci.yml` | build + test on every PR and on main |
+| `.github/workflows/deploy.yml` | after green CI on main → Azure App Service (inactive until set up, `docs/deploy-azure.md`) |
 | `docs/specs/`, `docs/agent-log.md` | specs per issue, log of agent work |
 | `Pages/My`, `Pages/Invoice` | Logged-in customer: subscriptions + invoices; printable invoice (own only, Admin all) |
 | `Pages/Admin/` | Orders (mark paid = fallback for bank transfers), Invoices & accounts. Folder locked by `AdminOnly` policy |

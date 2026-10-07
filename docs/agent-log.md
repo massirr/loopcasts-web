@@ -86,3 +86,19 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
   `dotnet user-secrets set "N8n:WebhookUrl" "…"` and `"N8n:Secret" "…"`.
 - **Learn:** registering one class as two services (`N8nNotifier` and `IEmailSender`) = in WPF, one service
   implementing two interfaces that different ViewModels ask for.
+
+## 2026-10-07 — #8 Deploy to Azure App Service (F1) — prepared, NOT deployed (blocked on approval)
+- **What:** `deploy.yml` (after green CI on main, publish-profile deploy; skipped until `AZURE_WEBAPP_NAME` exists);
+  `docs/deploy-azure.md` (az commands, settings, rollback, delete); Program.cs creates the SQLite folder
+  (`/home/data` on Azure).
+- **Why blocked:** creating Azure resources makes a public site where the mock checkout gives free access, and
+  needs admin passwords as App Settings → Koze decides and types the secrets.
+- **Tests:** 56 passing; `dotnet publish` output has no db/tests; published app started with a db in a
+  non-existing folder → folder created, /Courses 200.
+- **Manual steps for Koze:** follow `docs/deploy-azure.md` (≈10 min), ideally with a Mollie test key set.
+
+## 2026-10-07 — Blocked / waiting for Koze
+- **#6 Chatbot:** provider/model must be decided (with the teacher) + API key in user-secrets.
+- **#7 Customer import:** the agent may not read the old Dropbox copy (customer data). Needed: the column list of
+  the old orders/customers sheet (headers only) or an anonymised sample of ~5 rows.
+- **Project board:** `gh auth refresh -s project` (browser login), then the agent creates the board.
