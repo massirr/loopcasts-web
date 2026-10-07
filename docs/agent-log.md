@@ -102,3 +102,23 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **#7 Customer import:** the agent may not read the old Dropbox copy (customer data). Needed: the column list of
   the old orders/customers sheet (headers only) or an anonymised sample of ~5 rows.
 - **Project board:** `gh auth refresh -s project` (browser login), then the agent creates the board.
+
+## 2026-10-07 — #7 Import customers from the old data
+- **What:** `Services/OldDataImport.cs` (parse + clean + report, then apply in one transaction) and `/Admin/Import`
+  (upload → dry-run report → Import). Paid rows get order + invoice (old number/amounts) + account + Member login
+  (no password, no e-mail). First page in the `loopcasts-ui` style: tokens + buttons added to `site.css`
+  (only `:root` variables and new classes, so Bootstrap pages look the same).
+- **Decisions (Koze):** invoices as registered + report; credit notes report-only; logins without e-mail; admin page.
+  **Agent decision:** an order with an invoice number counts as paid (register "paid" column is empty from 0014 on),
+  each such row is reported as "check the bank".
+- **Findings in the samples:** 0021 Vermeulen BV (BE company) invoiced at 0% VAT, should be 21%; 0005 total typo
+  180.92; 0009 paid 590 of 599; number 2026-0029 used twice (invoice + credit note); 2026-0023 missing; duplicate
+  Sofie order; Schmidt unpaid. Bakker's credited 0015 is replaced by 0030 → new invoices continue at 2026-0031.
+- **Tests:** 83 passing (27 importer). Manual: real samples via the admin page on a scratch db → 29 orders,
+  28 invoices, 28 accounts (24 active), 28 logins; second import → 0 new. Browser check at 1320 and 360 px
+  (no sideways page scroll) with the fake test CSVs.
+- **Manual steps for Koze:** in the real app, Admin → Import → upload the two exports. Give the report to the
+  accountant (0021, 0005, credit note).
+- **Learn:** the page does two POSTs (Preview, Import) with the same data in hidden fields — like a WPF wizard
+  that keeps state in the ViewModel between steps; here the "ViewModel" is rebuilt from the form each request,
+  so the server parses again instead of trusting the preview.

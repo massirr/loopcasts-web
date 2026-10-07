@@ -1,3 +1,35 @@
+/* LoopCasts tokens (loopcasts-ui skill). Pages still on Bootstrap are not affected. */
+:root{
+  --canvas:#f6f7f4; --dot:#d9ddd6; --surface:#ffffff; --thumb:#eef1ec;
+  --ink:#17202a; --ink-2:#5a6573; --line:#d4d9d2; --edge:#9aa59a;
+  --sign:#f2c230; --enamel:#1f5f8b;
+  --beginner:#3f9d7a; --intermediate:#e0a030; --advanced:#d4513c;
+  --ok:#2f8a5b; --warn:#b7791f; --error:#c0392b;
+  --font-display:"Archivo",system-ui,sans-serif;
+  --font-body:"Public Sans",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --font-hand:"Gochi Hand","Comic Sans MS",cursive;
+  --r-card:8px; --r-btn:6px; --r-thumb:5px; --r-tag:4px;
+  --gutter:24px; --container:1320px;
+  --fast:.18s; --ease:ease;
+}
+@media (max-width:720px){ :root{ --gutter:12px } }
+
+/* loopcasts-ui buttons */
+.btn-sign, .btn-ink, .btn-outline {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 16px;
+  border-radius: var(--r-btn); border: 0; font: 600 1rem var(--font-body); text-decoration: none; cursor: pointer;
+  transition: transform .12s var(--ease), box-shadow .12s var(--ease);
+}
+.btn-sign { background: var(--sign); color: var(--ink); box-shadow: inset 0 -3px 0 rgb(0 0 0 / .18); }
+.btn-ink { background: var(--ink); color: #fff; }
+.btn-outline { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.btn-sign:focus-visible, .btn-ink:focus-visible, .btn-outline:focus-visible { outline: 2px solid var(--enamel); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .btn-sign:active, .btn-ink:active, .btn-outline:active { transform: translateY(1px); }
+  .btn-sign:active { box-shadow: inset 0 -1px 0 rgb(0 0 0 / .18); }
+}
+
 @media print {
   header, footer, .no-print {
     display: none !important;

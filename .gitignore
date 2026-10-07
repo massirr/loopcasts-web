@@ -12,3 +12,6 @@ obj/
 .vscode/
 .DS_Store
 ._*
+
+# Browser-test output (Playwright MCP)
+.playwright-mcp/
