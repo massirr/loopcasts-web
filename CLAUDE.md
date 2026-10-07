@@ -46,11 +46,13 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
+| `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
 | `tests/LoopCastsWeb.Tests/` | xUnit tests; `TestDb.Create()` = SQLite in-memory `AppDbContext` |
 | `.github/workflows/ci.yml` | build + test on every push/PR |
 | `docs/specs/`, `docs/agent-log.md` | specs per issue, log of agent work |
+| `Pages/My`, `Pages/Invoice` | Logged-in customer: subscriptions + invoices; printable invoice (own only, Admin all) |
 | `Pages/Admin/` | Orders (mark paid = fallback for bank transfers), Invoices & accounts. Folder locked by `AdminOnly` policy |
 
 ## Flow
@@ -74,7 +76,7 @@ access end date, "Set your password" link on the e-mail's first paid order).
 - Payment is a mock; real version = Mollie test mode + webhook (needs a public URL, e.g. a tunnel).
 - Team licence creates only the buyer's seat; the other 4 seats are not built yet.
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
-- No invoice PDF/e-mail yet; monthly re-billing not built.
+- Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). No e-mail yet; monthly re-billing not built.
 - Later in the semester: chatbot (AI component), n8n workflows/webhooks, newsletter unsubscribe.
 - Password manager (Bitwarden/Vaultwarden) for `paswoorden.xlsx` is a recommendation, not code.
 - Never commit the old LoopCasts Dropbox copy (passwords, customer e-mails) or `*.db` files.

@@ -1,0 +1,57 @@
+@page
+@model InvoiceModel
+@{
+    ViewData["Title"] = $"Invoice {Model.Invoice.Number}";
+    var i = Model.Invoice;
+    var s = Model.Seller;
+}
+
+<div class="mx-auto" style="max-width:760px">
+    <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Print / save as PDF</button>
+    </div>
+
+    <div class="d-flex justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0">@s["Name"]</h1>
+            <div class="small text-muted" style="white-space:pre-line">@s["Address"]</div>
+            @if (!string.IsNullOrWhiteSpace(s["VatNumber"])) { <div class="small text-muted">VAT @s["VatNumber"]</div> }
+        </div>
+        <div class="text-end">
+            <h2 class="h4 mb-0">Invoice</h2>
+            <div><strong>@i.Number</strong></div>
+            <div class="small">Date: @i.IssuedOn.ToString("dd/MM/yyyy")</div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <div class="small text-muted">Billed to</div>
+        @if (i.BillingCompany is not null) { <div><strong>@i.BillingCompany</strong></div> }
+        <div>@i.BillingName</div>
+        @if (i.BillingAddress is not null) { <div style="white-space:pre-line">@i.BillingAddress</div> }
+        <div>@(Countries.Find(i.BillingCountry)?.Name ?? i.BillingCountry)</div>
+        @if (i.BillingVatNumber is not null) { <div>VAT @i.BillingVatNumber</div> }
+    </div>
+
+    <table class="table">
+        <thead><tr><th>Description</th><th class="text-end">Amount</th></tr></thead>
+        <tbody>
+            <tr><td>@i.Description</td><td class="text-end">@($"€{i.AmountExclVat:0.00}")</td></tr>
+        </tbody>
+        <tfoot>
+            <tr><td class="text-end">Subtotal excl. VAT</td><td class="text-end">@($"€{i.AmountExclVat:0.00}")</td></tr>
+            <tr><td class="text-end">VAT @($"{i.VatRate * 100:0}")%</td><td class="text-end">@($"€{i.VatAmount:0.00}")</td></tr>
+            <tr><th class="text-end">Total</th><th class="text-end">@($"€{i.Total:0.00}")</th></tr>
+        </tfoot>
+    </table>
+
+    @if (i.ReverseCharge)
+    {
+        <p class="small"><strong>VAT reverse charged</strong> (art. 196 Directive 2006/112/EC): the customer accounts for the VAT.</p>
+    }
+    else if (i.VatRate == 0)
+    {
+        <p class="small">No VAT: customer established outside the EU.</p>
+    }
+    <p class="small text-muted">Paid online. Thank you!</p>
+</div>

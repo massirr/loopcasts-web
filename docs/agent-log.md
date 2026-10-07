@@ -29,3 +29,16 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Manual steps for Koze:** none (migration `AddOrderAccessKey` runs at startup and gives old orders a key).
 - **Learn:** `[BindNever]` is the Razor Pages answer to "the View may only change what the ViewModel exposes":
   model binding fills every public property it finds in the form unless you forbid it.
+
+## 2026-10-07 — #2 /My page: my subscription and invoices
+- **What:** `/My` (subscriptions + invoices) and printable `/Invoice?number=` (also linked from Admin → Invoices);
+  navbar "My LoopCasts"; `Invoice.Description` snapshot; `Seller:*` in appsettings.json; CI `push` only on main
+  (PRs ran CI twice).
+- **Why / decisions:** ownership rules in one testable place (`CustomerData`). Not yours → 404 instead of 403 so
+  invoice numbers can't be probed. PDF via the browser's print dialog instead of a PDF package.
+  Seller address/VAT number left empty: the old company files are off-limits for the agent (customer data).
+- **Tests:** 31 passing (3 ownership tests). Manual e2e: anon → login redirect, own invoice 200, other's 404,
+  migration backfilled descriptions of existing invoices.
+- **Manual steps for Koze:** fill `Seller:Address` and `Seller:VatNumber` in `appsettings.json`.
+- **Learn:** `[Authorize]` on a PageModel = WPF's "you can't open this window unless logged in", but enforced by the
+  server on every request.

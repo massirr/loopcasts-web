@@ -1,0 +1,63 @@
+@page
+@model MyModel
+@{
+    ViewData["Title"] = "My LoopCasts";
+    var today = DateOnly.FromDateTime(DateTime.UtcNow);
+}
+
+<h1 class="mb-1">My LoopCasts</h1>
+<p class="text-muted mb-4">@Model.Email</p>
+
+<h2 class="h4">Subscriptions</h2>
+@if (Model.Subscriptions.Count == 0)
+{
+    <p>No subscriptions yet. See <a asp-page="/Pricing">Pricing</a>.</p>
+}
+else
+{
+    <div class="table-responsive mb-5">
+        <table class="table align-middle">
+            <thead><tr><th>Product</th><th>Start</th><th>Access until</th><th>Status</th></tr></thead>
+            <tbody>
+                @foreach (var s in Model.Subscriptions)
+                {
+                    var a = s.Account;
+                    <tr>
+                        <td>@s.PlanName</td>
+                        <td>@a.StartsOn.ToString("dd/MM/yyyy")</td>
+                        <td>@(a.EndsOn?.ToString("dd/MM/yyyy") ?? "lifetime")</td>
+                        <td>
+                            @if (a.IsActive && (a.EndsOn is null || a.EndsOn >= today)) { <span class="badge text-bg-success">active</span> }
+                            else { <span class="badge text-bg-secondary">ended</span> }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<h2 class="h4">Invoices</h2>
+@if (Model.Invoices.Count == 0)
+{
+    <p>No invoices.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Number</th><th>Date</th><th class="text-end">Total</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var i in Model.Invoices)
+                {
+                    <tr>
+                        <td>@i.Number</td>
+                        <td>@i.IssuedOn.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">@($"€{i.Total:0.00}")</td>
+                        <td class="text-end"><a asp-page="/Invoice" asp-route-number="@i.Number">View / print</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -58,12 +58,14 @@ public class PaymentService
         order.PaidAt = now;
 
         // 2. Invoice — every billing field is COPIED from the order (snapshot, see the ERD page)
+        var plan = Plans.Find(order.PlanCode);
         var vat = VatCalculator.Calculate(order.Price, order.Country, order.IsCompany, order.VatNumber);
         var invoice = new Invoice
         {
             OrderId = order.Id,
             Number = await NextInvoiceNumberAsync(today.Year),
             IssuedOn = today,
+            Description = plan?.Name ?? order.PlanCode,
             BillingName = order.Name,
             BillingCompany = order.Company,
             BillingVatNumber = order.VatNumber,
@@ -78,7 +80,6 @@ public class PaymentService
         _db.Invoices.Add(invoice);
 
         // 3. Account with an end date (team licence: the buyer's seat; the 4 other seats come later)
-        var plan = Plans.Find(order.PlanCode);
         _db.Accounts.Add(new Account
         {
             OrderId = order.Id,
