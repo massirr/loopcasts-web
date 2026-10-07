@@ -6,19 +6,28 @@
 }
 
 <div class="mx-auto" style="max-width:480px">
-    <div class="alert alert-warning small">
-        <strong>Test payment.</strong> This page simulates the payment provider (e.g. Mollie). No real money is involved.
-    </div>
+    @if (!Model.UsesMollie)
+    {
+        <div class="alert alert-warning small">
+            <strong>Test payment.</strong> This page simulates the payment provider (no Mollie key configured). No real money is involved.
+        </div>
+    }
+    @if (Model.Error is not null)
+    {
+        <div class="alert alert-danger small">@Model.Error</div>
+    }
 
     <div class="card">
         <div class="card-body">
             <p class="text-muted small mb-1">LoopCasts BV · order #@o.Id</p>
             <h1 class="h4">@(Model.Plan?.Name ?? o.PlanCode)</h1>
-            <p class="display-6 my-3">@($"€{o.Price:0.00}")</p>
-            <p class="small text-muted">excl. VAT · @o.Email</p>
+            <p class="display-6 my-3">@($"€{Model.Total:0.00}")</p>
+            <p class="small text-muted">@($"€{o.Price:0.00}") excl. VAT · @o.Email</p>
 
             <form method="post" asp-route-id="@o.Id" asp-route-key="@o.AccessKey">
-                <button type="submit" class="btn btn-primary w-100">Pay @($"€{o.Price:0.00}") (test)</button>
+                <button type="submit" class="btn btn-primary w-100">
+                    Pay @($"€{Model.Total:0.00}") @(Model.UsesMollie ? "with Mollie" : "(test)")
+                </button>
             </form>
         </div>
     </div>

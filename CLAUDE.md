@@ -44,6 +44,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Data/CourseCsvImporter.cs` | Seeds courses from `Data/Seed/course-catalogue.csv` (cleans messy values, logs fixes) |
 | `Data/AdminSeeder.cs` | Creates Admin role + admin users from config `SeedAdmins:N:Email/Password` (**user-secrets**) |
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
+| `Services/MollieService.cs` | Mollie REST (typed HttpClient): create payment, `SyncAsync` re-fetches status → `MarkPaidAsync`. Webhook `POST /webhooks/mollie` in Program.cs |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
@@ -73,7 +74,8 @@ access end date, "Set your password" link on the e-mail's first paid order).
 ## Known limitations / next steps
 - Customer login (#1, done): set-password link is shown on OrderThanks for the first paid order only; it is not
   e-mailed yet (#5). "Forgot password" on the login page sends nothing until an e-mail sender exists.
-- Payment is a mock; real version = Mollie test mode + webhook (needs a public URL, e.g. a tunnel).
+- Mollie (#3): active only when user-secret `Mollie:ApiKey` (test_…) is set, otherwise /Pay is the mock.
+  `Mollie:WebhookBaseUrl` = public URL (tunnel/Azure); without it the status is checked when the customer returns.
 - Team licence creates only the buyer's seat; the other 4 seats are not built yet.
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
 - Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). No e-mail yet; monthly re-billing not built.
