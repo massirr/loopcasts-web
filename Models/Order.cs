@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 
 namespace LoopCastsWeb.Models;
 
 public class Order
 {
-    public int Id { get; set; }
+    // [BindNever] = the form can never set this (no "IsPaid=true" sent by a crafted POST)
+    [BindNever] public int Id { get; set; }
     [Required]
     public string Name { get; set; } = "";
     [Required]
@@ -22,9 +24,14 @@ public class Order
     public string? VatNumber { get; set; }
     public string? Address { get; set; }
     public string PlanCode { get; set; } = "";
-    public decimal Price { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public bool IsPaid { get; set; }
-    public DateTime? PaidAt { get; set; }
+    [BindNever] public decimal Price { get; set; }
+    [BindNever] public DateTime CreatedAt { get; set; }
+    [BindNever] public bool IsPaid { get; set; }
+    [BindNever] public DateTime? PaidAt { get; set; }
+
+    // Secret part of the /Pay and /OrderThanks URLs: ids are 1, 2, 3..., so without it anyone could open other orders
+    [BindNever] public string AccessKey { get; set; } = "";
+
+    public bool Opens(string? key) => AccessKey.Length > 0 && key == AccessKey;
 
 }

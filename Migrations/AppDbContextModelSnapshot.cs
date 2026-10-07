@@ -144,6 +144,10 @@ namespace LoopCastsWeb.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AccessKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Address")
                         .HasColumnType("TEXT");
 

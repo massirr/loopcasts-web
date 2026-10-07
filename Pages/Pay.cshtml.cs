@@ -22,19 +22,21 @@ public class PayModel : PageModel
     public Order? Order { get; set; }
     public Plan? Plan { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id)
+    public async Task<IActionResult> OnGetAsync(int id, string? key)
     {
         Order = await _db.Orders.FindAsync(id);
-        if (Order is null) return NotFound();
-        if (Order.IsPaid) return RedirectToPage("/OrderThanks", new { id });   // nothing left to pay
+        if (Order is null || !Order.Opens(key)) return NotFound();
+        if (Order.IsPaid) return RedirectToPage("/OrderThanks", new { id, key });   // nothing left to pay
 
         Plan = Plans.Find(Order.PlanCode);
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(int id)
+    public async Task<IActionResult> OnPostAsync(int id, string? key)
     {
-        if (!await _payments.MarkPaidAsync(id)) return NotFound();
-        return RedirectToPage("/OrderThanks", new { id });
+        var order = await _db.Orders.FindAsync(id);
+        if (order is null || !order.Opens(key)) return NotFound();
+        await _payments.MarkPaidAsync(id);
+        return RedirectToPage("/OrderThanks", new { id, key });
     }
 }

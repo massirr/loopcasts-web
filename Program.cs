@@ -24,6 +24,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(AdminSeeder.AdminRole)));
 
+builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<PaymentService>();   // one instance per request, like the DbContext
 builder.Services.AddHostedService<ExpireAccountsService>();   // nightly: switch off expired accounts
 
