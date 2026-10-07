@@ -1,0 +1,14 @@
+# Build output
+bin/
+obj/
+
+# Local database (contains customer data) — never commit
+*.db
+*.db-shm
+*.db-wal
+
+# Editor / OS
+.vs/
+.vscode/
+.DS_Store
+._*

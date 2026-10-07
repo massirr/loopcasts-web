@@ -1,0 +1,16 @@
+title;level;videos;total_duration;status;published;single_price
+n8n basics;beginner;12;1h20;live;14/03/2023;39
+Webhooks from zero;beginner;9;55 min;live;02/05/2023;39
+REST APIs for data people;Beginner;14;1:45:00;live;19/09/2023;39
+Shell scripting that saves your week;intermediate;11;1h10;live;07/11/2023;39
+Cron and schedulers;intermediate;7;48 min;live;16/01/2024;39
+GitHub Actions in practice;medium;10;1h05;live;12/03/2024;39
+n8n error handling;intermediate;8;52min;live;28/05/2024;39
+Zapier to n8n migration;easy;6;0:41:00;retired;03/09/2024;
+Prompt engineering for workflows;beginner;10;1h 15;live;21/01/2025;39
+AI agents with n8n;advanced;13;1h50;live;08/04/2025;49
+RAG on your own documents;Advanced;9;1:12:00;live;17/06/2025;49
+Invoices without typing;intermediate;8;?;draft;;39
+MCP servers explained;expert;6;38 min;draft;13/01/2026;39
+n8n basics (2026 edition);beginner;;;draft;;
+Self-hosting n8n with Docker;intermediate;9;1h02;live;2025-10-14;39

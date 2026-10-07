@@ -1,0 +1,71 @@
+@page
+@model LoopCastsWeb.Pages.Admin.InvoicesModel
+@{
+    ViewData["Title"] = "Invoices & accounts";
+    var thisMonth = Model.Invoices.Where(i => i.IssuedOn.Year == DateTime.Today.Year && i.IssuedOn.Month == DateTime.Today.Month).ToList();
+    var today = DateOnly.FromDateTime(DateTime.Today);
+}
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link" asp-page="/Admin/Orders">Orders</a></li>
+    <li class="nav-item"><a class="nav-link active" asp-page="/Admin/Invoices">Invoices &amp; accounts</a></li>
+</ul>
+
+<h1 class="h3">Invoices</h1>
+<p class="text-muted">
+    Revenue this month (excl. VAT): <strong>@($"€{thisMonth.Sum(i => i.AmountExclVat):0.00}")</strong>
+    · @thisMonth.Count invoices · calculated, not summed by colour
+</p>
+
+<div class="table-responsive mb-5">
+    <table class="table align-middle">
+        <thead><tr><th>Number</th><th>Date</th><th>Customer</th><th class="text-end">Excl.</th><th class="text-end">VAT</th><th class="text-end">Total</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var i in Model.Invoices)
+            {
+                <tr>
+                    <td><strong>@i.Number</strong></td>
+                    <td>@i.IssuedOn.ToString("dd/MM/yyyy")</td>
+                    <td>@(i.BillingCompany ?? i.BillingName) <span class="small text-muted">@i.BillingCountry</span></td>
+                    <td class="text-end">@($"€{i.AmountExclVat:0.00}")</td>
+                    <td class="text-end">@($"€{i.VatAmount:0.00}") <span class="small text-muted">(@($"{i.VatRate * 100:0}")%)</span></td>
+                    <td class="text-end">@($"€{i.Total:0.00}")</td>
+                    <td>@if (i.ReverseCharge) { <span class="badge text-bg-secondary">reverse charge</span> }</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="d-flex justify-content-between align-items-center">
+    <h2 class="h3 mb-0">Accounts</h2>
+    <form method="post" asp-page-handler="RunExpiry">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Run expiry check now</button>
+    </form>
+</div>
+@if (Model.Message is not null)
+{
+    <div class="alert alert-info mt-2 small">@Model.Message</div>
+}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead><tr><th>E-mail</th><th>Order</th><th>Start</th><th>Ends</th><th>Status</th></tr></thead>
+        <tbody>
+            @foreach (var a in Model.Accounts)
+            {
+                var expired = a.EndsOn is { } end && end < today;
+                <tr>
+                    <td>@a.Email</td>
+                    <td>#@a.OrderId</td>
+                    <td>@a.StartsOn.ToString("dd/MM/yyyy")</td>
+                    <td>@(a.EndsOn?.ToString("dd/MM/yyyy") ?? "lifetime")</td>
+                    <td>
+                        @if (!a.IsActive) { <span class="badge text-bg-secondary">inactive</span> }
+                        else if (expired) { <span class="badge text-bg-danger">active but expired!</span> }
+                        else { <span class="badge text-bg-success">active</span> }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(dotnet *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(dot_clean *)",
+      "Bash(sqlite3 *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(mkdir *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:learn.microsoft.com)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(gh repo create * --public*)",
+      "Bash(gh repo edit * --visibility public*)",
+      "Read(**/paswoorden.xlsx)",
+      "Read(**/bank/**)",
+      "Read(**/Website/site/**)",
+      "Read(**/secrets.json)",
+      "Edit(../LoopCasts/**)",
+      "Write(../LoopCasts/**)"
+    ]
+  }
+}
