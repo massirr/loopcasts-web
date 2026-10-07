@@ -17,12 +17,14 @@ public class PaymentService
 {
     private readonly AppDbContext _db;
     private readonly MemberService _members;
+    private readonly N8nNotifier _n8n;
     private readonly ILogger<PaymentService> _logger;
 
-    public PaymentService(AppDbContext db, MemberService members, ILogger<PaymentService> logger)
+    public PaymentService(AppDbContext db, MemberService members, N8nNotifier n8n, ILogger<PaymentService> logger)
     {
         _db = db;
         _members = members;
+        _n8n = n8n;
         _logger = logger;
     }
 
@@ -32,23 +34,29 @@ public class PaymentService
         var order = await _db.Orders.FindAsync(orderId);
         if (order is null) return false;
 
-        if (!order.IsPaid)                      // paid twice (double click, webhook sent twice)? no 2nd invoice
-            await RecordPaymentAsync(order);
+        // paid twice (double click, webhook sent twice)? no 2nd invoice, no 2nd e-mail
+        var invoice = order.IsPaid ? null : await RecordPaymentAsync(order);
 
         // 4. Login for the customer — AFTER the payment is safely saved: if this fails, the payment is not lost,
         //    and the next call (webhook retry) tries again because EnsureMemberAsync is idempotent.
+        string? setupCode = null;
         try
         {
-            await _members.EnsureMemberAsync(order.Email);
+            var user = await _members.EnsureMemberAsync(order.Email);
+            setupCode = await _members.SetupCodeIfNoPasswordAsync(user);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Order {OrderId} is paid, but creating the customer login failed", order.Id);
         }
+
+        // 5. Invoice e-mail via n8n (never throws). The set-password link goes to the order's own e-mail address.
+        if (invoice is not null)
+            await _n8n.InvoiceCreatedAsync(invoice, order.Email, setupCode);
         return true;
     }
 
-    private async Task RecordPaymentAsync(Order order)
+    private async Task<Invoice> RecordPaymentAsync(Order order)
     {
         var now = DateTime.UtcNow;
         var today = DateOnly.FromDateTime(now);
@@ -91,6 +99,7 @@ public class PaymentService
 
         await _db.SaveChangesAsync();           // one transaction for all three
         _logger.LogInformation("Order {OrderId} paid → invoice {Number}", order.Id, invoice.Number);
+        return invoice;
     }
 
     /// "2026-0001", "2026-0002", ... The database has a UNIQUE index on Number,

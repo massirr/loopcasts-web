@@ -7,15 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LoopCastsWeb.Tests;
 
-/// Pretends to be api.mollie.com: answers every request with the given status + JSON, remembers what was asked.
+/// Pretends to be an HTTP API (Mollie, n8n): answers every request with the given status + JSON, remembers what was asked.
 public class FakeMollie(HttpStatusCode status, string json) : HttpMessageHandler
 {
     public List<(HttpMethod Method, string Path, string? Body)> Requests { get; } = [];
+    public List<string> Headers { get; } = [];   // X-LoopCasts-Secret values
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(ct);
         Requests.Add((request.Method, request.RequestUri!.AbsolutePath, body));
+        if (request.Headers.TryGetValues("X-LoopCasts-Secret", out var secret)) Headers.AddRange(secret);
         return new HttpResponseMessage(status) { Content = new StringContent(json) };
     }
 }
