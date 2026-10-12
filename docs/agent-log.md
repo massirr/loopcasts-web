@@ -213,3 +213,21 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
   "active but end date passed" list. Members choose a password with "Forgot password" (needs the n8n e-mails, #21).
 - **Learn:** `int?` foreign key = an optional relation, like a nullable navigation in a ViewModel: the query uses
   `a.PlanCode ?? (order's plan)` instead of an inner join, which would silently drop every row without an order.
+
+## 2026-10-12 — #21 n8n locally with e-mails and a renewal reminder  (PR #24, merged)
+- **What:** `docker-compose.yml` (n8n 2.42.7 + Mailpit v1.31.5, localhost only), workflows "LoopCasts e-mails" and
+  "Renewal reminder" as JSON in `n8n/workflows/`, `GET /api/automation/expiring` + `POST /api/automation/reminded`
+  (secret header), `Account.RemindedFor` (migration `AccountRemindedFor`). docs/n8n.md rewritten as the how-to.
+- **Why / decisions:** Mailpit as the only mail server, so a demo can never e-mail a real customer. The secret lives in
+  `.env` (git-ignored) and the site's user-secrets; the webhook checks it in an IF node, so no secret sits in an
+  importable credential file. Reminders are keyed on the end date, so a renewal gets a new reminder without extra state.
+  Team colleagues aren't reminded (they can't renew). Endpoints as static handlers → tested without a new package.
+  **Bug found end to end:** Identity 10's reset subject is "Reset your password", so #18's rewrite never applied
+  (its unit test used the wrong subject too) → now matched on Identity's body text, test covers both subjects.
+- **Tests:** 143, CI green. End to end on a scratch DB: invoice + password e-mails in Mailpit, wrong secret ignored,
+  reminder run → 2 of 5 made-up members (ending within 14 days), second run → 0. Screenshots `docs/design/screenshots/n8n-*.png`.
+- **Manual steps for Koze:** create `.env` + user-secrets as in docs/n8n.md §1, `docker compose up -d`, import + publish
+  the workflows, create the n8n owner login in the browser (local account, blocked for me).
+- **Learn:** the API handlers are plain static methods that get `HttpRequest`, `IConfiguration` and `AppDbContext` as
+  parameters — ASP.NET fills them in (dependency injection per parameter), like a WPF command that receives its
+  CommandParameter instead of reaching into the window.
