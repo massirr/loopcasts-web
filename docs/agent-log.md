@@ -196,3 +196,20 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Learn:** nested layouts — `Manage/_ManageLayout.cshtml` sets `Layout = "/Pages/Shared/_Layout.cshtml"` and
   re-renders the `Scripts` section, like a WPF UserControl that hosts a ContentPresenter inside the main window's
   template: the page fills the inner slot, the inner layout fills the outer one.
+
+## 2026-10-12 — #20 Import the old members database  (PR #23, merged)
+- **What:** /Admin/Import reads the old website's `users` table export (.sql): preview (counts per product, expired,
+  report, "active but end date passed" list with yearly value) → import (Account + Member login without password).
+  Migration `AccountsWithoutOrder`: `Account.OrderId` nullable, `Account.PlanCode`.
+- **Why / decisions:** no fake orders for old members (Admin → Orders would show ~1 900 invented prices). The password
+  column is skipped by name while reading, so the MD5 hashes never become strings; Preview → Import carries a sanitised
+  CSV. Monthly rows have no end date (rolling) → access until the next renewal date. The old site has one row per team
+  seat, so a team row counts as €599 / 5 in Lotte's list (first run counted €599 per row: found in the screenshot).
+  Skipped: grouping old team seats into licences (no buyer in the data).
+- **Tests:** 134 (10 new, made-up fixture incl. a hash with quotes/commas/`)`); the tests also caught a reader bug
+  (space before quoted values). CI green. Real export on a scratch DB: 1 940 members in 10 s, 21 duplicates skipped,
+  313 active-but-ended = €42 928.60 a year; second run imports nothing.
+- **Manual steps for Koze:** on the real site, import the orders CSVs first, then the members `.sql`. Give Lotte the
+  "active but end date passed" list. Members choose a password with "Forgot password" (needs the n8n e-mails, #21).
+- **Learn:** `int?` foreign key = an optional relation, like a nullable navigation in a ViewModel: the query uses
+  `a.PlanCode ?? (order's plan)` instead of an inner join, which would silently drop every row without an order.
