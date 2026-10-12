@@ -4,20 +4,21 @@
 @{
     ViewData["Title"] = "Import old data";
     var p = Model.Preview;
+    var m = Model.MembersPreview;
 }
 
 <div class="page admin import">
     <partial name="_AdminNav" />
     <header class="page-head">
-        <h1>Import the old spreadsheets</h1>
-        <p>Once: the orders sheet and the invoice register (Excel → Save as → CSV UTF-8). First you see what
-            will happen; nothing is saved until you click Import. Customers are not e-mailed.</p>
+        <h1>Import the old data</h1>
+        <p>Once: the orders sheet and the invoice register (Excel → Save as → CSV UTF-8), then the members table of the
+            old website. First you see what will happen; nothing is saved until you click Import. Nobody is e-mailed.</p>
     </header>
 
     @if (Model.Message is not null) { <p class="flash flash-ok" role="status"><span>@Model.Message</span></p> }
     @if (Model.Error is not null) { <p class="flash flash-error" role="alert"><span>@Model.Error</span></p> }
 
-    @if (p is null)
+    @if (p is null && m is null)
     {
         <form method="post" asp-page-handler="Preview" enctype="multipart/form-data" class="card form import-form">
             <label class="field">
@@ -30,8 +31,19 @@
             </label>
             <div><button class="btn-sign">Preview</button></div>
         </form>
+
+        <form method="post" asp-page-handler="PreviewMembers" enctype="multipart/form-data" class="card form import-form">
+            <h2 class="h-small">Old website members</h2>
+            <p class="muted small">The users table export from phpMyAdmin (.sql). Import the orders above first: e-mails that
+                already have an account are skipped. Passwords are not read; members choose a new one with "Forgot password".</p>
+            <label class="field">
+                <span>Users table (users table export.sql)</span>
+                <input type="file" name="users" accept=".sql,text/plain" required />
+            </label>
+            <div><button class="btn-sign">Preview</button></div>
+        </form>
     }
-    else
+    else if (p is not null)
     {
         var paid = p.Rows.Count(r => r.Invoice is not null);
         var counts = p.Report.GroupBy(l => l.Level).ToDictionary(g => g.Key, g => g.Count());
@@ -57,6 +69,70 @@
                 <thead><tr><th>What</th><th>Where</th><th>Details</th></tr></thead>
                 <tbody>
                     @foreach (var l in p.Report.OrderByDescending(l => l.Level))
+                    {
+                        <tr>
+                            <td><span class="tag lvl-@l.Level.ToString().ToLower()">@l.Level</span></td>
+                            <td class="nowrap">@l.Where</td>
+                            <td class="details">@l.Message</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (m is not null)
+    {
+        var counts = m.Report.GroupBy(l => l.Level).ToDictionary(g => g.Key, g => g.Count());
+        <section class="summary" aria-label="Members summary">
+            @foreach (var plan in Plans.All)
+            {
+                <div><strong class="num">@m.Members.Count(x => x.Plan == plan)</strong><span>@plan.Name</span></div>
+            }
+            <div><strong class="num">@m.Expired</strong><span>expired</span></div>
+            <div class="lvl-skipped"><strong class="num">@counts.GetValueOrDefault(OldDataImport.Level.Skipped)</strong><span>rows skipped</span></div>
+        </section>
+
+        <form method="post" asp-page-handler="ImportMembers" class="actions">
+            <input type="hidden" asp-for="MembersCsv" />
+            <button class="btn-sign" data-busy-text="Importing…">Import @m.Members.Count members</button>
+            <a class="btn-outline" asp-page="/Admin/Import">Cancel</a>
+            <span class="muted small">No e-mails are sent. Members with an account already are skipped.</span>
+        </form>
+
+        @if (m.ActiveButEnded.Count > 0)
+        {
+            <section class="section" aria-labelledby="overdue-title">
+                <div class="section-head">
+                    <h2 id="overdue-title">Active in the old system, but the end date passed</h2>
+                    <p class="muted num">@m.ActiveButEnded.Count members, <strong>@($"€{m.OverdueYearlyValue:0.00}")</strong> a year at today's prices (excl. VAT)</p>
+                </div>
+                <p class="muted small">For Lotte: these people could still watch on the old site without paying. They are imported as ended.
+                    A team row is one seat, so it counts as €599 / 5.</p>
+                <div class="table-scroll">
+                    <table class="table table-dense">
+                        <thead><tr><th>E-mail</th><th>Plan</th><th>Ended</th><th class="end">Per year (excl. VAT)</th></tr></thead>
+                        <tbody>
+                            @foreach (var o in m.ActiveButEnded.OrderBy(o => o.EndedOn))
+                            {
+                                <tr>
+                                    <td class="wrap-any">@o.Email</td>
+                                    <td>@o.PlanName</td>
+                                    <td>@o.EndedOn.ToString("dd/MM/yyyy")</td>
+                                    <td class="end">@($"€{o.YearlyValue:0.00}")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+
+        <div class="table-scroll">
+            <table class="table table-dense report">
+                <thead><tr><th>What</th><th>Where</th><th>Details</th></tr></thead>
+                <tbody>
+                    @foreach (var l in m.Report.OrderByDescending(l => l.Level))
                     {
                         <tr>
                             <td><span class="tag lvl-@l.Level.ToString().ToLower()">@l.Level</span></td>

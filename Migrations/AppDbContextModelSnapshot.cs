@@ -33,8 +33,11 @@ namespace LoopCastsWeb.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("PlanCode")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("StartsOn")
                         .HasColumnType("TEXT");

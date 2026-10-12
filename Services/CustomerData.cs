@@ -13,12 +13,13 @@ public static class CustomerData
     public record Subscription(Account Account, string PlanName);
 
     /// Accounts by the account e-mail (a team member sees their own seat, not the buyer's).
+    /// The plan comes from the order, or from the account itself for members imported from the old site (no order).
     public static async Task<List<Subscription>> SubscriptionsAsync(AppDbContext db, string email)
     {
         var e = email.ToLower();
         var rows = await db.Accounts
             .Where(a => a.Email.ToLower() == e)
-            .Join(db.Orders, a => a.OrderId, o => o.Id, (a, o) => new { a, o.PlanCode })
+            .Select(a => new { a, PlanCode = a.PlanCode ?? db.Orders.Where(o => o.Id == a.OrderId).Select(o => o.PlanCode).FirstOrDefault() ?? "" })
             .OrderByDescending(x => x.a.StartsOn)
             .ToListAsync();
         return rows.Select(x => new Subscription(x.a, Plans.Find(x.PlanCode)?.Name ?? x.PlanCode)).ToList();
