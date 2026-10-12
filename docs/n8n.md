@@ -13,7 +13,8 @@ Locally it runs in Docker next to **Mailpit**, a fake mail server.
 | Mailpit (all sent e-mails) | http://localhost:8025 |
 | SMTP for n8n | `mailpit:1025` (inside Docker) |
 | The site, seen from n8n | `http://host.docker.internal:5180` |
-| Workflows / credentials | `n8n/workflows/*.json`, `n8n/credentials/mailpit-smtp.json` (no secrets) |
+| Workflows / credentials | `n8n/workflows/*.json`, `n8n/credentials/*.json` (no secrets: the Gemini key is added in the UI) |
+| Chat assistant (FAQ, prompt, tests) | `n8n/knowledge/`, `n8n/eval/`, `docs/ai-evaluation.md` |
 
 ## 1. First time
 ```bash
@@ -23,13 +24,16 @@ dotnet user-secrets set "N8n:Secret" "<the same value>"          # copy it from 
 dotnet user-secrets set "N8n:WebhookUrl" "http://localhost:5678/webhook/loopcasts"
 
 docker compose up -d                                             # n8n + Mailpit
-docker compose exec n8n n8n import:credentials --input=/loopcasts/credentials/mailpit-smtp.json
+docker compose exec n8n n8n import:credentials --separate --input=/loopcasts/credentials   # Mailpit + an empty "Gemini"
 docker compose exec n8n n8n import:workflow --separate --input=/loopcasts/workflows
 docker compose exec n8n n8n publish:workflow --id=lcEmailsFlow0001
 docker compose exec n8n n8n publish:workflow --id=lcRenewalFlow001
+docker compose exec n8n n8n publish:workflow --id=lcAssistant00001
 docker compose restart n8n                                       # published workflows start after a restart
 ```
 Then open http://localhost:5678 and create the n8n owner login (local only, your own e-mail + password).
+For the chat assistant: Credentials → **Gemini** → paste your API key (https://aistudio.google.com/apikey) → Save, and
+`dotnet user-secrets set "Chat:Url" "http://localhost:5678/webhook/6f0d3c1e-2b7a-4c8e-9a51-1c2d3e4f5a60/chat"`.
 Start the site as usual (`dotnet watch`, port 5180).
 
 ## 2. Every day
@@ -80,7 +84,29 @@ docker compose exec -e N8N_RUNNERS_BROKER_PORT=5690 n8n n8n execute --id lcRenew
 ```
 (the extra port: the running n8n already uses the default one). Run it twice: the second run sends nothing.
 
-## 5. On a server (later)
+## 5. Workflow "LoopCasts assistant" (`lcAssistant00001`): the chat on the site
+`Chat on the website` (Chat Trigger, public, embedded, only http://localhost:5180 may embed it)
+→ **LoopCasts assistant** (AI Agent, rules in `n8n/knowledge/system-prompt.md`)
+with **Model (swap here)** (Google Gemini `gemini-2.5-flash`, credential "Gemini"), **Chat memory (per session)**
+(last 10 messages of that chat) and three tools that call the site's read-only public API:
+`courses` → `/api/public/courses`, `plans` → `/api/public/plans`, `faq` → `/api/public/faq` (= `n8n/knowledge/faq.md`).
+
+The site shows the n8n chat widget bottom-right (`Pages/Shared/_Chat.cshtml`) only when `Chat:Url` is set, with
+"Answers by an AI assistant" under the input. Another site address? Change *Allowed origins* in the Chat Trigger
+(n8n doesn't accept an expression there). Changed the prompt? Edit `system-prompt.md` **and** the agent's system message
+(a unit test checks they are equal). Test questions and results: `docs/ai-evaluation.md`.
+
+### Switching the model to Azure AI Foundry later
+The model is one node, so nothing else changes:
+1. Azure portal → **Azure AI Foundry** → create a project (region West Europe or Sweden Central) → *Models + endpoints*
+   → deploy e.g. `gpt-4.1-mini`. Note the resource name, the deployment name and a key.
+2. n8n → Credentials → **Azure OpenAI** (`azureOpenAiApi`): resource name, API key, API version (as shown in Foundry).
+3. In the workflow: delete *Model (swap here)*, add **Azure OpenAI Chat Model**, model = your deployment name,
+   temperature 0.2, connect it to the agent's *Chat Model* input, save and publish.
+4. Run `node n8n/eval/run-eval.mjs <chat URL>` again and compare with the Gemini results.
+Why: with Azure the prompts are not used to train models and stay in the EU region you choose (see docs/ai-evaluation.md).
+
+## 6. On a server (later)
 Same two workflows on a hosted n8n; replace the Mailpit credential with a real SMTP account, set `LOOPCASTS_SITE_URL`
 to the public site and `N8n:WebhookUrl` to the public n8n webhook. Without `N8n:WebhookUrl` the site still works:
 nothing is sent and the set-password link stays on the OrderThanks page.

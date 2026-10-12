@@ -379,6 +379,27 @@ input[readonly] { background: var(--thumb); }
 /* running text in a card (privacy) */
 .prose { max-width: 65ch; }
 
+/* chat assistant (#22): the n8n widget in loopcasts-ui colours. Ink, not --sign: it is not the main action of a page.
+   On body, not :root: the widget's own stylesheet loads later and sets these on :root. */
+body {
+  --chat--font-family: var(--font-body);
+  --chat--border-radius: var(--r-card);
+  --chat--color--primary: var(--ink); --chat--color--primary-shade-50: #2b3846; --chat--color--primary--shade-100: #3a4a5c;
+  --chat--color--secondary: var(--enamel); --chat--color-secondary-shade-50: #194d71;
+  --chat--color-white: #fff; --chat--color-light: var(--canvas); --chat--color-dark: var(--ink); --chat--color-medium: var(--line);
+  --chat--header--background: var(--ink); --chat--header--color: #fff;
+  --chat--message--bot--background: var(--surface); --chat--message--bot--color: var(--ink); --chat--message--bot--border: 1px solid var(--line);
+  --chat--message--user--background: var(--ink); --chat--message--user--color: #fff;
+  --chat--toggle--background: var(--ink); --chat--toggle--hover--background: #2b3846; --chat--toggle--active--background: #2b3846; --chat--toggle--color: #fff;
+  --chat--window--border: 1px solid var(--line);
+  --chat--footer--background: var(--surface); --chat--footer--color: var(--ink-2); --chat--footer--border-top: 1px solid var(--line);
+  --chat--input--send--button--color: var(--ink); --chat--input--send--button--color-hover: var(--enamel);
+  --chat--heading--font-size: 1.35rem;
+}
+.chat-heading h1 { font-family: var(--font-display); }
+.chat-ai-note { margin: 0; padding: 6px 12px 10px; font-size: .8125rem; color: var(--ink-2); background: var(--surface); }
+@media print { #n8n-chat { display: none !important; } }
+
 /* ---------- 8. The visitor's system settings (§10) ---------- */
 /* less motion: menus only cross-fade, nothing moves */
 @media (prefers-reduced-motion: reduce) {
