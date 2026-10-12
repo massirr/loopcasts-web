@@ -55,7 +55,7 @@
                         var expired = a.EndsOn is { } end && end < today;
                         <tr>
                             <td class="wrap-any">@a.Email</td>
-                            <td>#@a.OrderId</td>
+                            <td>@(a.OrderId is int id ? $"#{id}" : "old site")</td>
                             <td>@a.StartsOn.ToString("dd/MM/yyyy")</td>
                             <td>@(a.EndsOn?.ToString("dd/MM/yyyy") ?? "lifetime")</td>
                             <td>

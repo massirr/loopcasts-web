@@ -52,6 +52,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
 | `Services/TeamSeats.cs` | Team licence: buyer adds/removes colleagues on /My (`Plan.Seats`), seat = Account on the team order |
 | `Services/OldDataImport.cs` | One-time import of the old orders sheet + invoice register (clean, report, idempotent); UI `/Admin/Import` |
+| `Services/OldMemberImport.cs` | One-time import of the old website's `users` table (.sql): Account (plan on the account, no order) + Member login without password. Never reads the password column |
 | `Services/WorkflowThumb.cs` | Course → workflow thumbnail geometry (pure, unit-tested); drawn by `Pages/Shared/_WorkflowThumb` |
 | `Services/AccountExpiry.cs` | Deactivates accounts past `EndsOn`; `ExpireAccountsService` runs it at startup + every 24h |
 | `Pages/` | Index, Courses, Pricing, Order (form), Pay (**mock** checkout), OrderThanks |
@@ -89,6 +90,8 @@ access end date, "Set your password" link on the e-mail's first paid order).
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
 - Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). Invoice e-mail + set-password link via n8n (#5, `N8n:WebhookUrl`); monthly re-billing not built.
 - Old data (#7): imported invoices keep their old numbers/amounts. Credit notes are not modelled yet (report only).
+- Old members (#20): `Account.OrderId` is null for imported members (`Account.PlanCode` holds the plan). Old team rows
+  are single seats without a buyer, so they can't be managed on /My.
 - Polish (#18): "Download my data" holds only the login data (Identity); orders/invoices are on /My. Deleting an account
   keeps orders and invoices (law); no anonymising yet. Authenticator setup shows the key + an otpauth link, no QR code (would need a package).
 - Seller address + VAT number are not in the handbook (ch. 1–6) → `Seller:Address`/`Seller:VatNumber` still empty.

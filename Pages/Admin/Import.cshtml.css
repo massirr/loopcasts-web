@@ -12,3 +12,4 @@
 .lvl-note { color: var(--ink-2); }
 .lvl-warning { color: var(--warn); }
 .lvl-skipped { color: var(--error); }
+.h-small { font-size: 1.05rem; }

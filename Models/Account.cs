@@ -7,7 +7,8 @@ namespace LoopCastsWeb.Models;
 public class Account
 {
     public int Id { get; set; }
-    public int OrderId { get; set; }                 // FK → Orders.Id
+    public int? OrderId { get; set; }                // FK → Orders.Id; null = member imported from the old website (#20)
+    public string? PlanCode { get; set; }            // only for imported members (no order to read the plan from)
     public string Email { get; set; } = "";
     public DateOnly StartsOn { get; set; }
     public DateOnly? EndsOn { get; set; }            // null = lifetime (single course)
