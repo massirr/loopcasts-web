@@ -15,3 +15,6 @@ obj/
 
 # Browser-test output (Playwright MCP)
 .playwright-mcp/
+
+# docker compose settings (secrets)
+.env

@@ -1,0 +1,34 @@
+# Local automation stack (#21, docs/n8n.md): n8n + Mailpit.
+#   Start: docker compose up -d      Stop: docker compose down      (data stays in the n8n_data volume)
+# Mailpit is the ONLY mail server: every e-mail n8n sends ends up in http://localhost:8025, never in a real inbox.
+name: loopcasts
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.42.7
+    ports:
+      - "127.0.0.1:5678:5678"            # only this computer can reach n8n
+    environment:
+      GENERIC_TIMEZONE: Europe/Brussels  # the 08:00 schedule is Ghent time
+      TZ: Europe/Brussels
+      N8N_SECURE_COOKIE: "false"         # plain http on localhost
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"   # the workflows read the two LOOPCASTS_ values below
+      LOOPCASTS_SITE_URL: ${LOOPCASTS_SITE_URL:-http://host.docker.internal:5180}
+      LOOPCASTS_SECRET: ${LOOPCASTS_SECRET:?Set LOOPCASTS_SECRET in .env (same value as the site's N8n:Secret)}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # the site runs on this computer (dotnet watch, port 5180)
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n:/loopcasts:ro              # workflows + credentials to import (docs/n8n.md)
+    depends_on:
+      - mailpit
+
+  mailpit:
+    image: axllent/mailpit:v1.31.5
+    ports:
+      - "127.0.0.1:8025:8025"            # web UI: the "inbox" for every e-mail
+      - "127.0.0.1:1025:1025"            # SMTP, used by n8n as "mailpit:1025"
+
+volumes:
+  n8n_data:

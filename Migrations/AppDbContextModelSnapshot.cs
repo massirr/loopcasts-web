@@ -39,6 +39,9 @@ namespace LoopCastsWeb.Migrations
                     b.Property<string>("PlanCode")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("RemindedFor")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateOnly>("StartsOn")
                         .HasColumnType("TEXT");
 
