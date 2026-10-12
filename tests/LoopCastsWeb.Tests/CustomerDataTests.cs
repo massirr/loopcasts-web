@@ -59,4 +59,27 @@ public class CustomerDataTests
         Assert.Equal("Team licence", Assert.Single(subs).PlanName);
         Assert.Empty(await CustomerData.InvoicesAsync(db, "cleo@example.com"));
     }
+
+    [Theory]
+    [InlineData("ann@example.com", "Ann@Example.com")]    // name on the order (Seed uses the e-mail as name)
+    [InlineData("cleo.peeters@example.com", "Cleo")]      // never ordered → e-mail before the @, first part
+    public async Task Name_FromOrder_ElseFromEmail(string email, string name)
+    {
+        var db = await Seed();
+
+        Assert.Equal(name, await CustomerData.NameAsync(db, email));
+    }
+
+    [Fact]
+    public async Task MoveToEmail_OrdersSeatsAndInvoicesFollow()
+    {
+        var db = await Seed();
+
+        await CustomerData.MoveToEmailAsync(db, "ANN@example.com", "ann@new.be");
+        db.ChangeTracker.Clear();   // ExecuteUpdate writes straight to the database
+
+        Assert.Single(await CustomerData.InvoicesAsync(db, "ann@new.be"));
+        Assert.Single(await CustomerData.SubscriptionsAsync(db, "ann@new.be"));
+        Assert.Empty(await CustomerData.SubscriptionsAsync(db, "ann@example.com"));
+    }
 }

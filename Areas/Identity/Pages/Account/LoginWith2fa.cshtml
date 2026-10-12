@@ -1,0 +1,29 @@
+@page
+@model LoginWith2faModel
+@{
+    ViewData["Title"] = "Code from your app";
+}
+
+<div class="narrow">
+    <partial name="_AccountLogo" />
+    <section class="card">
+        <h1>Code from your app</h1>
+        <p class="muted">Open your authenticator app and enter the 6-digit code for LoopCasts.</p>
+        <form method="post" asp-route-returnUrl="@Model.ReturnUrl" class="form" novalidate>
+            <input asp-for="RememberMe" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+            <div class="field">
+                <label asp-for="Input.TwoFactorCode">Code</label>
+                <input asp-for="Input.TwoFactorCode" autocomplete="one-time-code" inputmode="numeric" autofocus />
+                <span asp-validation-for="Input.TwoFactorCode"></span>
+            </div>
+            <label class="check"><input asp-for="Input.RememberMachine" /> Don't ask again on this browser</label>
+            <button type="submit" class="btn-sign btn-wide" data-busy-text="Checking…">Log in</button>
+        </form>
+        <p class="small">No phone at hand? <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">Use a recovery code</a></p>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}

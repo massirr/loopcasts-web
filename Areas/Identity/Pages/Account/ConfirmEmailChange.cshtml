@@ -1,0 +1,14 @@
+@page
+@model LoopCastsWeb.Areas.Identity.Pages.Account.ConfirmEmailChangeModel
+@{
+    ViewData["Title"] = "Change your e-mail";
+}
+
+<div class="narrow">
+    <partial name="_AccountLogo" />
+    <section class="card">
+        <h1>Change your e-mail</h1>
+        <partial name="_Flash" model="Model.StatusMessage" />
+        <a class="btn-sign btn-wide" asp-area="Identity" asp-page="/Account/Manage/Index">Back to Account settings</a>
+    </section>
+</div>

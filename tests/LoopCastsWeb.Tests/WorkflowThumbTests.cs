@@ -28,9 +28,19 @@ public class WorkflowThumbTests
     public void HasBranch_IdOrTitleWord(int id, string title, bool branch) => Assert.Equal(branch, HasBranch(id, title));
 
     [Theory]
-    [InlineData(1, 12, 3, 22)]
-    [InlineData(2, null, 2, 22)]
-    [InlineData(4, 13, 4, 18)]   // four steps are drawn smaller to fit
+    [InlineData(2, "n8n basics", Shape.Straight)]
+    [InlineData(1, "n8n basics", Shape.Loop)]              // Id % 3 == 1 loops
+    [InlineData(5, "Cron and schedulers", Shape.Loop)]     // schedules repeat
+    [InlineData(1, "AI agents with n8n", Shape.Tool)]      // AI calls a tool; the word wins over the Id
+    [InlineData(11, "RAG on your own documents", Shape.Tool)]
+    [InlineData(3, "AI agents", Shape.Branch)]             // the branch rule (§5) always comes first
+    [InlineData(2, "Retail tips", Shape.Straight)]         // "ai" inside a word does not count
+    public void ShapeOf_TitleWordsThenId(int id, string title, Shape shape) => Assert.Equal(shape, ShapeOf(id, title));
+
+    [Theory]
+    [InlineData(2, 12, 3, 22)]
+    [InlineData(5, null, 2, 22)]
+    [InlineData(8, 13, 4, 18)]   // four steps are drawn smaller to fit
     public void Straight_StepsInALine_WithOneEdgeMoreThanSteps(int id, int? videos, int steps, double size)
     {
         var t = Build(id, "Plain title", videos);
@@ -55,6 +65,37 @@ public class WorkflowThumbTests
     }
 
     [Fact]
+    public void Branch_EvenId_SplitsRightAfterTheTrigger()
+    {
+        var t = Build(6, "Plain title", 8);
+
+        Assert.True(t.Branch);
+        Assert.Equal(3, t.Steps);
+        Assert.Equal(5, t.Edges.Count);
+        Assert.StartsWith("M33 35C", t.Edges[0]);   // the first edge already curves
+    }
+
+    [Fact]
+    public void Loop_ArcFromLastStepBackToFirst()
+    {
+        var t = Build(4, "Plain title", 12);
+
+        Assert.Equal(Shape.Loop, t.Shape);
+        Assert.Equal(3 + 2, t.Edges.Count);        // line edges + the arc
+        Assert.Contains('C', t.Edges[^1]);
+    }
+
+    [Fact]
+    public void Tool_OneSmallNodeUnderAStep()
+    {
+        var t = Build(10, "AI agents with n8n", 13);
+
+        var tool = Assert.Single(t.Nodes, n => n.Kind == Kind.Tool);
+        Assert.Equal(12, tool.W);
+        Assert.Equal(5 + 1, t.Edges.Count);        // 4 steps → 5 line edges, plus the line to the tool
+    }
+
+    [Fact]
     public void SameCourse_SamePicture()
     {
         var a = Build(new Course { Id = 10, Title = "AI agents with n8n", VideoCount = 13 });
@@ -69,7 +110,8 @@ public class WorkflowThumbTests
     {
         for (var id = 1; id <= 6; id++)
             foreach (var videos in new int?[] { null, 4, 9, 13, 50 })
-                foreach (var n in Build(id, "x", videos).Nodes)
+            foreach (var title in new[] { "x", "AI agents" })
+                foreach (var n in Build(id, title, videos).Nodes)
                 {
                     var (left, top) = n.Kind == Kind.Trigger ? (n.X - n.W / 2, n.Y - n.H / 2) : (n.X, n.Y);
                     Assert.InRange(left, 0, 160 - n.W);

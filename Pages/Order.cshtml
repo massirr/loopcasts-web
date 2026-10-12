@@ -5,7 +5,8 @@
     var plan = Model.SelectedPlan!;
 }
 
-<div class="page">
+<div class="page checkout">
+    <partial name="_Progress" model="1" />
     <header class="page-head">
         <h1>Your order</h1>
         <p>We need a few details for your invoice and your login. Takes a minute.</p>
@@ -70,13 +71,13 @@
                 </div>
             </fieldset>
 
-            <div><button type="submit" class="btn-sign">Continue to payment</button></div>
+            <div><button type="submit" class="btn-sign" data-busy-text="One moment…">Continue to payment</button></div>
         </form>
 
         <aside class="card summary" aria-label="Your plan">
             <h2 class="h-small">@plan.Name</h2>
-            <p class="price num">@($"€{plan.Price:0}")</p>
-            <p class="muted small">excl. VAT · @plan.Detail</p>
+            <p class="price num">@($"€{plan.Price:0}") <span class="muted small">excl. VAT</span></p>
+            <p class="muted small">@plan.Detail</p>
             <p class="small">VAT depends on your country and whether you order as a company. You see the total before you pay.</p>
             <a class="small" asp-page="/Pricing">Choose another plan</a>
         </aside>

@@ -29,5 +29,7 @@ public class CoursesModel : PageModel
             .OrderBy(c => c.Level)
             .ThenBy(c => c.Title)
             .ToList();
+        // "Recorded by …" only when there is more than one instructor (loopcasts-ui §6); read by _CourseCard
+        ViewData["ManyInstructors"] = live.Select(c => c.Instructor).Distinct().Count() > 1;
     }
 }

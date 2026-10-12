@@ -1,0 +1,19 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Login and e-mail";
+}
+@* No username or phone number (loopcasts-ui §8): the login is the e-mail. The form posts to the Email page. *@
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Login and e-mail</h2>
+    <p>You log in with <strong class="wrap-any">@Model.Username</strong>. Your invoices go to the same address.</p>
+    <form method="post" asp-page="./Email" asp-page-handler="ChangeEmail" class="form">
+        <div class="field">
+            <label for="new-email">New e-mail</label>
+            <input id="new-email" name="Input.NewEmail" type="email" autocomplete="email" required />
+        </div>
+        <div><button type="submit" class="btn-ink" data-busy-text="Sending…">Change e-mail</button></div>
+    </form>
+    <p class="muted small">We send a link to the new address. Your e-mail changes when you click it.</p>
+</section>

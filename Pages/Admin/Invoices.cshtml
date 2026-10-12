@@ -12,7 +12,7 @@
     <section class="section" aria-labelledby="inv-title">
         <header class="page-head">
             <h1 id="inv-title">Invoices</h1>
-            <p class="num">Revenue this month excl. VAT: <strong>@($"€{thisMonth.Sum(i => i.AmountExclVat):0.00}")</strong> · @thisMonth.Count invoices · calculated, not summed by colour</p>
+            <p class="num">Revenue this month excl. VAT: <strong>@($"€{thisMonth.Sum(i => i.AmountExclVat):0.00}")</strong> from @thisMonth.Count invoices.</p>
         </header>
         <div class="table-scroll">
             <table class="table table-dense">

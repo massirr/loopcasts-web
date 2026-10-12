@@ -7,9 +7,10 @@
 }
 
 <div class="page">
+    <partial name="_Progress" model="@(o.IsPaid ? 3 : 2)" />
     <header class="page-head">
         <h1>@(o.IsPaid ? $"Thanks, {firstName}. You're in." : $"Thanks, {firstName}. We're waiting for your payment.")</h1>
-        <p>Everything below happened by itself the moment you paid. Nobody had to retype anything.</p>
+        <p>@(o.IsPaid ? "Your invoice and your access are ready. You find both on My courses." : "As soon as your payment arrives, your invoice and your access appear here.")</p>
     </header>
 
     @* What really happened on the server; site.js only lights the finished steps up one by one *@
@@ -48,7 +49,8 @@
                 {
                     <dt>Invoice</dt>
                     <dd>
-                        @inv.Number · @($"€{inv.Total:0.00}") incl. @($"{inv.VatRate * 100:0}")% VAT
+                        <span class="num">@inv.Number</span><br />
+                        @($"€{inv.Total:0.00}") incl. @($"{inv.VatRate * 100:0}")% VAT
                         @if (inv.ReverseCharge) { <br /><span class="muted small">VAT reverse charged</span> }
                     </dd>
                 }

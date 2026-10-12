@@ -26,6 +26,9 @@
                 case WorkflowThumb.Kind.Step:
                     <rect class="wf-step" x="@F(n.X)" y="@F(n.Y)" width="@F(n.W)" height="@F(n.H)" rx="5" />
                     break;
+                case WorkflowThumb.Kind.Tool:
+                    <rect class="wf-tool" x="@F(n.X)" y="@F(n.Y)" width="@F(n.W)" height="@F(n.H)" rx="6" />
+                    break;
                 default:
                     <rect class="wf-end" x="@F(n.X)" y="@F(n.Y)" width="@F(n.W)" height="@F(n.H)" rx="5" />
                     break;

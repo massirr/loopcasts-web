@@ -1,0 +1,43 @@
+@page
+@model TwoFactorAuthenticationModel
+@{
+    ViewData["Title"] = "Two-factor login";
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <div class="section-head">
+        <h2>Two-factor login</h2>
+        <p class="status @(Model.Is2faEnabled ? "status-ok" : "status-off")">@(Model.Is2faEnabled ? "On" : "Off")</p>
+    </div>
+    <p>You log in with your password and a code from an app on your phone. Someone who knows your password still can't get in.</p>
+
+    @if (Model.Is2faEnabled)
+    {
+        @if (Model.RecoveryCodesLeft == 0)
+        {
+            <p class="flash flash-error" role="alert"><span>You have no recovery codes left. <a asp-page="./GenerateRecoveryCodes">Make new ones</a> before you lose your phone.</span></p>
+        }
+        else if (Model.RecoveryCodesLeft <= 3)
+        {
+            <p class="flash flash-info"><span>You have @Model.RecoveryCodesLeft recovery code@(Model.RecoveryCodesLeft == 1 ? "" : "s") left. <a asp-page="./GenerateRecoveryCodes">Make new ones</a>.</span></p>
+        }
+        <div class="row">
+            <a class="btn-outline btn-small" asp-page="./EnableAuthenticator">Set up a new phone</a>
+            <a class="btn-outline btn-small" asp-page="./GenerateRecoveryCodes">New recovery codes</a>
+            <a class="btn-quiet btn-small btn-danger-quiet" asp-page="./Disable2fa">Turn off</a>
+        </div>
+        @if (Model.IsMachineRemembered)
+        {
+            <form method="post" class="row">
+                <span class="muted small">This browser doesn't ask for a code.</span>
+                <button type="submit" class="btn-quiet btn-small">Forget this browser</button>
+            </form>
+        }
+        <p class="small"><a asp-page="./ResetAuthenticator">Reset your key</a> if someone else may have it.</p>
+    }
+    else
+    {
+        <p class="muted">Any authenticator app works, for example Microsoft Authenticator or Google Authenticator.</p>
+        <div><a class="btn-sign" asp-page="./EnableAuthenticator">Turn on two-factor login</a></div>
+    }
+</section>

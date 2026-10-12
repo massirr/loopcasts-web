@@ -34,6 +34,27 @@ public static class CustomerData
             .ToListAsync();
     }
 
+    /// The name for the account button: the name on the newest order, else the e-mail before the @ ("ann.peeters" → "Ann").
+    /// Identity only stores the e-mail; staff and colleagues on a team seat never ordered themselves.
+    public static async Task<string> NameAsync(AppDbContext db, string email)
+    {
+        var e = email.ToLower();
+        var name = await db.Orders.Where(o => o.Email.ToLower() == e)
+            .OrderByDescending(o => o.Id).Select(o => o.Name).FirstOrDefaultAsync();
+        if (!string.IsNullOrWhiteSpace(name)) return name.Trim();
+        var part = email.Split('@')[0].Split('.', '_', '-', '+')[0];
+        return part.Length == 0 ? email : char.ToUpperInvariant(part[0]) + part[1..];
+    }
+
+    /// After a confirmed login e-mail change: orders and seats follow the customer, so /My keeps showing them.
+    /// Invoices keep their Billing* snapshot (the e-mail is not on the invoice).
+    public static async Task MoveToEmailAsync(AppDbContext db, string oldEmail, string newEmail)
+    {
+        var e = oldEmail.ToLower();
+        await db.Orders.Where(o => o.Email.ToLower() == e).ExecuteUpdateAsync(s => s.SetProperty(o => o.Email, newEmail));
+        await db.Accounts.Where(a => a.Email.ToLower() == e).ExecuteUpdateAsync(s => s.SetProperty(a => a.Email, newEmail));
+    }
+
     /// One invoice, only if it belongs to this e-mail (or the caller is staff).
     public static async Task<Invoice?> InvoiceAsync(AppDbContext db, string number, string? email, bool isAdmin)
     {

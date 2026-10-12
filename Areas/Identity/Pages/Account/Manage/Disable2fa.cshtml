@@ -1,0 +1,14 @@
+@page
+@model Disable2faModel
+@{
+    ViewData["Title"] = "Turn off two-factor login";
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Turn off two-factor login?</h2>
+    <p>You then log in with only your password. Your authenticator app keeps its key; to change it, <a asp-page="./ResetAuthenticator">reset your key</a>.</p>
+    <form method="post" class="row">
+        <button type="submit" class="btn-danger" data-busy-text="Turning off…">Turn off two-factor login</button>
+        <a asp-page="./TwoFactorAuthentication">Keep it on</a>
+    </form>
+</section>

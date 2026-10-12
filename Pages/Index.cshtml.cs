@@ -17,5 +17,6 @@ public class IndexModel : PageModel
     {
         var live = await _db.Courses.Where(c => c.Status == "live").ToListAsync();
         Courses = live.OrderByDescending(c => c.PublishedOn).Take(6).ToList();
+        ViewData["ManyInstructors"] = live.Select(c => c.Instructor).Distinct().Count() > 1;
     }
 }

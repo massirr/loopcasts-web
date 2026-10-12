@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,11 +11,6 @@
     <link rel="stylesheet" href="~/LoopCastsWeb.styles.css" asp-append-version="true" />
 </head>
 <body>
-    @{
-        // aria-current="page" on the link of the page you are on (screen readers + the underline in the nav)
-        var current = ViewContext.RouteData.Values["page"] as string;
-        string? Here(string page) => current == page ? "page" : null;
-    }
     <a class="skip" href="#main">Skip to content</a>
     <header class="nav">
         <div class="container nav-inner">
@@ -23,11 +18,8 @@
                 <partial name="_Logo" />
                 <span>LoopCasts</span>
             </a>
-            <nav class="nav-links" aria-label="Main">
-                <a class="nav-link" asp-area="" asp-page="/Courses" aria-current="@Here("/Courses")">Courses</a>
-                <a class="nav-link" asp-area="" asp-page="/Pricing" aria-current="@Here("/Pricing")">Pricing</a>
-                <partial name="_LoginPartial" />
-            </nav>
+            @* Courses, Pricing, account menu, and the phone menu sheet (loopcasts-ui §4) *@
+            <partial name="_LoginPartial" />
         </div>
     </header>
 
@@ -37,7 +29,7 @@
 
     <footer class="footer">
         <div class="container footer-inner">
-            <span>&copy; LoopCasts BV, Ghent · <a asp-area="" asp-page="/Privacy">Privacy</a></span>
+            <span class="row"><span>&copy; LoopCasts BV, Ghent</span><a asp-area="" asp-page="/Privacy">Privacy</a></span>
             <partial name="_SupportLine" />
         </div>
     </footer>

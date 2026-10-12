@@ -1,0 +1,28 @@
+@* Account settings: the list on the left (desktop) / on top (phone), the page on the right. Inside the site layout. *@
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    var name = (ViewContext.RouteData.Values["page"] as string ?? "").Replace("/Account/Manage/", "");
+    string? Here(params string[] pages) => pages.Contains(name) ? "page" : null;
+}
+<div class="page">
+    <header class="page-head">
+        <h1>Account settings</h1>
+        <p class="wrap-any">@User.Identity?.Name</p>
+    </header>
+    <div class="settings">
+        <nav class="settings-nav" aria-label="Account settings">
+            <a asp-area="Identity" asp-page="/Account/Manage/Index" aria-current="@Here("Index", "Email")">Login and e-mail</a>
+            <a asp-area="Identity" asp-page="/Account/Manage/ChangePassword" aria-current="@Here("ChangePassword", "SetPassword")">Password</a>
+            <a asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication"
+               aria-current="@Here("TwoFactorAuthentication", "EnableAuthenticator", "Disable2fa", "GenerateRecoveryCodes", "ShowRecoveryCodes", "ResetAuthenticator")">Two-factor login</a>
+            <a asp-area="Identity" asp-page="/Account/Manage/PersonalData" aria-current="@Here("PersonalData", "DeletePersonalData")">Your data</a>
+        </nav>
+        <div class="settings-body">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

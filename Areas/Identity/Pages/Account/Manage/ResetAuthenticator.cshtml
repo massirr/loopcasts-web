@@ -1,0 +1,14 @@
+@page
+@model ResetAuthenticatorModel
+@{
+    ViewData["Title"] = "Reset your key";
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Reset your key?</h2>
+    <p>Two-factor login turns off, and your authenticator app stops working for LoopCasts until you add it again with the new key.</p>
+    <form method="post" class="row">
+        <button type="submit" class="btn-danger" data-busy-text="Resetting…">Reset key</button>
+        <a asp-page="./TwoFactorAuthentication">Cancel</a>
+    </form>
+</section>

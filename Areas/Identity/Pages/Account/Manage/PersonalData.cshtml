@@ -1,0 +1,17 @@
+@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Your data";
+}
+<section class="card">
+    <h2>Download your data</h2>
+    <p>A file with what your login holds: your e-mail and your two-factor settings. Your plans and invoices are on <a asp-area="" asp-page="/My">My courses</a>.</p>
+    <form method="post" asp-page="./DownloadPersonalData" data-no-busy>
+        <button type="submit" class="btn-outline">Download my data</button>
+    </form>
+</section>
+<section class="card">
+    <h2>Delete your account</h2>
+    <p>Your login is deleted and you can't watch your courses any more. Invoices stay in our books, as the law requires.</p>
+    <div><a class="btn-danger" asp-page="./DeletePersonalData">Delete my account</a></div>
+</section>

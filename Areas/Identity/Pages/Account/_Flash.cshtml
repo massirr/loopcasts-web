@@ -1,0 +1,28 @@
+@model string?
+@* The message after an action (not named _StatusMessage: the Identity package has its own with that name in Manage/). Identity's own texts in our words (loopcasts-ui §6); unknown ones stay as they are. *@
+@{
+    var words = new Dictionary<string, string>
+    {
+        ["Your password has been changed."] = "Your password is changed.",
+        ["Your password has been set."] = "Your password is saved.",
+        ["Confirmation link to change email sent. Please check your email."] = "We sent a link to your new e-mail. Click it to finish the change.",
+        ["Your email is unchanged."] = "That is already your login e-mail.",
+        ["Verification email sent. Please check your email."] = "We sent you a link to confirm your e-mail.",
+        ["Your authenticator app has been verified."] = "Two-factor login is on.",
+        ["2fa has been disabled. You can reenable 2fa when you setup an authenticator app"] = "Two-factor login is off. You can turn it on again any time.",
+        ["The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code."] = "This browser is forgotten. Next time you log in here, we ask for a code.",
+        ["You have generated new recovery codes."] = "Here are your new recovery codes. The old ones no longer work.",
+        ["Your authenticator app key has been reset, you will need to configure your authenticator app using the new key."] = "Your key is reset. Add LoopCasts to your authenticator app again with the new key.",
+        ["Thank you for confirming your email change."] = "Your login e-mail is changed.",
+        ["Thank you for confirming your email."] = "Your e-mail is confirmed.",
+        ["Error changing email."] = "This link doesn't work any more. Change your e-mail again to get a new one.",
+        ["Error changing user name."] = "Another login already uses that e-mail.",
+        ["Error confirming your email."] = "This link doesn't work any more.",
+    };
+    var error = Model?.StartsWith("Error") == true;
+    var text = Model is null ? null : words.GetValueOrDefault(Model, Model);
+}
+@if (!string.IsNullOrEmpty(text))
+{
+    <p class="flash @(error ? "flash-error" : "flash-ok")" role="@(error ? "alert" : "status")"><span>@text</span></p>
+}

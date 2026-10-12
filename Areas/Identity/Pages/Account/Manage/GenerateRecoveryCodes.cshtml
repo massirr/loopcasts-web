@@ -1,0 +1,14 @@
+@page
+@model GenerateRecoveryCodesModel
+@{
+    ViewData["Title"] = "New recovery codes";
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Make new recovery codes?</h2>
+    <p>Your old codes stop working. Your authenticator app keeps working.</p>
+    <form method="post" class="row">
+        <button type="submit" class="btn-ink" data-busy-text="Making codes…">Make new codes</button>
+        <a asp-page="./TwoFactorAuthentication">Cancel</a>
+    </form>
+</section>

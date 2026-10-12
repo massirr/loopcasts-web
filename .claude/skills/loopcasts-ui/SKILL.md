@@ -15,7 +15,7 @@ The `frontend-design` skill is installed: use it for craft, but never let it cha
 ## 1. Tokens (copy into `wwwroot/css/site.css`, see `tokens.css` next to this file)
 | Token | Value | Use |
 |---|---|---|
-| `--canvas` | `#f6f7f4` | page background, with a 16px dot grid (`--dot #d9ddd6`) |
+| `--canvas` | `#f6f7f4` | page background. Dot grid (`--dot #d9ddd6`, 16px) is **fixed to the window** (a `position:fixed` layer behind the page, not `background-attachment:fixed`) and **fades out** from ~30% to ~75% of the window height, so forms and tables sit on plain canvas |
 | `--surface` | `#ffffff` | cards, forms, nav |
 | `--thumb` | `#eef1ec` | workflow thumbnail background |
 | `--ink` | `#17202a` | text, borders, filled end node, primary dark button |
@@ -51,19 +51,25 @@ Light theme only for now. Never put a level colour on a button or nav.
 - Radius: cards 8px, buttons 6px, thumbnails 5px, tags 4px. No big shadows; cards are 1px `--line` borders.
 
 ## 4. Components
-- **Nav:** sticky at the top, translucent so the dot grid shows through: `background: rgb(255 255 255 / .55); backdrop-filter: blur(6px)` (with `-webkit-` prefix), 1px bottom border, `z-index: 10`, logo mark + "LoopCasts" left, links right. Logo mark = two
-  rounded rectangles joined by a line (outline node → filled node). SVG in `Pages/Shared/_Logo.cshtml`.
+- **Nav (decided):** sticky, translucent (`rgb(255 255 255 / .55)` + `backdrop-filter: blur(6px)`), 1px bottom border, z-index 10.
+  Left: logo. Right, always visible: Courses, Pricing. Logged out: "Log in" outline button.
+  Logged in: ONE account button (initials chip + first name) that opens a menu: "Signed in as {email}",
+  My courses, Account settings, Admin (**only for the Admin role**), divider, Log out.
+  Menu: `aria-expanded`, Esc and outside click close it, focus moves into it, opens with scale .96→1 + fade
+  from the button's corner (`transform-origin: top right`), closes the same way.
+  Below 720px: Courses/Pricing/account collapse into one menu icon that opens a full-width sheet with all links.
+  Logo mark = two rounded rectangles joined by a line (outline node → filled node), SVG in `Pages/Shared/_Logo.cshtml`.
 - **Buttons:** `.btn-sign` (yellow `--sign`, ink text, `box-shadow: inset 0 -3px 0 rgb(0 0 0 / .18)`),
   `.btn-ink` (ink fill, white text), `.btn-outline` (transparent, 2px inset ink). Min height 40px.
 - **Course card:** surface, 1px border, 8px radius, padding 10–12px. Order: workflow thumbnail → title (Archivo 800)
   → meta line (level word in its level colour, darkened for contrast) → "Recorded by {Instructor}" with initials avatar. Same order on every card.
 - **Workflow thumbnail** (the signature, see §5).
 - **Person chip:** 20–28px circle, `--enamel` fill, white initials. Used for instructors and support.
-- **Support line** (footer and /My): "Questions? Lotte answers, not a bot." + support e-mail as plain text.
+- **Support line** (footer): "Questions? Mail support@…" with the address as plain, selectable text.
 - **Level:** the word (Beginner / Intermediate / Advanced) in bold, coloured with a darkened level tone (`#2e7a5e`, `#8a5d0c`, `#b23e2b`) for 4.5:1 contrast.
 - **Forms:** labels above inputs, 1px `--line` border, 6px radius, focus = 2px `--enamel` outline with 2px offset.
   Errors under the field in `error` colour with what to fix ("Enter a VAT number like BE0123456789").
-- **Team strip** (home + about): 5 person chips (MD, LJ, YE, PC, TV) with first names on hover/title.
+- **Team strip:** not used until real photos exist.
 
 ## 5. Workflow thumbnail (Razor partial `Pages/Shared/_WorkflowThumb.cshtml`, model = Course)
 Drawn as inline SVG, `viewBox="0 0 160 70"`, background `--thumb`, aspect-ratio 16/7, `max-width:100%`.
@@ -72,15 +78,25 @@ Deterministic from the course, so the same course always looks the same:
 - **Steps:** `n = clamp(ceil(VideoCount/4), 2, 4)` white rounded squares (2px ink stroke), 22px (18px when n = 4). Null VideoCount → 2.
 - **Branch:** if `Course.Id % 3 == 0` OR the title contains "error", "if", "routing", "human" → split into two
   parallel steps after the first step, merging before the end.
+- **More variety (#18):** when there is no branch, AI words ("ai", "agent", "rag", "mcp", "llm", "prompt") hang a small tool
+  node under one step; schedule words ("cron", "schedule", "loop", "retry", "batch", "every") or `Id % 3 == 1` draw a loop arc
+  from the last step back to the first. A branch with an even Id splits right after the trigger.
 - **End node:** filled ink square. Edges: 2px `--edge`, curved (`C`) on branches.
 - Put the geometry in a C# helper `Services/WorkflowThumb.cs` (pure function → list of nodes/edges) so it's unit-tested.
 - `aria-hidden="true"` on the SVG; the card title carries the meaning.
 
 ## 6. Human touch (data)
 - Courses get an `Instructor` (string, default "Marieke De Smet") via a migration when the course card needs it.
-- Show real first names: "Recorded by Marieke", "Lotte answers", invoices "Questions? lotte@…" (no fake people).
+- Real names only where they help the customer (e.g. "Recorded by Marieke" once there are several instructors); never invent people.
 - Copy voice: plain, friendly, small-company, first person plural ("we"). Slogan: "Learn automation. Stop doing boring work."
   Never invent numbers; use the handbook (60 courses, 2 new videos a week, since 2019, Ghent).
+- **Write about what the customer gets, never about how we work inside.** No "nobody retypes", "not a bot",
+  "the same workflow we teach", Excel-colour jokes. No defensive claims that raise suspicion.
+- Keep: "↳ made by five people above a bike shop in Ghent" (home hero only).
+- Support line everywhere: "Questions? Mail support@…" (plain text e-mail from `Seller:SupportEmail`). No staff names in it.
+- "Recorded by …" on course cards only when more than one instructor exists in the catalogue.
+- No initials-only team strip until real photos exist.
+- No middle dots (·) anywhere in UI text; use sentences, line breaks or separate elements.
 
 ## 7. Motion (CSS in `site.css`, tiny JS in `wwwroot/js/site.js`; no animation libraries)
 In ASP.NET the server only sends HTML; animation is plain CSS/JS that runs in the browser, exactly like a static site.
@@ -103,11 +119,12 @@ Rule from `frontend-design`: ONE motion that plays by itself; everything else an
 | Home `/` | Hero (uppercase slogan, handwritten note, See plans + Browse courses, team strip) + "What happens when you order" workflow panel; **6** course cards + "All courses" link; support line |
 | Courses `/Courses` | All live courses as cards, grouped or filterable by level |
 | Pricing `/Pricing` | 4 plans as cards; one `.btn-sign` per plan; Team plan mentions "5 seats" |
-| Order → Pay | Form in one column (max 560px), summary card on the right (stacks under 720px); Pay = one `.btn-sign` |
+| Order → Pay → Done | 3-step progress drawn as workflow nodes; form + summary as one centred block (max ~960px), summary top-aligned and sticky on desktop, stacked under 720px; Pay = one `.btn-sign` with a "Paying…" state that blocks double clicks |
 | OrderThanks | The Paid → Invoice → Account → E-mail step sequence, then invoice summary + set-password link |
-| My `/My` | Plan, access end date, invoices table, team seats; support line with Lotte |
+| My courses `/My` | Plan, access end date, invoices table, team seats (one card: list + inline add row); setup link as a "Copy link" button |
 | Invoice | Print-friendly: no dot grid, no nav (`@media print`), plain ink on white |
 | Admin `/Admin/*` | Same tokens, quieter: no handwritten note, no hero, no thumbnails; dense tables in `.table-scroll` |
+| Account settings (`/Identity/Account/Manage/*`, our own views) | Left list (desktop) / stacked (phone) with: **Login and e-mail**, **Password**, **Two-factor login** (for every account), **Your data** (download, delete account; invoices kept as the law requires). No username or phone number fields. |
 | Identity pages (login, reset password) | Centered card on the canvas, logo above, one `.btn-sign` |
 
 ## 9. Implementation rules
@@ -118,3 +135,14 @@ Rule from `frontend-design`: ONE motion that plays by itself; everything else an
 - Repeated markup → partials (`_CourseCard`, `_WorkflowThumb`, `_PersonChip`, `_Logo`) instead of copy-paste.
 - Before finishing: check 360px, 720px and 1320px widths, keyboard focus visible on every control, colour contrast
   ≥ 4.5:1 for text (yellow `--sign` only with ink text).
+
+## 10. Feel (from the `apple-design` skill, adapted; loopcasts-ui wins on fonts and colours)
+- Feedback on press, not release: every button/link has an `:active` state (translateY(1px) or scale(.97)).
+- Every interactive element has hover, `:active`, `:focus-visible`, disabled and (for submits) loading states.
+- Transitions never block input and can be interrupted (CSS transitions on transform/opacity, not keyframes, for menus).
+- Things close the way they opened (same path, mirrored easing); `transform-origin` = the element that opened it.
+- `prefers-reduced-motion: reduce` → opacity cross-fades only, no movement, no looping flow on cards.
+- `prefers-reduced-transparency: reduce` → solid nav and menus, no blur.
+- `prefers-contrast: more` → solid surfaces, 2px borders, no dot grid.
+- Ignore apple-design's "prefer the system font" and its drag/gesture/spring sections (no drag UI here).
+- Stress-test with `break-ui` (long names, long e-mails, empty lists, 5/5 seats) and phones with `mobile-native` when installed.
