@@ -1,0 +1,165 @@
+{
+  "id": "lcRenewalFlow001",
+  "name": "Renewal reminder",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Brussels"
+  },
+  "nodes": [
+    {
+      "id": "r1",
+      "name": "Every day at 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "r0",
+      "name": "Run now (test)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        180
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "r2",
+      "name": "Accounts ending soon",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        80
+      ],
+      "parameters": {
+        "url": "={{ $env.LOOPCASTS_SITE_URL }}/api/automation/expiring?days=14",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-LoopCasts-Secret",
+              "value": "={{ $env.LOOPCASTS_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "r3",
+      "name": "Reminder e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        80
+      ],
+      "parameters": {
+        "fromEmail": "LoopCasts <support@loopcasts.example>",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=Your LoopCasts {{ $json.plan }} ends on {{ $json.endsOnText }}",
+        "emailFormat": "html",
+        "html": "=<p>Hi {{ $json.name }},</p><p>Your {{ $json.plan }} ends on {{ $json.endsOnText }}. Renew before then and you keep watching without a break.</p><p><a href=\"{{ $json.renewUrl }}\">Renew your {{ $json.plan }}</a></p><p>Not renewing? Then you don't need to do anything; your access simply stops on {{ $json.endsOnText }}.</p><p>The LoopCasts team<br>Questions? Mail support@loopcasts.example</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "smtp": {
+          "id": "lcMailpitSmtp001",
+          "name": "Mailpit (local)"
+        }
+      }
+    },
+    {
+      "id": "r4",
+      "name": "Mark as reminded",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        80
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LOOPCASTS_SITE_URL }}/api/automation/reminded",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-LoopCasts-Secret",
+              "value": "={{ $env.LOOPCASTS_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ accountId: $('Accounts ending soon').item.json.accountId, endsOn: $('Accounts ending soon').item.json.endsOn }) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Every day at 08:00": {
+      "main": [
+        [
+          {
+            "node": "Accounts ending soon",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run now (test)": {
+      "main": [
+        [
+          {
+            "node": "Accounts ending soon",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accounts ending soon": {
+      "main": [
+        [
+          {
+            "node": "Reminder e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reminder e-mail": {
+      "main": [
+        [
+          {
+            "node": "Mark as reminded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

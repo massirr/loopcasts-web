@@ -1,3 +1,4 @@
+using LoopCastsWeb.Api;
 using LoopCastsWeb.Data;
 using LoopCastsWeb.Services;
 using Microsoft.AspNetCore.Identity;
@@ -83,6 +84,9 @@ app.MapPost("/webhooks/mollie", async (HttpRequest request, MollieService mollie
     await mollie.SyncAsync(form["id"].ToString());
     return Results.Ok();
 });
+
+// JSON endpoints for n8n (renewal reminders), protected by the N8n:Secret header
+app.MapAutomationApi();
 
 app.MapRazorPages()
    .WithStaticAssets();

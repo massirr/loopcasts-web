@@ -13,4 +13,5 @@ public class Account
     public DateOnly StartsOn { get; set; }
     public DateOnly? EndsOn { get; set; }            // null = lifetime (single course)
     public bool IsActive { get; set; } = true;       // the nightly job sets this to false after EndsOn
+    public DateOnly? RemindedFor { get; set; }        // the EndsOn a renewal reminder was sent for (#21): never twice
 }

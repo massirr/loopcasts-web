@@ -57,12 +57,13 @@ public class N8nNotifier : IEmailSender
 
     // Identity writes its own e-mails ("Please reset your password by <a href='…'>clicking here</a>.").
     // We keep only its link and say it in our words (loopcasts-ui §6). Any other e-mail goes out unchanged.
+    // Recognised by the start of Identity's text, not the subject: the subject differs per Identity version (#21).
     private static readonly Dictionary<string, (string Subject, string Text, string Button)> OurWords = new()
     {
-        ["Reset Password"] = ("Choose a new LoopCasts password",
+        ["Please reset your password"] = ("Choose a new LoopCasts password",
             "You asked to choose a new password for your LoopCasts login. The button works for 24 hours. Didn't ask? Then ignore this e-mail; your password stays the same.",
             "Choose a new password"),
-        ["Confirm your email"] = ("Confirm your LoopCasts e-mail",
+        ["Please confirm your account"] = ("Confirm your LoopCasts e-mail",
             "Click the button to use this address for your LoopCasts login and invoices. Didn't ask? Then ignore this e-mail; nothing changes.",
             "Confirm this e-mail"),
     };
@@ -70,7 +71,9 @@ public class N8nNotifier : IEmailSender
 
     private (string Subject, string Html) InOurWords(string subject, string html)
     {
-        if (!OurWords.TryGetValue(subject, out var w) || Href.Match(html) is not { Success: true } link) return (subject, html);
+        var known = OurWords.FirstOrDefault(x => html.StartsWith(x.Key, StringComparison.Ordinal));
+        if (known.Key is null || Href.Match(html) is not { Success: true } link) return (subject, html);
+        var w = known.Value;
         var url = link.Groups[1].Value;   // already HTML-encoded by Identity
         return (w.Subject,
             $"<p>Hi,</p><p>{w.Text}</p><p><a href=\"{url}\">{w.Button}</a></p>" +

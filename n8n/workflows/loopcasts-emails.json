@@ -1,0 +1,188 @@
+{
+  "id": "lcEmailsFlow0001",
+  "name": "LoopCasts e-mails",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Brussels"
+  },
+  "nodes": [
+    {
+      "id": "e1",
+      "name": "Site event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "9d1c3a52-6a3e-4c55-9a51-0f2b4c2a7e01",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "loopcasts",
+        "options": {}
+      }
+    },
+    {
+      "id": "e2",
+      "name": "Secret OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.headers['x-loopcasts-secret'] }}",
+              "rightValue": "={{ $env.LOOPCASTS_SECRET }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e3",
+      "name": "Which event?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        440,
+        -100
+      ],
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 2,
+        "output": "={{ $json.body.event === 'invoice.created' ? 0 : 1 }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "e4",
+      "name": "Invoice e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        -200
+      ],
+      "parameters": {
+        "fromEmail": "LoopCasts <support@loopcasts.example>",
+        "toEmail": "={{ $json.body.to }}",
+        "subject": "=Your LoopCasts invoice {{ $json.body.invoiceNumber }}",
+        "emailFormat": "html",
+        "html": "=<p>Hi {{ $json.body.name.split(' ')[0] }},</p><p>Thanks for your order. Your invoice {{ $json.body.invoiceNumber }} for {{ $json.body.description }} is ready: €{{ Number($json.body.total).toFixed(2) }} incl. VAT, already paid.</p><p><a href=\"{{ $json.body.invoiceUrl }}\">View or print your invoice</a></p>{{ $json.body.setPasswordUrl ? '<p>Your login is ready too. Choose your password first; the link works for 24 hours.</p><p><a href=\"' + $json.body.setPasswordUrl + '\">Choose your password</a></p>' : '' }}<p>The LoopCasts team<br>Questions? Mail support@loopcasts.example</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "smtp": {
+          "id": "lcMailpitSmtp001",
+          "name": "Mailpit (local)"
+        }
+      }
+    },
+    {
+      "id": "e5",
+      "name": "Login e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        0
+      ],
+      "parameters": {
+        "fromEmail": "LoopCasts <support@loopcasts.example>",
+        "toEmail": "={{ $json.body.to }}",
+        "subject": "={{ $json.body.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.body.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "smtp": {
+          "id": "lcMailpitSmtp001",
+          "name": "Mailpit (local)"
+        }
+      }
+    },
+    {
+      "id": "e6",
+      "name": "Wrong secret: ignore",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        440,
+        120
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Site event": {
+      "main": [
+        [
+          {
+            "node": "Secret OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Secret OK?": {
+      "main": [
+        [
+          {
+            "node": "Which event?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wrong secret: ignore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Which event?": {
+      "main": [
+        [
+          {
+            "node": "Invoice e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Login e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
