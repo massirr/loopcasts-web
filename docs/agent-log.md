@@ -231,3 +231,25 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Learn:** the API handlers are plain static methods that get `HttpRequest`, `IConfiguration` and `AppDbContext` as
   parameters — ASP.NET fills them in (dependency injection per parameter), like a WPF command that receives its
   CommandParameter instead of reaching into the window.
+
+## 2026-10-12 — #22 Chat assistant for visitors (n8n + Gemini)  (PR #25, merged; evaluation blocked → #26)
+- **What:** n8n workflow "LoopCasts assistant" (Chat Trigger → AI Agent → Gemini `gemini-2.5-flash` + window memory
+  + 3 HTTP tools), read-only `GET /api/public/courses|plans|faq`, public FAQ (`n8n/knowledge/faq.md`) and system prompt,
+  n8n chat widget on the site when `Chat:Url` is set ("Answers by an AI assistant" under the input),
+  `docs/ai-evaluation.md` (15 questions, privacy note) + `n8n/eval/run-eval.mjs`, Azure AI Foundry switch in docs/n8n.md §5.
+- **Why / decisions:** only public data reaches the model (Gemini free tier uses inputs to improve Google's products);
+  the FAQ is served by the site so there is one file, and tests block staff names/e-mails in it and keep the workflow's
+  prompt equal to `system-prompt.md`. The old support answers describe the old process (passwords by mail, Friday
+  logins), so the FAQ describes the new site instead. Node versions read from the n8n 2.42.7 container, not guessed.
+  Found while testing: the Chat Trigger doesn't evaluate expressions in *Allowed origins* (literal value now); the
+  widget's CSS overrides `:root` variables (ours are on `body`); the widget has no footer text option → small observer.
+  The Gemini credential is imported **without** a key, already linked to the model node.
+- **Blocked:** Gemini API key (needs Koze's Google account) → no real answers yet; evaluation table says "pending".
+  Follow-up issue #26. Checked without a key: CORS, tools reachable from n8n, workflow runs to the model node, widget
+  screenshots at 1320/360, eval runner (0/15 "no answer", doc restored).
+- **Tests:** 148, CI green.
+- **Manual steps for Koze:** n8n → Credentials → Gemini → paste key; `dotnet user-secrets set "Chat:Url" "http://localhost:5678/webhook/6f0d3c1e-2b7a-4c8e-9a51-1c2d3e4f5a60/chat"`;
+  `node n8n/eval/run-eval.mjs <that URL>`; read every answer, fix the prompt/FAQ for failures (#26).
+- **Learn:** the AI part is "retrieval by tools": the model doesn't know LoopCasts, it calls the site's API like a
+  ViewModel calls a service, and the system prompt is its contract. Swapping Gemini for Azure changes one node, like
+  swapping an `IEmailSender` implementation in DI.
