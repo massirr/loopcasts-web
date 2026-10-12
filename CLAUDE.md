@@ -1,5 +1,7 @@
 # LoopCastsWeb — notes for Claude Code
 
+**Current status, open work and next steps: `docs/handover.md`** (read it first, update it at the end of a session).
+
 ## HARD RULES (never break, no exceptions)
 1. **No secrets** in code, appsettings*.json, commits, issues, PRs or logs. Never print password/API-key values.
 2. **Secrets only via `dotnet user-secrets`** (dev) or environment variables / App Service settings (server).
@@ -49,7 +51,7 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Services/N8nNotifier.cs` | Events to the n8n webhook (`invoice.created`, `email`); also Identity's `IEmailSender`. Never throws. See `docs/n8n.md` |
 | `Services/RenewalReminders.cs`, `Api/AutomationApi.cs` | Renewal reminders for n8n: `GET /api/automation/expiring?days=14`, `POST /api/automation/reminded` (header `X-LoopCasts-Secret` = `N8n:Secret`) |
 | `docker-compose.yml`, `n8n/` | Local n8n + Mailpit (only mail server); workflows "LoopCasts e-mails" + "Renewal reminder" as JSON. `.env` = `LOOPCASTS_SECRET` (git-ignored). See `docs/n8n.md` |
-| `Api/PublicApi.cs`, `Pages/Shared/_Chat.cshtml` | Chat assistant (#22): public read-only `/api/public/courses|plans|faq` for the n8n "LoopCasts assistant" (Gemini); widget only when `Chat:Url` is set. FAQ/prompt in `n8n/knowledge/`, eval in `n8n/eval/` + `docs/ai-evaluation.md`. Only public data goes to the model |
+| `Api/PublicApi.cs`, `Pages/Shared/_Chat.cshtml` | Chat assistant (#22): public read-only `/api/public/courses|plans|faq` for the n8n "LoopCasts assistant" (Groq `openai/gpt-oss-120b`; was Gemini); widget only when `Chat:Url` is set. FAQ/prompt in `n8n/knowledge/`, eval in `n8n/eval/` + `docs/ai-evaluation.md`. Only public data goes to the model |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
@@ -98,7 +100,8 @@ access end date, "Set your password" link on the e-mail's first paid order).
 - Polish (#18): "Download my data" holds only the login data (Identity); orders/invoices are on /My. Deleting an account
   keeps orders and invoices (law); no anonymising yet. Authenticator setup shows the key + an otpauth link, no QR code (would need a package).
 - Seller address + VAT number are not in the handbook (ch. 1–6) → `Seller:Address`/`Seller:VatNumber` still empty.
-- Chat assistant (#22): Gemini key not set yet (Koze adds it in n8n → Credentials → Gemini); evaluation results pending.
+- Chat assistant (#22): model switched from Gemini (free tier 20 requests/day, 503s) to Groq (free, 1 000/day). In n8n,
+  **Save is not Publish**: the site's chat runs the published version. Evaluation results in docs/ai-evaluation.md (#26).
 - Later in the semester: newsletter unsubscribe.
 - Password manager (Bitwarden/Vaultwarden) for `paswoorden.xlsx` is a recommendation, not code.
 - Never commit the old LoopCasts Dropbox copy (passwords, customer e-mails) or `*.db` files.

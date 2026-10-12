@@ -45,3 +45,8 @@ right away, and support only gets the questions that need a person. (The course'
 - Manual: chat webhook + CORS (only localhost:5180), n8n → site tools via host.docker.internal, workflow runs up to the
   model node, widget screenshots `docs/design/screenshots/chat-widget-{1320,360}.png`, eval runner run once (no key → 0/15, doc restored).
 - After the key: `node n8n/eval/run-eval.mjs <chat URL>` → results in docs/ai-evaluation.md.
+
+## Changed after merge (12/10/2026, #26)
+Model switched from Google Gemini to **Groq `openai/gpt-oss-120b`** (max 2000 tokens, retry 3×): Gemini's free tier
+(20 requests/day per model, frequent 503s) answered only 3 of 15 evaluation questions. Credential placeholder
+`n8n/credentials/groq.json` replaces `gemini.json`. Reasons and limits: docs/ai-evaluation.md, docs/n8n.md §5.

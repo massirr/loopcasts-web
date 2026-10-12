@@ -13,7 +13,7 @@ Locally it runs in Docker next to **Mailpit**, a fake mail server.
 | Mailpit (all sent e-mails) | http://localhost:8025 |
 | SMTP for n8n | `mailpit:1025` (inside Docker) |
 | The site, seen from n8n | `http://host.docker.internal:5180` |
-| Workflows / credentials | `n8n/workflows/*.json`, `n8n/credentials/*.json` (no secrets: the Gemini key is added in the UI) |
+| Workflows / credentials | `n8n/workflows/*.json`, `n8n/credentials/*.json` (no secrets: the Groq key is added in the UI) |
 | Chat assistant (FAQ, prompt, tests) | `n8n/knowledge/`, `n8n/eval/`, `docs/ai-evaluation.md` |
 
 ## 1. First time
@@ -24,7 +24,7 @@ dotnet user-secrets set "N8n:Secret" "<the same value>"          # copy it from 
 dotnet user-secrets set "N8n:WebhookUrl" "http://localhost:5678/webhook/loopcasts"
 
 docker compose up -d                                             # n8n + Mailpit
-docker compose exec n8n n8n import:credentials --separate --input=/loopcasts/credentials   # Mailpit + an empty "Gemini"
+docker compose exec n8n n8n import:credentials --separate --input=/loopcasts/credentials   # Mailpit + an empty "Groq"
 docker compose exec n8n n8n import:workflow --separate --input=/loopcasts/workflows
 docker compose exec n8n n8n publish:workflow --id=lcEmailsFlow0001
 docker compose exec n8n n8n publish:workflow --id=lcRenewalFlow001
@@ -32,7 +32,7 @@ docker compose exec n8n n8n publish:workflow --id=lcAssistant00001
 docker compose restart n8n                                       # published workflows start after a restart
 ```
 Then open http://localhost:5678 and create the n8n owner login (local only, your own e-mail + password).
-For the chat assistant: Credentials → **Gemini** → paste your API key (https://aistudio.google.com/apikey) → Save, and
+For the chat assistant: Credentials → **Groq** → paste your API key (https://console.groq.com/keys) → Save, and
 `dotnet user-secrets set "Chat:Url" "http://localhost:5678/webhook/6f0d3c1e-2b7a-4c8e-9a51-1c2d3e4f5a60/chat"`.
 Start the site as usual (`dotnet watch`, port 5180).
 
@@ -87,7 +87,8 @@ docker compose exec -e N8N_RUNNERS_BROKER_PORT=5690 n8n n8n execute --id lcRenew
 ## 5. Workflow "LoopCasts assistant" (`lcAssistant00001`): the chat on the site
 `Chat on the website` (Chat Trigger, public, embedded, only http://localhost:5180 may embed it)
 → **LoopCasts assistant** (AI Agent, rules in `n8n/knowledge/system-prompt.md`)
-with **Model (swap here)** (Google Gemini `gemini-2.5-flash`, credential "Gemini"), **Chat memory (per session)**
+with **Model (swap here)** (Groq `openai/gpt-oss-120b`, temperature 0.2, max 2000 tokens, retry 3× on failure,
+credential "Groq"), **Chat memory (per session)**
 (last 10 messages of that chat) and three tools that call the site's read-only public API:
 `courses` → `/api/public/courses`, `plans` → `/api/public/plans`, `faq` → `/api/public/faq` (= `n8n/knowledge/faq.md`).
 
@@ -96,6 +97,36 @@ The site shows the n8n chat widget bottom-right (`Pages/Shared/_Chat.cshtml`) on
 (n8n doesn't accept an expression there). Changed the prompt? Edit `system-prompt.md` **and** the agent's system message
 (a unit test checks they are equal). Test questions and results: `docs/ai-evaluation.md`.
 
+### When the model says "busy" (503) or "quota exceeded" (429)
+- **503 high demand**: Google is overloaded for a moment. Node *Model (swap here)* → Settings → **Retry On Fail** on,
+  Max Tries 3, Wait Between Tries 5000 ms. Then the visitor gets an answer instead of an error.
+- **429 quota exceeded**: the free daily limit is used up (Gemini free: 20 requests/day per model; one chat answer =
+  2–3 requests). Retrying doesn't help; switch to a model with a bigger free limit (below).
+- Changed the model in the editor? **Save is not enough: click Publish.** The chat on the site runs the *published*
+  version; Save only changes the draft. (From the repo: `import:workflow` → `publish:workflow` → `restart`, as in §1.)
+- Imported a workflow from the command line? **Reload the editor tab** (Cmd+R) before you touch it. An open tab keeps
+  the old version, and Save there overwrites the import without a warning. (n8n keeps every saved version, so nothing is lost: it can be restored from the workflow history.)
+
+### Why Groq (since 12/10/2026; before: Google Gemini)
+Gemini's free tier allowed 20 requests a day per model and was often "busy" (503): the first evaluation got only 3 of
+15 answers. Groq's free plan: `openai/gpt-oss-120b` with 30 requests/min and 1 000/day, fast, supports tool calling,
+doesn't train on API data. No credit card.
+Max tokens is 2000, not 700: gpt-oss is a reasoning model and its hidden reasoning counts toward the limit; 2000 is a
+ceiling, a short answer costs the same.
+
+### Swapping the model (any provider)
+1. Make a credential for the provider (n8n → Credentials → Add → e.g. **Groq**, **Google Gemini(PaLM) Api**, **Azure OpenAI**).
+2. In the workflow: delete *Model (swap here)*, add the provider's **Chat Model** node, pick the model, Options →
+   temperature 0.2; connect it to the agent's *Chat Model* input; name it *Model (swap here)*; Settings → Retry On Fail.
+   **Save, then Publish.**
+3. Export it to the repo (§2): keep the credential reference pointing to the key-less placeholder in
+   `n8n/credentials/` (every n8n has its own credential ids). Run `node n8n/eval/run-eval.mjs <chat URL>` again.
+Watch the free limit of 8 000 tokens per minute: each answer uses roughly 2 000–4 000 tokens (prompt ~500 + FAQ ~1 000 + chat history), so a fast burst of
+questions can hit it. For the evaluation that is fine (7 s between questions); for a busy site, use a paid plan or Azure.
+
+A local model (Ollama) is free and private, but this laptop (M1, 8 GB) only runs small models that follow the rules and
+call tools poorly; not recommended for the demo.
+
 ### Switching the model to Azure AI Foundry later
 The model is one node, so nothing else changes:
 1. Azure portal → **Azure AI Foundry** → create a project (region West Europe or Sweden Central) → *Models + endpoints*
@@ -103,7 +134,7 @@ The model is one node, so nothing else changes:
 2. n8n → Credentials → **Azure OpenAI** (`azureOpenAiApi`): resource name, API key, API version (as shown in Foundry).
 3. In the workflow: delete *Model (swap here)*, add **Azure OpenAI Chat Model**, model = your deployment name,
    temperature 0.2, connect it to the agent's *Chat Model* input, save and publish.
-4. Run `node n8n/eval/run-eval.mjs <chat URL>` again and compare with the Gemini results.
+4. Run `node n8n/eval/run-eval.mjs <chat URL>` again and compare with the Groq results.
 Why: with Azure the prompts are not used to train models and stay in the EU region you choose (see docs/ai-evaluation.md).
 
 ## 6. On a server (later)
