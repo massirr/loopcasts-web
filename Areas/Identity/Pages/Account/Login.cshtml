@@ -8,7 +8,7 @@
     <partial name="_AccountLogo" />
     <section class="card">
         <h1>Log in</h1>
-        <p class="muted">With the e-mail you ordered with. Staff use their personal account.</p>
+        <p class="muted">Use the e-mail you ordered with.</p>
         @if (!string.IsNullOrEmpty(Model.ErrorMessage)) { <p class="flash flash-error" role="alert"><span>@Model.ErrorMessage</span></p> }
         <form id="account" method="post" class="form" novalidate>
             <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>

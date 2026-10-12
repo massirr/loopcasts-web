@@ -1,6 +1,9 @@
-.order-layout { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 340px); gap: 32px 48px; align-items: start; }
+/* form + summary as one centred block, summary top-aligned and sticky on desktop, on top under 720px */
+.checkout { width: min(100%, 960px); margin-inline: auto; }
+.order-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 320px); gap: 32px 48px; align-items: start; }
 @media (max-width: 720px) { .order-layout { grid-template-columns: minmax(0, 1fr); } .summary { order: -1; } }
 .company { border: 0; padding: 0; margin: 0; }
 @media (min-width: 721px) { .summary { position: sticky; top: 84px; } }   /* on phones it sits above the form, not over it */
 .h-small { font-size: 1.05rem; }
 .price { font: 800 2.2rem/1 var(--font-display); }
+.price span { font-family: var(--font-body); font-weight: 400; }

@@ -6,9 +6,10 @@
 }
 
 <div class="narrow">
+    <partial name="_Progress" model="2" />
     @if (!Model.UsesMollie)
     {
-        <p class="flash flash-info"><span><strong>Test payment.</strong> This page stands in for the payment provider (no Mollie key set). No real money moves.</span></p>
+        <p class="flash flash-info"><span><strong>Test payment.</strong> No real money moves: the button marks your order as paid.</span></p>
     }
     @if (Model.Error is not null)
     {
@@ -16,13 +17,14 @@
     }
 
     <section class="card">
-        <p class="muted small">LoopCasts BV · order @o.Id</p>
+        <p class="muted small">Order @o.Id at LoopCasts BV</p>
         <h1>@(Model.Plan?.Name ?? o.PlanCode)</h1>
         <p class="pay-total num">@($"€{Model.Total:0.00}")</p>
-        <p class="muted small wrap-any">@($"€{o.Price:0.00}") excl. VAT · @o.Email</p>
+        <p class="muted small">Incl. VAT (@($"€{o.Price:0.00}") excl. VAT)</p>
+        <p class="muted small wrap-any">Invoice and login go to @o.Email</p>
 
         <form method="post" asp-route-id="@o.Id" asp-route-key="@o.AccessKey">
-            <button type="submit" class="btn-sign btn-wide">
+            <button type="submit" class="btn-sign btn-wide" data-busy-text="Paying…">
                 Pay @($"€{Model.Total:0.00}") @(Model.UsesMollie ? "with Mollie" : "(test)")
             </button>
         </form>

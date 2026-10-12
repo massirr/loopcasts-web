@@ -9,7 +9,7 @@
     <partial name="_AdminNav" />
     <header class="page-head">
         <h1>Orders</h1>
-        <p class="num">@Model.Orders.Count orders · @open waiting for payment</p>
+        <p class="num">@Model.Orders.Count orders, @open waiting for payment.</p>
     </header>
 
     @if (Model.Orders.Count == 0)
@@ -34,7 +34,7 @@
                                 <span class="muted small">@o.Email</span>
                                 @if (o.IsCompany)
                                 {
-                                    <br /><span class="small">@o.Company · @o.VatNumber</span>
+                                    <br /><span class="small">@o.Company</span> <span class="small muted">@o.VatNumber</span>
                                 }
                             </td>
                             <td>@(Plans.Find(o.PlanCode)?.Name ?? o.PlanCode)</td>

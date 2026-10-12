@@ -1,13 +1,13 @@
 @page
 @model MyModel
 @{
-    ViewData["Title"] = "My LoopCasts";
+    ViewData["Title"] = "My courses";
     var today = DateOnly.FromDateTime(DateTime.UtcNow);
 }
 
 <div class="page">
     <header class="page-head">
-        <h1>My LoopCasts</h1>
+        <h1>My courses</h1>
         <p class="wrap-any">@Model.Email</p>
     </header>
 
@@ -16,8 +16,10 @@
     @if (Model.SetupUrl is not null)
     {
         <div class="flash flash-info stack">
-            <label for="setup-url">Send this link to your colleague so they can choose a password. It works for 24 hours and is shown only once.</label>
-            <input id="setup-url" readonly value="@Model.SetupUrl" onclick="this.select()" />
+            <label for="setup-url">Send this link to your colleague so they can choose a password. It works for 24 hours and you see it only once.</label>
+            @* site.js shows the button and hides the field; without JS (or clipboard access) the field stays *@
+            <div><button type="button" class="btn-ink btn-small" data-copy="setup-url" aria-live="polite" hidden>Copy link</button></div>
+            <input id="setup-url" readonly value="@Model.SetupUrl" onfocus="this.select()" />
         </div>
     }
 
@@ -49,41 +51,41 @@
 
     @foreach (var l in Model.Licences)
     {
-        <section class="section" aria-labelledby="team-@l.Order.Id">
+        <section class="card" aria-labelledby="team-@l.Order.Id">
             <div class="section-head">
                 <h2 id="team-@l.Order.Id">Your team</h2>
-                <p class="muted num">@l.Used of @l.Seats seats used · team licence, order @l.Order.Id</p>
+                <p class="muted num">@l.Used of @l.Seats seats used</p>
             </div>
-            <div class="table-scroll">
-                <table class="table">
-                    <thead><tr><th>Who</th><th class="end"><span class="visually-hidden">Actions</span></th></tr></thead>
-                    <tbody>
-                        @foreach (var a in l.Accounts.Where(a => a.IsActive))
+            <ul class="seats">
+                @foreach (var a in l.Accounts.Where(a => a.IsActive))
+                {
+                    var mine = string.Equals(a.Email, l.Order.Email, StringComparison.OrdinalIgnoreCase);
+                    <li>
+                        <span>@a.Email @if (mine) { <span class="muted">(you)</span> }</span>
+                        @if (!mine)
                         {
-                            var mine = string.Equals(a.Email, l.Order.Email, StringComparison.OrdinalIgnoreCase);
-                            <tr>
-                                <td class="wrap-any">@a.Email @if (mine) { <span class="muted">(you)</span> }</td>
-                                <td class="end">
-                                    @if (!mine)
-                                    {
-                                        <form method="post" asp-page-handler="RemoveSeat" asp-route-orderId="@l.Order.Id" asp-route-accountId="@a.Id">
-                                            <button class="btn-quiet btn-small btn-danger-quiet" aria-label="Remove @a.Email">Remove</button>
-                                        </form>
-                                    }
-                                </td>
-                            </tr>
+                            <form method="post" asp-page-handler="RemoveSeat" asp-route-orderId="@l.Order.Id" asp-route-accountId="@a.Id">
+                                <button class="btn-quiet btn-small btn-danger-quiet" aria-label="Remove @a.Email">Remove</button>
+                            </form>
                         }
-                    </tbody>
-                </table>
-            </div>
-            @if (l.Used < l.Seats)
-            {
-                <form method="post" asp-page-handler="AddSeat" asp-route-orderId="@l.Order.Id" class="add-seat">
-                    <label for="seat-@l.Order.Id" class="visually-hidden">Colleague's e-mail</label>
-                    <input id="seat-@l.Order.Id" name="email" type="email" required placeholder="colleague@company.com" />
-                    <button class="btn-ink">Add colleague</button>
-                </form>
-            }
+                    </li>
+                }
+                <li>
+                    @if (l.Used < l.Seats)
+                    {
+                        <form method="post" asp-page-handler="AddSeat" asp-route-orderId="@l.Order.Id" class="seat-add">
+                            <label for="seat-@l.Order.Id" class="visually-hidden">Colleague's e-mail</label>
+                            <input id="seat-@l.Order.Id" name="email" type="email" required autocomplete="off" placeholder="colleague@company.com" />
+                            <button class="btn-ink" data-busy-text="Adding…">Add colleague</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="muted">All @l.Seats seats are in use. Remove someone to add a colleague.</span>
+                    }
+                </li>
+            </ul>
+            <p class="muted small">Team licence, order @l.Order.Id</p>
         </section>
     }
 
@@ -102,10 +104,10 @@
                         @foreach (var i in Model.Invoices)
                         {
                             <tr>
-                                <td>@i.Number</td>
+                                <td><strong>@i.Number</strong></td>
                                 <td>@i.IssuedOn.ToString("dd/MM/yyyy")</td>
                                 <td class="end">@($"€{i.Total:0.00}")</td>
-                                <td class="end"><a asp-page="/Invoice" asp-route-number="@i.Number" aria-label="View or print invoice @i.Number">View / print</a></td>
+                                <td class="end"><a asp-page="/Invoice" asp-route-number="@i.Number" aria-label="View or print invoice @i.Number">View or print</a></td>
                             </tr>
                         }
                     </tbody>

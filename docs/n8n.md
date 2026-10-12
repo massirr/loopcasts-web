@@ -19,7 +19,7 @@ dotnet user-secrets set "N8n:Secret" "<long random string>"     # optional, chec
   "setPasswordUrl": "https://…/Identity/Account/ResetPassword?code=…" }   // null if the customer has a password
 
 // any e-mail from the login system (e.g. "Forgot password")
-{ "event": "email", "to": "ann@example.com", "subject": "Reset your password", "html": "…" }
+{ "event": "email", "to": "ann@example.com", "subject": "Choose a new LoopCasts password", "html": "…" }
 ```
 
 ## Workflow (4 nodes)
@@ -28,10 +28,19 @@ dotnet user-secrets set "N8n:Secret" "<long random string>"     # optional, chec
 2. **Switch** on `{{$json.body.event}}`: `invoice.created` / `email`.
 3. **Send Email** (SMTP or Gmail) for `invoice.created`:
    - To `{{$json.body.to}}`, Subject `Your LoopCasts invoice {{$json.body.invoiceNumber}}`
-   - HTML: greeting, total `€{{$json.body.total}}`, button to `{{$json.body.invoiceUrl}}`
-     (login required → customer sees/prints it), and if `setPasswordUrl` is not empty:
-     "Choose your password: {{$json.body.setPasswordUrl}}" (valid 24 h).
+   - HTML (copy into the node; wording follows loopcasts-ui §6):
+     ```html
+     <p>Hi {{$json.body.name}},</p>
+     <p>Thanks for your order. Your invoice {{$json.body.invoiceNumber}} for {{$json.body.description}}
+        is ready: €{{$json.body.total}} incl. VAT, already paid.</p>
+     <p><a href="{{$json.body.invoiceUrl}}">View or print your invoice</a></p>
+     {{ $json.body.setPasswordUrl ? '<p>Your login is ready too. Choose your password first; the link works for 24 hours.</p><p><a href="' + $json.body.setPasswordUrl + '">Choose your password</a></p>' : '' }}
+     <p>The LoopCasts team<br>Questions? Mail support@loopcasts.example</p>
+     ```
+     The invoice page needs a login, so the customer sees (and prints) only their own invoice.
 4. **Send Email** for `email`: To `{{$json.body.to}}`, Subject `{{$json.body.subject}}`, HTML `{{$json.body.html}}`.
+   The site already writes these e-mails in our words (`N8nNotifier.InOurWords`: "Choose a new LoopCasts password",
+   "Confirm your LoopCasts e-mail"); n8n only sends them.
 
 Optional: an *HTML → PDF* node (e.g. Gotenberg) on `invoiceUrl` to attach a PDF. The link is enough for the prototype.
 

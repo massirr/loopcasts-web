@@ -1,0 +1,14 @@
+@model int
+@* Checkout progress Order → Pay → Done as workflow nodes (loopcasts-ui §8). Model = the current step, 1–3. *@
+@{
+    string[] steps = ["Order", "Pay", "Done"];
+}
+<ol class="progress" aria-label="Checkout steps">
+    @for (var i = 0; i < steps.Length; i++)
+    {
+        var n = i + 1;
+        <li class="@(n < Model || Model == steps.Length ? "done" : null)" aria-current="@(n == Model ? "step" : null)">
+            <span class="node" aria-hidden="true"></span>@steps[i]
+        </li>
+    }
+</ol>

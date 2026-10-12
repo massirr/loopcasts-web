@@ -1,0 +1,31 @@
+@page
+@model EmailModel
+@{
+    ViewData["Title"] = "Login and e-mail";
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Login and e-mail</h2>
+    <p>You log in with <strong class="wrap-any">@Model.Email</strong>. Your invoices go to the same address.</p>
+    @if (!Model.IsEmailConfirmed)
+    {
+        <form method="post" asp-page-handler="SendVerificationEmail" class="row">
+            <span class="muted">This e-mail is not confirmed yet.</span>
+            <button type="submit" class="btn-quiet btn-small">Send me a link</button>
+        </form>
+    }
+    <form method="post" asp-page-handler="ChangeEmail" class="form" novalidate>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+        <div class="field">
+            <label asp-for="Input.NewEmail">New e-mail</label>
+            <input asp-for="Input.NewEmail" autocomplete="email" />
+            <span asp-validation-for="Input.NewEmail"></span>
+        </div>
+        <div><button type="submit" class="btn-ink" data-busy-text="Sending…">Change e-mail</button></div>
+    </form>
+    <p class="muted small">We send a link to the new address. Your e-mail changes when you click it.</p>
+</section>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}

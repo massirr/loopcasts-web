@@ -1,0 +1,22 @@
+@page
+@model ShowRecoveryCodesModel
+@{
+    ViewData["Title"] = "Recovery codes";
+    var codes = Model.RecoveryCodes ?? [];   // the PageModel sends you back when there are none
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Your recovery codes</h2>
+    <p><strong>Keep these somewhere safe</strong>, for example in your password manager. Lost your phone? Each code lets you log in once.</p>
+    <ul class="codes">
+        @foreach (var code in codes)
+        {
+            <li>@code</li>
+        }
+    </ul>
+    <textarea id="recovery-codes" readonly rows="5" hidden>@string.Join("\n", codes)</textarea>
+    <div class="row">
+        <button type="button" class="btn-ink btn-small" data-copy="recovery-codes" aria-live="polite" hidden>Copy codes</button>
+        <a class="btn-outline btn-small" asp-page="./TwoFactorAuthentication">Done</a>
+    </div>
+</section>

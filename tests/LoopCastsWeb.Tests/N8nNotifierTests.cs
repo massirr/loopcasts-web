@@ -88,4 +88,30 @@ public class N8nNotifierTests
 
         Assert.Contains("\"event\":\"email\"", Assert.Single(n8n.Requests).Body);
     }
+
+    [Fact]
+    public async Task IdentityEmail_InOurWords_KeepsTheLink()
+    {
+        var n8n = new FakeMollie(HttpStatusCode.OK, "{}");
+        var sp = TestDb.Services(n8n: n8n, config: Config);
+
+        await sp.GetRequiredService<N8nNotifier>().SendEmailAsync("ann@example.com", "Reset Password",
+            "Please reset your password by <a href='https://shop.test/reset?code=abc'>clicking here</a>.");
+
+        var body = Assert.Single(n8n.Requests).Body!;
+        Assert.Contains("\"subject\":\"Choose a new LoopCasts password\"", body);
+        Assert.Contains("https://shop.test/reset?code=abc", body);
+        Assert.DoesNotContain("clicking here", body);
+    }
+
+    [Fact]
+    public async Task UnknownEmail_GoesOutUnchanged()
+    {
+        var n8n = new FakeMollie(HttpStatusCode.OK, "{}");
+        var sp = TestDb.Services(n8n: n8n, config: Config);
+
+        await sp.GetRequiredService<N8nNotifier>().SendEmailAsync("ann@example.com", "Hello", "plain text");
+
+        Assert.Contains("\"subject\":\"Hello\"", Assert.Single(n8n.Requests).Body);
+    }
 }

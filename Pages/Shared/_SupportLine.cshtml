@@ -1,7 +1,5 @@
 @inject IConfiguration Config
-@* Handbook ch. 1 + 6: Lotte does support; customers mail the shared support inbox *@
+@* Support line everywhere (loopcasts-ui §6): the shared support inbox as plain, selectable text, no staff names *@
 <p class="support">
-    <partial name="_PersonChip" model="@("Lotte Janssens")" view-data="@(new ViewDataDictionary(ViewData) { ["Small"] = true })" />
-    <span>Questions? Lotte answers, not a bot.</span>
-    <span class="wrap-any">@Config["Seller:SupportEmail"]</span>
+    <span>Questions? Mail <span class="wrap-any">@Config["Seller:SupportEmail"]</span></span>
 </p>

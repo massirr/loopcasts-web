@@ -1,4 +1,6 @@
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Text.Json.Nodes;
 using LoopCastsWeb.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -41,13 +43,39 @@ public class N8nNotifier : IEmailSender
             : $"{BaseUrl}/Identity/Account/ResetPassword?code={passwordSetupCode}",
     });
 
-    public Task SendEmailAsync(string email, string subject, string htmlMessage) => SendAsync(new JsonObject
+    public Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        ["event"] = "email",
-        ["to"] = email,
-        ["subject"] = subject,
-        ["html"] = htmlMessage,
-    });
+        (subject, htmlMessage) = InOurWords(subject, htmlMessage);
+        return SendAsync(new JsonObject
+        {
+            ["event"] = "email",
+            ["to"] = email,
+            ["subject"] = subject,
+            ["html"] = htmlMessage,
+        });
+    }
+
+    // Identity writes its own e-mails ("Please reset your password by <a href='…'>clicking here</a>.").
+    // We keep only its link and say it in our words (loopcasts-ui §6). Any other e-mail goes out unchanged.
+    private static readonly Dictionary<string, (string Subject, string Text, string Button)> OurWords = new()
+    {
+        ["Reset Password"] = ("Choose a new LoopCasts password",
+            "You asked to choose a new password for your LoopCasts login. The button works for 24 hours. Didn't ask? Then ignore this e-mail; your password stays the same.",
+            "Choose a new password"),
+        ["Confirm your email"] = ("Confirm your LoopCasts e-mail",
+            "Click the button to use this address for your LoopCasts login and invoices. Didn't ask? Then ignore this e-mail; nothing changes.",
+            "Confirm this e-mail"),
+    };
+    private static readonly Regex Href = new("href='([^']*)'");
+
+    private (string Subject, string Html) InOurWords(string subject, string html)
+    {
+        if (!OurWords.TryGetValue(subject, out var w) || Href.Match(html) is not { Success: true } link) return (subject, html);
+        var url = link.Groups[1].Value;   // already HTML-encoded by Identity
+        return (w.Subject,
+            $"<p>Hi,</p><p>{w.Text}</p><p><a href=\"{url}\">{w.Button}</a></p>" +
+            $"<p>The LoopCasts team<br>Questions? Mail {WebUtility.HtmlEncode(_config["Seller:SupportEmail"])}</p>");
+    }
 
     private async Task SendAsync(JsonObject body)
     {

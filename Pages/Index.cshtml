@@ -16,15 +16,6 @@
             <a class="btn-sign" asp-page="/Pricing">See plans</a>
             <a class="btn-outline" asp-page="/Courses">Browse courses</a>
         </div>
-        <div class="team">
-            <span class="faces">
-                @foreach (var person in new[] { "Marieke De Smet", "Lotte Janssens", "Yasmine El", "Pieter Claes", "Tom Verhaeghe" })
-                {
-                    <partial name="_PersonChip" model="person" />
-                }
-            </span>
-            <span>Questions? Lotte answers, not a bot.</span>
-        </div>
     </div>
 
     <figure class="card flow-panel">
@@ -52,7 +43,7 @@
                 @Html.Raw($"<text x=\"{x + 20}\" y=\"{y + 44}\" text-anchor=\"middle\">{System.Net.WebUtility.HtmlEncode(steps[i])}</text>")
             }
         </svg>
-        <figcaption class="muted small">This site runs the same kind of workflow we teach: nobody types your invoice by hand.</figcaption>
+        <figcaption class="muted small">Pay, and your invoice and your login are ready right away.</figcaption>
     </figure>
 </section>
 
@@ -61,7 +52,7 @@
         <h2 id="courses-title">New courses</h2>
         <a asp-page="/Courses">All courses</a>
     </div>
-    <div class="grid">
+    <div class="course-grid">
         @foreach (var course in Model.Courses)
         {
             <partial name="_CourseCard" model="course" />

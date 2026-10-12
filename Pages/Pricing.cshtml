@@ -20,7 +20,7 @@
                 <p class="muted">@plan.Detail</p>
                 @if (plan.Seats > 1)
                 {
-                    <p class="small"><strong>@plan.Seats seats</strong> · for companies</p>
+                    <p class="small"><strong>@plan.Seats seats</strong>, for companies</p>
                 }
                 @* Before: a mailto: link. Now: our own order form, with the plan already chosen. *@
                 <a class="btn-sign btn-wide" asp-page="/Order" asp-route-plan="@plan.Code" aria-label="Order @plan.Name">Order</a>

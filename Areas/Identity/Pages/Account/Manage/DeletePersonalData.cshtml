@@ -1,0 +1,28 @@
+@page
+@model DeletePersonalDataModel
+@{
+    ViewData["Title"] = "Delete your account";
+}
+<section class="card">
+    <h2>Delete your account?</h2>
+    <p class="flash flash-error"><span>This can't be undone. Your login is deleted and you can't watch your courses any more. Invoices stay in our books, as the law requires.</span></p>
+    <form method="post" class="form" novalidate>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+        @if (Model.RequirePassword)
+        {
+            <div class="field">
+                <label asp-for="Input.Password">Your password</label>
+                <input asp-for="Input.Password" autocomplete="current-password" />
+                <span asp-validation-for="Input.Password"></span>
+            </div>
+        }
+        <div class="row">
+            <button type="submit" class="btn-danger" data-busy-text="Deleting…">Delete my account</button>
+            <a asp-page="./PersonalData">Keep my account</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}

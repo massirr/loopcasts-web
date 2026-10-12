@@ -78,6 +78,9 @@ Deterministic from the course, so the same course always looks the same:
 - **Steps:** `n = clamp(ceil(VideoCount/4), 2, 4)` white rounded squares (2px ink stroke), 22px (18px when n = 4). Null VideoCount → 2.
 - **Branch:** if `Course.Id % 3 == 0` OR the title contains "error", "if", "routing", "human" → split into two
   parallel steps after the first step, merging before the end.
+- **More variety (#18):** when there is no branch, AI words ("ai", "agent", "rag", "mcp", "llm", "prompt") hang a small tool
+  node under one step; schedule words ("cron", "schedule", "loop", "retry", "batch", "every") or `Id % 3 == 1` draw a loop arc
+  from the last step back to the first. A branch with an even Id splits right after the trigger.
 - **End node:** filled ink square. Edges: 2px `--edge`, curved (`C`) on branches.
 - Put the geometry in a C# helper `Services/WorkflowThumb.cs` (pure function → list of nodes/edges) so it's unit-tested.
 - `aria-hidden="true"` on the SVG; the card title carries the meaning.

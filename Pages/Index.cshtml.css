@@ -6,7 +6,6 @@
     text-transform: uppercase; overflow-wrap: anywhere;
 }
 .hero-copy .lead { max-width: 46ch; }
-.team { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--ink-2); font-size: .92rem; }
 .flow-panel { margin: 0; }
 .h-small { font-size: 1rem; }
 .hero-svg { width: 100%; height: auto; display: block; }

@@ -1,0 +1,14 @@
+@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm your e-mail";
+}
+
+<div class="narrow">
+    <partial name="_AccountLogo" />
+    <section class="card">
+        <h1>Confirm your e-mail</h1>
+        <partial name="_Flash" model="Model.StatusMessage" />
+        <a class="btn-sign btn-wide" asp-area="" asp-page="/My">Go to My courses</a>
+    </section>
+</div>

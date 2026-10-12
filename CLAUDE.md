@@ -60,8 +60,9 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `.github/workflows/deploy.yml` | after green CI on main → Azure App Service (inactive until set up, `docs/deploy-azure.md`) |
 | `docs/specs/`, `docs/agent-log.md` | specs per issue, log of agent work |
 | `Pages/My`, `Pages/Invoice` | Logged-in customer: subscriptions + invoices; printable invoice (own only, Admin all) |
-| `Pages/Shared/` | `_Layout`, `_Logo`, `_CourseCard`, `_WorkflowThumb`, `_PersonChip`, `_SupportLine`, `_LoginPartial` |
-| `Areas/Identity/Pages/Account/` | Our views for Login, Register, Forgot/Reset password, Access denied, Lockout (Identity package PageModels) |
+| `Pages/Shared/` | `_Layout`, `_Logo`, `_CourseCard`, `_WorkflowThumb`, `_PersonChip`, `_SupportLine`, `_Progress` (Order → Pay → Done), `_LoginPartial` (whole right side of the nav: links, account menu, phone sheet; keep the name, the Identity UI looks for it) |
+| `Areas/Identity/Pages/Account/` | Our views for Login, Register, Forgot/Reset password, Access denied, Lockout, LoginWith2fa/RecoveryCode (Identity package PageModels); `_Flash` = status messages in our words; own `ConfirmEmailChange` PageModel (moves orders/seats to the new e-mail) |
+| `Areas/Identity/Pages/Account/Manage/` | Account settings (`_ManageLayout`): Login and e-mail, Password, Two-factor login, Your data. No username/phone |
 | `Pages/Admin/` | Orders (mark paid = fallback for bank transfers), Invoices & accounts. Folder locked by `AdminOnly` policy |
 
 ## Flow
@@ -88,8 +89,9 @@ access end date, "Set your password" link on the e-mail's first paid order).
 - `Customer` is not split out of `Order` yet (planned: `Order.CustomerId`, Customer = SCD Type 1).
 - Invoice = printable page (browser → PDF); seller address/VAT nr in `appsettings.json` `Seller:*` (to fill in). Invoice e-mail + set-password link via n8n (#5, `N8n:WebhookUrl`); monthly re-billing not built.
 - Old data (#7): imported invoices keep their old numbers/amounts. Credit notes are not modelled yet (report only).
-- Redesign (#16): `Account/Manage/*` (2FA, personal data) still uses the Identity package layout (its own Bootstrap).
-  Seller address + VAT number are not in the handbook (ch. 1–6) → `Seller:Address`/`Seller:VatNumber` still empty.
+- Polish (#18): "Download my data" holds only the login data (Identity); orders/invoices are on /My. Deleting an account
+  keeps orders and invoices (law); no anonymising yet. Authenticator setup shows the key + an otpauth link, no QR code (would need a package).
+- Seller address + VAT number are not in the handbook (ch. 1–6) → `Seller:Address`/`Seller:VatNumber` still empty.
 - Later in the semester: chatbot (AI component), n8n workflows/webhooks, newsletter unsubscribe.
 - Password manager (Bitwarden/Vaultwarden) for `paswoorden.xlsx` is a recommendation, not code.
 - Never commit the old LoopCasts Dropbox copy (passwords, customer e-mails) or `*.db` files.

@@ -1,0 +1,26 @@
+@page
+@model LoginWithRecoveryCodeModel
+@{
+    ViewData["Title"] = "Recovery code";
+}
+
+<div class="narrow">
+    <partial name="_AccountLogo" />
+    <section class="card">
+        <h1>Use a recovery code</h1>
+        <p class="muted">Each code works once. Afterwards, make new codes under Account settings.</p>
+        <form method="post" class="form" novalidate>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+            <div class="field">
+                <label asp-for="Input.RecoveryCode">Recovery code</label>
+                <input asp-for="Input.RecoveryCode" autocomplete="off" autofocus />
+                <span asp-validation-for="Input.RecoveryCode"></span>
+            </div>
+            <button type="submit" class="btn-sign btn-wide" data-busy-text="Checking…">Log in</button>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}

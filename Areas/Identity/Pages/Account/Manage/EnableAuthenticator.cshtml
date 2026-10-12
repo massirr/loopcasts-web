@@ -1,0 +1,31 @@
+@page
+@model EnableAuthenticatorModel
+@{
+    ViewData["Title"] = "Turn on two-factor login";
+}
+<partial name="_Flash" model="Model.StatusMessage" />
+<section class="card">
+    <h2>Turn on two-factor login</h2>
+    <ol class="stack how">
+        <li>Install an authenticator app on your phone, for example Microsoft Authenticator or Google Authenticator.</li>
+        <li class="stack">
+            <span>In the app, add an account with this key. Spaces and capitals don't matter.</span>
+            <span class="key">@Model.SharedKey</span>
+            <a class="small" href="@Model.AuthenticatorUri">On your phone? Open it in your authenticator app</a>
+        </li>
+        <li>Enter the 6-digit code the app shows.</li>
+    </ol>
+    <form method="post" class="form" novalidate>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
+        <div class="field">
+            <label asp-for="Input.Code">Code from the app</label>
+            <input asp-for="Input.Code" autocomplete="one-time-code" inputmode="numeric" />
+            <span asp-validation-for="Input.Code"></span>
+        </div>
+        <div><button type="submit" class="btn-sign" data-busy-text="Checking…">Turn on</button></div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+}
