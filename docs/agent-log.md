@@ -147,3 +147,52 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Learn:** CSS isolation (`Page.cshtml.css`) adds a `b-xxxx` attribute to the page's own tags; markup written with
   `Html.Raw` or by a partial doesn't get it, so its styles must live in `site.css` — like a WPF style defined in a
   UserControl's resources that doesn't reach controls created somewhere else.
+
+## 2026-10-12 — #18 Polish every page  (PR #19, merged)
+- **What:** account menu (Admin only for the Admin role) + phone menu sheet (Esc, outside click, arrows), fixed fading
+  dot grid; our own Account settings views (Login and e-mail, Password, Two-factor login, Your data; no username/phone)
+  + LoginWith2fa/RecoveryCode; Order → Pay → Done progress, "Paying…" blocks a double submit; /My: Copy link, team as
+  one card; more thumbnail shapes (`WorkflowThumb.ShapeOf`), no lone last card, no "Recorded by" with one instructor,
+  no initials strip; hover/active/focus/disabled/busy on every control; reduced motion/transparency, more contrast.
+- **Why / decisions:** changing the login e-mail would have emptied /My (orders are found by e-mail), so our own
+  `ConfirmEmailChange` moves orders and seats (`CustomerData.MoveToEmailAsync`). Identity's e-mails are rewritten in
+  one place (`N8nNotifier.InOurWords`) instead of overriding three PageModels. Status messages via `_Flash`, because
+  the package's own `Manage/_StatusMessage` wins over a same-named partial one folder up. Skipped: QR code (needs a
+  package; key + `otpauth:` link), orders in the data download, anonymising after delete. `break-ui`, `mobile-native`,
+  `apple-design` skills not installed; skill §10 rules used instead.
+- **Wording (§6):**
+
+  | Where | Old | New |
+  |---|---|---|
+  | Home caption | This site runs the same kind of workflow we teach: nobody types your invoice by hand. | Pay, and your invoice and your login are ready right away. |
+  | Home hero | Questions? Lotte answers, not a bot. (+ initials strip) | removed |
+  | Support line | Questions? Lotte answers, not a bot. | Questions? Mail support@loopcasts.example |
+  | Footer | © LoopCasts BV, Ghent · Privacy | © LoopCasts BV, Ghent / Privacy (separate) |
+  | Nav | My LoopCasts / Admin / Account / Log out | menu: Signed in as … / My courses / Account settings / Admin / Log out |
+  | /My | My LoopCasts; View / print; "… is shown only once." | My courses; View or print; "… you see it only once." + Copy link → Copied |
+  | /My team | 3 of 5 seats used · team licence, order 1 | 3 of 5 seats used / Team licence, order 1 |
+  | Pricing | 5 seats · for companies | 5 seats, for companies |
+  | Order | excl. VAT · {plan detail} | €… excl. VAT / {plan detail} |
+  | Pay | This page stands in for the payment provider (no Mollie key set). No real money moves. | No real money moves: the button marks your order as paid. |
+  | Pay | LoopCasts BV · order 1; €… excl. VAT · {e-mail} | Order 1 at LoopCasts BV; Incl. VAT (€… excl. VAT); Invoice and login go to {e-mail}; Paying… |
+  | OrderThanks | Everything below happened by itself the moment you paid. Nobody had to retype anything. | Your invoice and your access are ready. You find both on My courses. |
+  | OrderThanks | {nr} · €… incl. 21% VAT | {nr} / €… incl. 21% VAT |
+  | Invoice | Questions? Lotte answers at support@… | Questions? Mail support@… |
+  | Privacy | Mail … and Lotte will help you. | You can download your data or delete your account yourself … / Mail … and we'll help you. |
+  | Login | With the e-mail you ordered with. Staff use their personal account. | Use the e-mail you ordered with. |
+  | Access denied | Go to My LoopCasts | Go to My courses |
+  | Admin | 12 orders · 3 waiting; Company · VAT; "· 4 invoices · calculated, not summed by colour" | 12 orders, 3 waiting for payment.; Company VAT; "from 4 invoices." |
+  | E-mails (Identity) | Reset Password: Please reset your password by clicking here. / Confirm your email: Please confirm your account by clicking here. | Choose a new LoopCasts password … / Confirm your LoopCasts e-mail … (full text in the spec) |
+  | Invoice e-mail (n8n) | greeting, total, button | Hi {name}, Thanks for your order. Your invoice {nr} for {description} is ready: €{total} incl. VAT, already paid. |
+
+  Full table incl. status messages: `docs/specs/18-polish.md`.
+- **Tests:** 124 (new: account-button name, e-mail move, thumbnail shapes, e-mails in our words). CI green. Headless
+  Chrome (DevTools protocol, scratch DB): 42 page/role combinations × 360/720/1320, no sideways scroll; menus, focus
+  ring, Paying…, Copy link, two-factor with a real TOTP code all checked. Found + fixed during the check: package
+  `_StatusMessage` winning over ours, thumbnail `max-height` also shrinking its width.
+  Screenshots: `docs/design/screenshots/polish-*.png`.
+- **Manual steps for Koze:** in the browser, try Account settings → Two-factor login with your phone's authenticator
+  app; copy the n8n invoice template from `docs/n8n.md` into the Send Email node.
+- **Learn:** nested layouts — `Manage/_ManageLayout.cshtml` sets `Layout = "/Pages/Shared/_Layout.cshtml"` and
+  re-renders the `Scripts` section, like a WPF UserControl that hosts a ContentPresenter inside the main window's
+  template: the page fills the inner slot, the inner layout fills the outer one.
