@@ -1,0 +1,35 @@
+@inject IConfiguration Config
+@* Chat assistant (#22): the n8n chat widget, bottom-right. Loaded only when Chat:Url is set (the chat webhook of the
+   "LoopCasts assistant" workflow). Answers come from an AI model in n8n that only sees public data (docs/n8n.md §5). *@
+@if (Config["Chat:Url"] is { Length: > 0 } chatUrl)
+{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@n8n/chat@1.41.5/dist/style.css" />
+    <script type="module">
+        import { createChat } from "https://cdn.jsdelivr.net/npm/@@n8n/chat@1.41.5/dist/chat.bundle.es.js";
+        createChat({
+            webhookUrl: @Json.Serialize(chatUrl),
+            mode: "window",
+            showWelcomeScreen: false,
+            loadPreviousSession: false,
+            initialMessages: [
+                "Hi! I'm the LoopCasts AI assistant. Ask me about courses, plans, prices, VAT or ordering.",
+                "Please don't type personal or payment details here. For your own account, mail support@loopcasts.example.",
+            ],
+            i18n: {
+                en: {
+                    title: "Questions?",
+                    subtitle: "Courses, plans, prices and ordering",
+                    getStarted: "New conversation",
+                    inputPlaceholder: "Type your question…",
+                    closeButtonTooltip: "Close chat",
+                },
+            },
+        });
+        // "Answers by an AI assistant" under the input. The footer only exists while the chat window is open.
+        new MutationObserver(() => {
+            const footer = document.querySelector("#n8n-chat .chat-footer");
+            if (footer && !footer.querySelector(".chat-ai-note"))
+                footer.insertAdjacentHTML("beforeend", '<p class="chat-ai-note">Answers by an AI assistant</p>');
+        }).observe(document.body, { childList: true, subtree: true });
+    </script>
+}

@@ -33,4 +33,11 @@
     <EmbeddedResource Remove="tests/**" />
   </ItemGroup>
 
+  <!-- n8n/: workflows and credentials are for Docker, not the website. Only the public FAQ ships (/api/public/faq). -->
+  <ItemGroup>
+    <Content Remove="n8n/**" />
+    <None Remove="n8n/**" />
+    <Content Include="n8n/knowledge/faq.md" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

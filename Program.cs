@@ -87,6 +87,8 @@ app.MapPost("/webhooks/mollie", async (HttpRequest request, MollieService mollie
 
 // JSON endpoints for n8n (renewal reminders), protected by the N8n:Secret header
 app.MapAutomationApi();
+// Read-only public data (courses, plans, FAQ) for the chat assistant
+app.MapPublicApi();
 
 app.MapRazorPages()
    .WithStaticAssets();
