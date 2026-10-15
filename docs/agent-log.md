@@ -253,3 +253,20 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Learn:** the AI part is "retrieval by tools": the model doesn't know LoopCasts, it calls the site's API like a
   ViewModel calls a service, and the system prompt is its contract. Swapping Gemini for Azure changes one node, like
   swapping an `IEmailSender` implementation in DI.
+
+## 2026-10-15 — #27 Login e-mails are sent by the site, not n8n  (PR #28, merged)
+- **What:** `LoginEmailSender` (Identity's `IEmailSender`) sends "Forgot password?" / "Change e-mail" straight over
+  SMTP (`System.Net.Mail`, `Smtp:*`, Mailpit `localhost:1025`); our wording moved there. `N8nNotifier` only sends
+  `invoice.created`; the n8n `email` branch is gone. ADR `docs/decisions/0001-n8n-or-code.md` with all automations.
+- **Why / decisions:** teacher feedback: getting back into your account must not depend on n8n. Never throws (Identity's
+  PageModels are in the package and don't catch). The "couldn't send" message only for logged-in users: on
+  "Forgot password?" it would reveal which addresses are customers. Skipped: SMTP login/TLS → add with #8 (Azure).
+  #26 was already on main (045b25b); its prompt follow-ups (handover) are still open.
+- **Tests:** 151 (fake SMTP server on localhost, SMTP down, no host). CI green. Real run with n8n stopped: mail in Mailpit.
+- **Manual steps for Koze:** n8n doesn't start again after `docker compose stop n8n`: Docker Desktop's mount of the
+  external disk is stale ("mkdir /host_mnt/Volumes/Koze_disk: file exists") → Quit + reopen Docker Desktop, then
+  `docker compose up -d`. No re-import needed (the workflow in n8n still has the old `email` branch, harmless; to sync:
+  `import:workflow` + `publish:workflow --id=lcEmailsFlow0001` + restart, docs/n8n.md §2).
+- **Learn:** `IEmailSender` is an interface in DI; swapping `N8nNotifier` for `LoginEmailSender` is one line in
+  Program.cs, like giving a WPF ViewModel another `IDialogService`. TempData survives exactly one redirect (PRG): the
+  sender sets a flag, the next page shows it.

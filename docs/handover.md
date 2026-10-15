@@ -1,46 +1,41 @@
 # Handover: where things stand
 
 For whoever picks this up next (Koze, Claude Code, Cowork). Update this file at the end of every working session.
-Last update: **12/10/2026, evening.** Deadline: working demo on **Wednesday**.
+Last update: **15/10/2026, evening.**
 
 ## Done and merged on `main`
 | Issue | PR | What |
 |---|---|---|
 | #18 Polish every page | #19 | Account menu, own Account settings, checkout progress, wording |
 | #20 Import old members | #23 | /Admin/Import reads the old `users` table (.sql), never the password column |
-| #21 n8n + Mailpit + renewal reminder | #24 | `docker compose up -d`, two workflows, `/api/automation/*` |
+| #21 n8n + Mailpit + renewal reminder | #24 | `docker compose up -d`, workflows, `/api/automation/*` |
 | #22 Chat assistant | #25 | n8n "LoopCasts assistant" + `/api/public/*` + widget on the site |
+| #26 AI evaluation (Groq) | — (045b25b, directly on main) | Gemini → Groq `openai/gpt-oss-120b`; 14/15 auto, 15/15 on review (docs/ai-evaluation.md) |
+| #27 Login e-mails by the site | #28 | "Forgot password?"/"Change e-mail" over SMTP from the site, not n8n; ADR 0001 |
 
-## In progress: #26 "Run the AI evaluation" (NOT committed yet, on `main` working tree)
-Uncommitted changes (keep them, they become one PR for #26):
-- `n8n/workflows/loopcasts-assistant.json`: model switched from **Gemini to Groq** `openai/gpt-oss-120b`,
-  max 2000 tokens, temperature 0.2, Retry On Fail (3×, 5 s); points to the key-less placeholder credential.
-- `n8n/credentials/groq.json` (replaces `gemini.json`, no key inside).
-- `docs/ai-evaluation.md`: model choice, first results (14/15) and the review of every answer.
-- `docs/n8n.md`, `CLAUDE.md`, `docs/specs/22-chat-assistant.md`: Groq instead of Gemini, pitfalls.
+## Where each automation runs
+Rule + full table: `docs/decisions/0001-n8n-or-code.md`. In short: code = money, data, security, must-always-work;
+n8n = invoice e-mail, renewal reminder, chat assistant.
 
-Why Groq: Gemini's free tier allows 20 requests/day per model (one chat answer = 2–3 requests) and was often "busy"
-(503): only 3 of 15 questions got an answer. Groq's free plan: 1 000 requests/day, fast, doesn't train on API data.
-
-The live n8n (Docker on Koze's Mac) runs exactly the repo version, with Koze's own "Groq" credential (has the key).
-
-## Evaluation status
-First full run with Groq: **14/15 pass**, but the review says **15/15 behaved correctly** (the fail is a bug in the
-check: `don’t` with a curly apostrophe). That run used max tokens **700** (an old editor tab overwrote the 2000; see
-"Pitfalls"). Details per answer: `docs/ai-evaluation.md` → "Review of the first Groq run".
-
-## Next steps (agreed for tomorrow, in this order)
-1. Fix the eval check: accept `'` and `’` in `n8n/eval/questions.json` patterns (question 9).
-2. VAT wording: the model says "Belgian 21% VAT is added at checkout" for everyone. Make the plans tool clearer
-   (rename or drop `priceInclBelgianVat` in `Api/PublicApi.cs` + test) and add a prompt line: VAT depends on country
-   and company, see the FAQ.
-3. Off-topic questions: answer "I only help with LoopCasts" without sending people to support@ (rule 2 of the prompt).
-4. Card numbers: tell visitors never to share card details in the chat; renewing = ordering again via /Pricing.
-5. Decide: keep "I'm an AI assistant" in every first answer (rule 1) or only when asked (the widget already says it).
-6. Prompt changes go in **both** `n8n/knowledge/system-prompt.md` and the workflow JSON (a unit test checks they match),
-   then import + publish + restart (docs/n8n.md §2), run the eval again, then one PR for #26 and an agent-log entry.
+## Next steps
+1. **Docker Desktop:** n8n doesn't start since `docker compose stop n8n` on 15/10 ("mkdir /host_mnt/Volumes/Koze_disk:
+   file exists"). Quit + reopen Docker Desktop, then `docker compose up -d`. Then re-import + publish "LoopCasts
+   e-mails" (docs/n8n.md §2) so n8n loses the old `email` branch (harmless until then: the site no longer sends it).
+2. Chat prompt follow-ups from the #26 review (not done yet, new issue when picked up):
+   - eval check: accept `'` and `’` in `n8n/eval/questions.json` (question 9);
+   - VAT wording: rename/drop `priceInclBelgianVat` in `Api/PublicApi.cs` (+ test), prompt line "VAT depends on
+     country and company, see the FAQ";
+   - off-topic: "I only help with LoopCasts" without sending people to support@;
+   - never share card details in the chat; renewing = ordering again via /Pricing;
+   - decide whether "I'm an AI assistant" goes in every first answer.
+   Prompt changes go in **both** `n8n/knowledge/system-prompt.md` and the workflow JSON (a test checks), then import
+   + publish + restart, run the eval again.
+3. #8 Deploy to Azure: also set `Smtp:*` as App Service settings; `LoginEmailSender` needs SMTP login + TLS first.
 
 ## Pitfalls (learned the hard way)
+- `DEMO.md` is deleted in the working tree on Koze's Mac (not by Claude, not committed). Restore with `git restore DEMO.md` if that was a mistake.
+- Docker Desktop + external disk: after stopping a container with a bind mount on /Volumes, it may refuse to start
+  again ("file exists"). Restart Docker Desktop.
 - **Save is not Publish** in n8n 2.x. The site's chat runs the *published* version; Save only changes the draft.
 - **Reload the n8n editor tab after a command-line import.** An open tab keeps the old version, and saving it
   overwrites the import without warning (this put back the 700-token limit on 12/10).
@@ -50,4 +45,4 @@ check: `don’t` with a curly apostrophe). That run used max tokens **700** (an 
 - Free-tier limits change often: check the provider's page before blaming the workflow.
 
 ## Blocked / needs Koze
-- Nothing blocked right now. Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.
+- Restart Docker Desktop (step 1 above). Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.
