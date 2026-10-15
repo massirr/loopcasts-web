@@ -37,9 +37,11 @@ builder.Services.AddHttpClient<MollieService>(client =>
     if (builder.Configuration["Mollie:ApiKey"] is { Length: > 0 } key)
         client.DefaultRequestHeaders.Authorization = new("Bearer", key);
 });
-// n8n webhook for e-mails (N8n:WebhookUrl). Also Identity's e-mail sender, so "Forgot password" works.
+// n8n webhook for the invoice e-mail (N8n:WebhookUrl)
 builder.Services.AddHttpClient<N8nNotifier>(client => client.Timeout = TimeSpan.FromSeconds(10));
-builder.Services.AddTransient<IEmailSender>(sp => sp.GetRequiredService<N8nNotifier>());
+// Login e-mails ("Forgot password?") go straight over SMTP (Smtp:*), so they work without n8n (#27)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<IEmailSender, LoginEmailSender>();
 builder.Services.AddHostedService<ExpireAccountsService>();   // nightly: switch off expired accounts
 
 var app = builder.Build();

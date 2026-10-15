@@ -1,9 +1,6 @@
-using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Text.Json.Nodes;
 using LoopCastsWeb.Models;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace LoopCastsWeb.Services;
 
@@ -11,10 +8,10 @@ namespace LoopCastsWeb.Services;
 /// Sends events to ONE n8n webhook (config N8n:WebhookUrl); the n8n workflow sends the e-mails (docs/n8n.md).
 /// Replaces "make the invoice in Word and mail it on Friday" (handbook ch. 2).
 ///   invoice.created → invoice e-mail with a link to the invoice (+ set-password link for a new customer)
-///   email           → any e-mail from the login system, e.g. "Forgot password" (this class is the IEmailSender)
+/// Login e-mails ("Forgot password?") are NOT sent here but by the site itself: LoginEmailSender (#27).
 /// n8n down or not configured? Logged, never thrown: a payment must never fail because an e-mail could not be sent.
 /// </summary>
-public class N8nNotifier : IEmailSender
+public class N8nNotifier
 {
     private readonly HttpClient _http;
     private readonly IConfiguration _config;
@@ -42,43 +39,6 @@ public class N8nNotifier : IEmailSender
         ["setPasswordUrl"] = passwordSetupCode is null ? null
             : $"{BaseUrl}/Identity/Account/ResetPassword?code={passwordSetupCode}",
     });
-
-    public Task SendEmailAsync(string email, string subject, string htmlMessage)
-    {
-        (subject, htmlMessage) = InOurWords(subject, htmlMessage);
-        return SendAsync(new JsonObject
-        {
-            ["event"] = "email",
-            ["to"] = email,
-            ["subject"] = subject,
-            ["html"] = htmlMessage,
-        });
-    }
-
-    // Identity writes its own e-mails ("Please reset your password by <a href='…'>clicking here</a>.").
-    // We keep only its link and say it in our words (loopcasts-ui §6). Any other e-mail goes out unchanged.
-    // Recognised by the start of Identity's text, not the subject: the subject differs per Identity version (#21).
-    private static readonly Dictionary<string, (string Subject, string Text, string Button)> OurWords = new()
-    {
-        ["Please reset your password"] = ("Choose a new LoopCasts password",
-            "You asked to choose a new password for your LoopCasts login. The button works for 24 hours. Didn't ask? Then ignore this e-mail; your password stays the same.",
-            "Choose a new password"),
-        ["Please confirm your account"] = ("Confirm your LoopCasts e-mail",
-            "Click the button to use this address for your LoopCasts login and invoices. Didn't ask? Then ignore this e-mail; nothing changes.",
-            "Confirm this e-mail"),
-    };
-    private static readonly Regex Href = new("href='([^']*)'");
-
-    private (string Subject, string Html) InOurWords(string subject, string html)
-    {
-        var known = OurWords.FirstOrDefault(x => html.StartsWith(x.Key, StringComparison.Ordinal));
-        if (known.Key is null || Href.Match(html) is not { Success: true } link) return (subject, html);
-        var w = known.Value;
-        var url = link.Groups[1].Value;   // already HTML-encoded by Identity
-        return (w.Subject,
-            $"<p>Hi,</p><p>{w.Text}</p><p><a href=\"{url}\">{w.Button}</a></p>" +
-            $"<p>The LoopCasts team<br>Questions? Mail {WebUtility.HtmlEncode(_config["Seller:SupportEmail"])}</p>");
-    }
 
     private async Task SendAsync(JsonObject body)
     {

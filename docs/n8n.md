@@ -1,9 +1,11 @@
 # n8n: e-mails and reminders for LoopCasts
 
-n8n does the automation around the site: it sends the e-mails and the daily renewal reminder.
+n8n does the automation around the site: the invoice e-mail, the daily renewal reminder and the chat assistant.
 Locally it runs in Docker next to **Mailpit**, a fake mail server.
+Login e-mails ("Forgot password?", "Change e-mail") are **not** in n8n: the site sends them itself over SMTP, so
+nobody gets locked out when n8n is down (#27). What goes where, and why: [ADR 0001](decisions/0001-n8n-or-code.md).
 
-> **Mailpit is the only mail server.** Every e-mail n8n sends ends up in Mailpit's web page
+> **Mailpit is the only mail server.** Every e-mail n8n and the site send ends up in Mailpit's web page
 > (http://localhost:8025). No real inbox can receive anything, so testing with real customer
 > addresses is safe: nothing leaves your computer.
 
@@ -12,6 +14,7 @@ Locally it runs in Docker next to **Mailpit**, a fake mail server.
 | n8n editor | http://localhost:5678 |
 | Mailpit (all sent e-mails) | http://localhost:8025 |
 | SMTP for n8n | `mailpit:1025` (inside Docker) |
+| SMTP for the site (login e-mails) | `localhost:1025` (`Smtp:*` in appsettings.Development.json) |
 | The site, seen from n8n | `http://host.docker.internal:5180` |
 | Workflows / credentials | `n8n/workflows/*.json`, `n8n/credentials/*.json` (no secrets: the Groq key is added in the UI) |
 | Chat assistant (FAQ, prompt, tests) | `n8n/knowledge/`, `n8n/eval/`, `docs/ai-evaluation.md` |
@@ -48,7 +51,7 @@ Changed it in the n8n editor? Export it back into the repo:
 
 ## 3. Workflow "LoopCasts e-mails" (`lcEmailsFlow0001`)
 `Webhook POST /webhook/loopcasts` → **Secret OK?** (header `X-LoopCasts-Secret` = `LOOPCASTS_SECRET`, else ignored)
-→ **Which event?** → *Invoice e-mail* or *Login e-mail* → Mailpit.
+→ **Which event?** → `invoice.created`: *Invoice e-mail* → Mailpit; any other event: *Other event: ignore*.
 
 The site sends (`Services/N8nNotifier.cs`):
 ```jsonc
@@ -57,10 +60,9 @@ The site sends (`Services/N8nNotifier.cs`):
   "description": "Yearly subscription", "total": 180.29,
   "invoiceUrl": "https://…/Invoice?number=2026-0007",
   "setPasswordUrl": "https://…/Identity/Account/ResetPassword?code=…" }   // null if the customer has a password
-
-// any e-mail from the login system, already in our words ("Choose a new LoopCasts password", "Confirm your LoopCasts e-mail")
-{ "event": "email", "to": "ann@example.com", "subject": "Choose a new LoopCasts password", "html": "…" }
 ```
+(Until #27 there was also an `email` event for the login e-mails. They now go out from the site:
+`Services/LoginEmailSender.cs`. Test it with n8n stopped: `docker compose stop n8n`, "Forgot password?", look in Mailpit.)
 Invoice e-mail text (in the workflow, loopcasts-ui §6): "Hi Ann, Thanks for your order. Your invoice 2026-0007 for
 Yearly subscription is ready: €180.29 incl. VAT, already paid." + "View or print your invoice" (+ "Your login is ready too.
 Choose your password first; the link works for 24 hours." for a new customer).
@@ -138,8 +140,10 @@ The model is one node, so nothing else changes:
 Why: with Azure the prompts are not used to train models and stay in the EU region you choose (see docs/ai-evaluation.md).
 
 ## 6. On a server (later)
-Same two workflows on a hosted n8n; replace the Mailpit credential with a real SMTP account, set `LOOPCASTS_SITE_URL`
+Same workflows on a hosted n8n; replace the Mailpit credential with a real SMTP account, set `LOOPCASTS_SITE_URL`
 to the public site and `N8n:WebhookUrl` to the public n8n webhook. Without `N8n:WebhookUrl` the site still works:
-nothing is sent and the set-password link stays on the OrderThanks page.
+no invoice e-mail is sent and the set-password link stays on the OrderThanks page.
+The site needs its own `Smtp:Host`/`Smtp:Port`/`Smtp:From` (App Service settings) for the login e-mails; a real
+server also needs a login + TLS, which `LoginEmailSender` doesn't do yet.
 
 Optional: an *HTML → PDF* node (e.g. Gotenberg) on `invoiceUrl` to attach a PDF. The link is enough for the prototype.

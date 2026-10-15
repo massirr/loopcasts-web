@@ -48,9 +48,11 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `Data/AdminSeeder.cs` | Creates Admin role + admin users from config `SeedAdmins:N:Email/Password` (**user-secrets**) |
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
 | `Services/MollieService.cs` | Mollie REST (typed HttpClient): create payment, `SyncAsync` re-fetches status → `MarkPaidAsync`. Webhook `POST /webhooks/mollie` in Program.cs |
-| `Services/N8nNotifier.cs` | Events to the n8n webhook (`invoice.created`, `email`); also Identity's `IEmailSender`. Never throws. See `docs/n8n.md` |
+| `Services/N8nNotifier.cs` | Event `invoice.created` to the n8n webhook (invoice e-mail). Never throws. See `docs/n8n.md` |
+| `Services/LoginEmailSender.cs` | Identity's `IEmailSender` (Forgot password, Change e-mail): straight over SMTP (`Smtp:Host/Port/From`, `System.Net.Mail`), NOT via n8n (#27). Our wording lives here. Never throws; SMTP down → log + TempData `LoginEmailNotSent` (shown by `_Flash`, only when logged in) |
 | `Services/RenewalReminders.cs`, `Api/AutomationApi.cs` | Renewal reminders for n8n: `GET /api/automation/expiring?days=14`, `POST /api/automation/reminded` (header `X-LoopCasts-Secret` = `N8n:Secret`) |
-| `docker-compose.yml`, `n8n/` | Local n8n + Mailpit (only mail server); workflows "LoopCasts e-mails" + "Renewal reminder" as JSON. `.env` = `LOOPCASTS_SECRET` (git-ignored). See `docs/n8n.md` |
+| `docs/decisions/` | ADRs. **0001 n8n or code**: code = money, data, security, must-always-work; n8n = outside services, schedules, notifications, texts the business changes, AI. Check it before placing a new automation |
+| `docker-compose.yml`, `n8n/` | Local n8n + Mailpit (only mail server, SMTP also on `localhost:1025` for the site); workflows "LoopCasts e-mails" + "Renewal reminder" as JSON. `.env` = `LOOPCASTS_SECRET` (git-ignored). See `docs/n8n.md` |
 | `Api/PublicApi.cs`, `Pages/Shared/_Chat.cshtml` | Chat assistant (#22): public read-only `/api/public/courses|plans|faq` for the n8n "LoopCasts assistant" (Groq `openai/gpt-oss-120b`; was Gemini); widget only when `Chat:Url` is set. FAQ/prompt in `n8n/knowledge/`, eval in `n8n/eval/` + `docs/ai-evaluation.md`. Only public data goes to the model |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
@@ -88,7 +90,8 @@ access end date, "Set your password" link on the e-mail's first paid order).
 
 ## Known limitations / next steps
 - Customer login (#1, done): set-password link is shown on OrderThanks for the first paid order only; it is
-  also e-mailed via n8n (#5) when `N8n:WebhookUrl` is set; "Forgot password" goes through n8n too.
+  also e-mailed via n8n (#5) when `N8n:WebhookUrl` is set. "Forgot password"/"Change e-mail" are sent by the site
+  over SMTP (#27), so they work without n8n. `LoginEmailSender` has no SMTP login/TLS yet (needed on a real server, #8).
 - Mollie (#3): active only when user-secret `Mollie:ApiKey` (test_…) is set, otherwise /Pay is the mock.
   `Mollie:WebhookBaseUrl` = public URL (tunnel/Azure); without it the status is checked when the customer returns.
 - Team seats (#4): colleague setup link is shown to the buyer once, only for a NEW login (else takeover risk).
