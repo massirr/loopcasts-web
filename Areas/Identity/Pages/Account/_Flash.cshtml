@@ -21,6 +21,11 @@
     };
     var error = Model?.StartsWith("Error") == true;
     var text = Model is null ? null : words.GetValueOrDefault(Model, Model);
+    // The e-mail didn't go out (SMTP down, #27): say so instead of Identity's "we sent a link"
+    if (TempData[LoopCastsWeb.Services.LoginEmailSender.NotSentKey] is true)
+    {
+        (text, error) = (LoopCastsWeb.Services.LoginEmailSender.NotSentText, true);
+    }
 }
 @if (!string.IsNullOrEmpty(text))
 {

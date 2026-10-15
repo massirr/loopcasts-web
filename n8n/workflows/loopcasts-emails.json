@@ -100,29 +100,14 @@
     },
     {
       "id": "e5",
-      "name": "Login e-mail",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
+      "name": "Other event: ignore",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
       "position": [
         680,
         0
       ],
-      "parameters": {
-        "fromEmail": "LoopCasts <support@loopcasts.example>",
-        "toEmail": "={{ $json.body.to }}",
-        "subject": "={{ $json.body.subject }}",
-        "emailFormat": "html",
-        "html": "={{ $json.body.html }}",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "credentials": {
-        "smtp": {
-          "id": "lcMailpitSmtp001",
-          "name": "Mailpit (local)"
-        }
-      }
+      "parameters": {}
     },
     {
       "id": "e6",
@@ -177,7 +162,7 @@
         ],
         [
           {
-            "node": "Login e-mail",
+            "node": "Other event: ignore",
             "type": "main",
             "index": 0
           }
