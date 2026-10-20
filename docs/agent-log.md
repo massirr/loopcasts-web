@@ -271,7 +271,26 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
   Program.cs, like giving a WPF ViewModel another `IDialogService`. TempData survives exactly one redirect (PRG): the
   sender sets a flag, the next page shows it.
 
-## 2026-10-20 — #31 Full course catalogue (60) + cross-check report  (PR #32, open)
+## 2026-10-20 — #29 Chatbot answers: clickable links, no JSON, review fixes  (PR #30, merged)
+- **What:** public API gives only full URLs (FAQ paths, new `pricingUrl`), no Belgian-VAT price. n8n assistant: Chat
+  Trigger answers with the last node, agent continues on error, new Code node *Check answer* (links on
+  `LOOPCASTS_PUBLIC_URL`, JSON/code → friendly sentence, model failed → "isn't available" message). Prompt review fixes;
+  eval 17 questions, **17/17**, each answer reviewed. Housekeeping: "LoopCasts e-mails" re-imported + published (old
+  `email` branch gone in n8n); #6 closed (→ #22, #26, docs/ai-evaluation.md).
+- **Why / decisions:** links are fixed in two layers: the API only hands out full URLs (the model can't build them
+  right), and *Check answer* repairs what the model still gets wrong. The eval found an **invented** link
+  (`loopcasts.example/pricing`) that the automatic check passed: now links to another host are moved to the site or
+  dropped, and q15 fails on them. The prompt's "see the FAQ" became "the VAT rules are in the FAQ": there is no FAQ
+  page. Skipped: a timeout on the model node (Groq node has none; failures already end in the friendly message).
+- **Tests:** 152 xUnit (plans without VAT field + `pricingUrl`, FAQ paths absolute); `check-answer.test.mjs` runs the
+  node's code from the workflow JSON (also in CI). Broken-model test and the real widget checked by hand.
+- **Manual steps for Koze:** `docker compose up -d` (new env `LOOPCASTS_PUBLIC_URL`); **reload** any open n8n editor tab
+  before touching the assistant (imported from the command line). On a server: set `LOOPCASTS_PUBLIC_URL` = the site's
+  `App:BaseUrl` and the Chat Trigger's *Allowed origins*.
+- **Learn:** the API returns records serialized to camelCase JSON (`PricingUrl` → `pricingUrl`), the same contract the
+  model reads. *Check answer* is like a WPF value converter between ViewModel and View: the data (AI answer) stays,
+  only how it's shown is made safe.
+## 2026-10-20 — #31 Full course catalogue (60) + cross-check report  (PR #32, merged)
 - **What:** `Data/Seed/course-catalogue.csv` = export of the full `course catalogue.xlsx` (60: 53 live, 4 retired,
   3 draft). `CourseCsvImporter` runs at every start and updates by title (Ids kept, nothing deleted), with new
   cleaning rules (bare-number durations, `dd.MM.yyyy`, `d-M-yy`, month-first dates). Cross-check report

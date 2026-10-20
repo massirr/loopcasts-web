@@ -31,11 +31,16 @@ public class PublicApiTests
     [Fact]
     public void Plans_SamePricesAsTheOrderForm()
     {
-        var list = Assert.IsType<Ok<List<PublicApi.PlanInfo>>>(PublicApi.PlansList(Config)).Value!;
+        var result = Assert.IsType<Ok<PublicApi.PlansInfo>>(PublicApi.PlansList(Config)).Value!;
+        var list = result.Plans;
+
+        Assert.Equal("https://shop.test/Pricing", result.PricingUrl);   // the model links prices to it (#29)
 
         Assert.Equal(Plans.All.Select(p => (p.Code, p.Price)), list.Select(p => (p.Code, p.PriceExclVat)));
         var yearly = list.Single(p => p.Code == "yearly");
-        Assert.Equal((180.29m, "per year", "https://shop.test/Order?plan=yearly"), (yearly.PriceInclBelgianVat, yearly.Period, yearly.OrderUrl));
+        Assert.Equal(("per year", "https://shop.test/Order?plan=yearly"), (yearly.Period, yearly.OrderUrl));
+        // No "incl. Belgian VAT" price: VAT depends on country and company (FAQ), the model said "Belgian VAT is added" (#29)
+        Assert.DoesNotContain("Vat", string.Join(",", typeof(PublicApi.PlanInfo).GetProperties().Select(p => p.Name)).Replace("ExclVat", ""));
         Assert.Equal((5, true), (list.Single(p => p.Code == "team").Seats, list.Single(p => p.Code == "team").CompanyOnly));
     }
 
@@ -50,7 +55,7 @@ public class PublicApiTests
     [Fact]
     public void Faq_ServedAsMarkdown_PublicInformationOnly()
     {
-        var result = Assert.IsType<ContentHttpResult>(PublicApi.Faq(RepoRoot()));
+        var result = Assert.IsType<ContentHttpResult>(PublicApi.Faq(RepoRoot(), Config));
         var text = result.ResponseContent!;
 
         Assert.StartsWith("text/markdown", result.ContentType);
@@ -61,7 +66,18 @@ public class PublicApiTests
     }
 
     [Fact]
-    public void Faq_MissingFile_404() => Assert.IsType<NotFound>(PublicApi.Faq(Path.GetTempPath()));
+    public void Faq_MissingFile_404() => Assert.IsType<NotFound>(PublicApi.Faq(Path.GetTempPath(), Config));
+
+    [Fact]
+    public void Faq_SitePathsBecomeFullLinks()
+    {
+        var text = ((ContentHttpResult)PublicApi.Faq(RepoRoot(), Config)).ResponseContent!;
+
+        Assert.Contains("https://shop.test/Pricing", text);
+        Assert.Contains("https://shop.test/Identity/Account/Login", text);
+        Assert.DoesNotMatch(@"(^|\s)/(Courses|Pricing|Order|Identity|Privacy)", text);   // the model only sees full URLs
+        Assert.Contains("24 hours", text);                                                // the rest is untouched
+    }
 
     [Fact]
     public void AssistantWorkflow_UsesTheDocumentedPrompt_AndOnlyPublicTools()

@@ -1,7 +1,8 @@
-// Runs the 15 test questions against the chat assistant and writes the answers + automatic pass/fail into
+// Runs the test questions against the chat assistant and writes the answers + automatic pass/fail into
 // docs/ai-evaluation.md (between the "results" markers). Node 18+, no packages.
 //   node n8n/eval/run-eval.mjs http://localhost:5678/webhook/<chat webhook id>/chat
 // Automatic check: every "expect" pattern must match, no "forbid" pattern may match (case-insensitive).
+// "{base}" in a pattern = the site address visitors use (LOOPCASTS_PUBLIC_URL, default http://localhost:5180).
 // Read the answers yourself too: the patterns catch the obvious failures, not every bad answer.
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -10,6 +11,8 @@ if (!url) { console.error("Usage: node n8n/eval/run-eval.mjs <chat webhook URL>"
 const root = new URL("../../", import.meta.url);
 const questions = JSON.parse(readFileSync(new URL("n8n/eval/questions.json", root)));
 const docPath = new URL("docs/ai-evaluation.md", root);
+const base = (process.env.LOOPCASTS_PUBLIC_URL ?? "http://localhost:5180").replace(/\/+$/, "").replace(/[.?]/g, "\\$&");
+const pattern = p => new RegExp(p.replaceAll("{base}", base), "i");
 const cell = s => s.replace(/\|/g, "\\|").replace(/\s*\n\s*/g, "<br>");
 const run = Date.now();
 
@@ -24,13 +27,15 @@ for (const q of questions) {
     const body = await res.json().catch(() => ({}));
     answer = body.output ?? `(no answer: HTTP ${res.status} ${body.message ?? ""})`;
   } catch (e) { answer = `(no answer: ${e.message})`; }
-  const missing = q.expect.filter(p => !new RegExp(p, "i").test(answer));
-  const found = q.forbid.filter(p => new RegExp(p, "i").test(answer));
+  const missing = q.expect.filter(p => !pattern(p).test(answer));
+  const found = q.forbid.filter(p => pattern(p).test(answer));
+  // the "Check answer" fallback when the model failed (e.g. tokens per minute used up) is no answer either
+  if (answer.startsWith("Sorry, the assistant isn't available")) answer = `(no answer: model failed) ${answer}`;
   const pass = !answer.startsWith("(no answer") && missing.length === 0 && found.length === 0;
   const why = pass ? "" : [...missing.map(p => `missing /${p}/`), ...found.map(p => `contains /${p}/`)].join(", ") || "no answer";
   console.log(`${q.id}. ${pass ? "PASS" : "FAIL"} ${q.question}\n   → ${answer.slice(0, 200)}${why ? `\n   (${why})` : ""}`);
   rows.push(`| ${q.id} | ${q.type} | ${cell(q.question)} | ${cell(answer)} | ${pass ? "pass" : `**fail** (${cell(why)})`} |`);
-  await new Promise(r => setTimeout(r, 7000));   // Gemini free tier: a few requests per minute
+  await new Promise(r => setTimeout(r, 20000));   // stay under the free tier's tokens per minute
 }
 
 const passed = rows.filter(r => r.endsWith("| pass |")).length;
