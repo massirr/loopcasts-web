@@ -20,7 +20,7 @@ n8n = invoice e-mail, renewal reminder, chat assistant.
 ## Open PRs (review + merge; #30 = #29 chat links, on its own branch)
 | Issue | PR | What |
 |---|---|---|
-| #31 Full course catalogue (60) + cross-check | #PR31 | 53 live courses on the site/API/chat; importer updates by title; `docs/analysis/course-catalogue-crosscheck.md`. Review + merge |
+| #31 Full course catalogue (60) + cross-check | #32 | 53 live courses on the site/API/chat; importer updates by title; `docs/analysis/course-catalogue-crosscheck.md`. Review + merge |
 
 ## Next steps
 1. **n8n re-import (to check):** Docker is fixed (n8n + Mailpit running again on 20/10). Still to check: re-import +

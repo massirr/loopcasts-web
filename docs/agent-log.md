@@ -271,7 +271,7 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
   Program.cs, like giving a WPF ViewModel another `IDialogService`. TempData survives exactly one redirect (PRG): the
   sender sets a flag, the next page shows it.
 
-## 2026-10-20 — #31 Full course catalogue (60) + cross-check report  (PR #PR31, open)
+## 2026-10-20 — #31 Full course catalogue (60) + cross-check report  (PR #32, open)
 - **What:** `Data/Seed/course-catalogue.csv` = export of the full `course catalogue.xlsx` (60: 53 live, 4 retired,
   3 draft). `CourseCsvImporter` runs at every start and updates by title (Ids kept, nothing deleted), with new
   cleaning rules (bare-number durations, `dd.MM.yyyy`, `d-M-yy`, month-first dates). Cross-check report
