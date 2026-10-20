@@ -45,7 +45,7 @@ public class PublicApiTests
     }
 
     // The real FAQ in the repo: it goes to an AI model, so it may hold public information only
-    private static string RepoRoot()
+    internal static string RepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "n8n", "knowledge", "faq.md"))) dir = dir.Parent;

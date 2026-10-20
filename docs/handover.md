@@ -1,7 +1,7 @@
 # Handover: where things stand
 
 For whoever picks this up next (Koze, Claude Code, Cowork). Update this file at the end of every working session.
-Last update: **20/10/2026** (evening, #29).
+Last update: **20/10/2026** (evening, #29 + #31 merged).
 
 ## Done and merged on `main`
 | Issue | PR | What |
@@ -12,17 +12,16 @@ Last update: **20/10/2026** (evening, #29).
 | #22 Chat assistant | #25 | n8n "LoopCasts assistant" + `/api/public/*` + widget on the site |
 | #26 AI evaluation (Groq) | — (045b25b, directly on main) | Gemini → Groq `openai/gpt-oss-120b`; 14/15 auto, 15/15 on review (docs/ai-evaluation.md) |
 | #27 Login e-mails by the site | #28 | "Forgot password?"/"Change e-mail" over SMTP from the site, not n8n; ADR 0001 |
-
-## Open PR
-| #29 Chat answers: clickable links, no JSON | #30 | *Check answer* node, full URLs in the public API, prompt review fixes; eval 17/17. Already imported + published in local n8n. Review + merge |
+| #29 Chat answers: clickable links, no JSON | #30 | *Check answer* node, full URLs in the public API, prompt review fixes; eval 17/17 |
+| #31 Full course catalogue (60) + cross-check | #32 | 53 live courses on site/API/chat; importer updates by title; `docs/analysis/course-catalogue-crosscheck.md` |
 
 ## Where each automation runs
 Rule + full table: `docs/decisions/0001-n8n-or-code.md`. In short: code = money, data, security, must-always-work;
 n8n = invoice e-mail, renewal reminder, chat assistant.
 
 ## Next steps
-1. Review + merge PR #30 (#29). Done on 20/10: "LoopCasts e-mails" re-imported + published (no `email` branch in
-   n8n any more), #6 closed.
+1. Course data (#31): durations in the catalogue are too short for most courses (cross-check report). Fix in the
+   xlsx → export again (spec 31) → restart the site: the importer updates by title. Or calculate them from Vimeo (not built).
 2. Small chat wording left (docs/ai-evaluation.md, #29 review): q3 says "see the VAT section of our FAQ" but there is
    no FAQ page on the site. Either a /Faq page (the markdown is already there) or leave it.
 3. #8 Deploy to Azure: also set `Smtp:*` as App Service settings; `LoginEmailSender` needs SMTP login + TLS first.
@@ -44,5 +43,4 @@ n8n = invoice e-mail, renewal reminder, chat assistant.
   `LOOPCASTS_PUBLIC_URL` (how a visitor's browser does; used for chat links). Don't mix them up.
 
 ## Blocked / needs Koze
-- Review + merge PR #30.
 - Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.

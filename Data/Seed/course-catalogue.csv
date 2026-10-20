@@ -14,3 +14,48 @@ Invoices without typing;intermediate;8;?;draft;;39
 MCP servers explained;expert;6;38 min;draft;13/01/2026;39
 n8n basics (2026 edition);beginner;;;draft;;
 Self-hosting n8n with Docker;intermediate;9;1h02;live;2025-10-14;39
+Make.com for n8n people;advanced;11;2h19;live;2025-09-10;49
+Google Sheets as a database (and why not);Beginner;14;2h 58;live;2019-08-12;49
+Slack bots with n8n;advanced;7;102 min;live;06.02.2019;
+Airtable automations;easy;6;68;live;2026-06-23;39
+OAuth2 without tears;advanced;12;176 min;retired;2026-06-23;49
+JSON for the impatient;easy;5;56min;live;06/11/2021;39
+Regex you will actually use;advanced;9;2h02;live;2023-07-20;
+Docker for automation people;advanced;11;2h 4;live;2026-02-14;
+Python scripts in your workflow;;6;1h25;live;2019-10-13;49
+Scraping politely;easy;13;2h55;live;10/13/2023;39
+PDF generation;intermediate;5;60;live;2023-04-05;
+E-mail parsing;intermediate;9;1h 48;live;2023-05-05;39
+Stripe webhooks;intermediate;13;2h 50;live;2020-08-02;39
+Mollie payments;intermediate;6;57 min;live;2026-03-19;39
+HubSpot + n8n;intermediate;8;1h50;live;2025-10-14;49
+Notion API;intermediate;7;74 min;live;11.04.2026;39
+Telegram bots;beginner;15;202;live;2024-08-26;49
+Queue mode and scaling n8n;;7;1h49;live;2024-06-15;39
+Backups that restore;beginner;13;2h36;live;2022-09-04;49
+Monitoring your workflows;intermediate;8;91 min;live;2019-03-27;
+LLM structured output;medium;9;99 min;live;2024-04-07;39
+Local LLMs with Ollama;advanced;11;145;live;2020-05-09;39
+Vector databases in 60 minutes;easy;12;152 min;live;2026-06-23;39
+Whisper: transcripts for free;;7;100;live;2022-08-12;
+Evaluating prompts;advanced;8;1h42;retired;2024-07-15;39
+Human-in-the-loop patterns;beginner;16;3h06;live;2026-06-23;39
+Secrets management;advanced;11;2:15:00;live;2023-05-23;49
+GDPR for automation builders;medium;12;2:30:00;live;02/28/2019;
+BPMN for developers;expert;12;2:14:00;live;2024-01-25;
+Idempotency explained;intermediate;13;3:00:00;live;2021-11-28;39
+Rate limits and retries;medium;12;2h 30;live;8-1-20;49
+Zapier vs Make vs n8n;intermediate;14;2h51;live;2020-10-18;49
+Home automation with n8n;intermediate;7;98;live;24 okt;39
+Git for workflow exports;advanced;16;3h06;live;2022-05-02;39
+CI/CD for n8n;beginner;6;96 min;live;2023-07-15;39
+Excel to API;advanced;15;186 min;retired;2021-04-15;39
+Data cleaning in the Code node;beginner;7;91;live;2020-06-18;
+Dates and time zones;advanced;11;2h 14;live;2020-02-23;39
+Invoicing workflows;intermediate;15;2:47:00;live;2024-12-26;39
+CRM sync patterns;intermediate;11;2h15;live;2019-09-19;39
+Testing workflows;;14;217;live;23-1-24;39
+Sub-workflows and reuse;beginner;8;2h09;live;2023-12-10;39
+Webhook security;intermediate;10;121;live;2025-07-16;39
+Agents with memory;beginner;15;3h00;live;2024-08-25;49
+Multi-agent setups;beginner;6;78;live;2026-03-16;49
