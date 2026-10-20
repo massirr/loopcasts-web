@@ -1,7 +1,7 @@
 # Handover: where things stand
 
 For whoever picks this up next (Koze, Claude Code, Cowork). Update this file at the end of every working session.
-Last update: **15/10/2026, evening.**
+Last update: **20/10/2026.**
 
 ## Done and merged on `main`
 | Issue | PR | What |
@@ -18,9 +18,9 @@ Rule + full table: `docs/decisions/0001-n8n-or-code.md`. In short: code = money,
 n8n = invoice e-mail, renewal reminder, chat assistant.
 
 ## Next steps
-1. **Docker Desktop:** n8n doesn't start since `docker compose stop n8n` on 15/10 ("mkdir /host_mnt/Volumes/Koze_disk:
-   file exists"). Quit + reopen Docker Desktop, then `docker compose up -d`. Then re-import + publish "LoopCasts
-   e-mails" (docs/n8n.md §2) so n8n loses the old `email` branch (harmless until then: the site no longer sends it).
+1. **n8n re-import (to check):** Docker is fixed (n8n + Mailpit running again on 20/10). Still to check: re-import +
+   publish "LoopCasts e-mails" (docs/n8n.md §2) so n8n loses the old `email` branch (harmless until then: the site
+   no longer sends it).
 2. Chat prompt follow-ups from the #26 review (not done yet, new issue when picked up):
    - eval check: accept `'` and `’` in `n8n/eval/questions.json` (question 9);
    - VAT wording: rename/drop `priceInclBelgianVat` in `Api/PublicApi.cs` (+ test), prompt line "VAT depends on
@@ -33,7 +33,6 @@ n8n = invoice e-mail, renewal reminder, chat assistant.
 3. #8 Deploy to Azure: also set `Smtp:*` as App Service settings; `LoginEmailSender` needs SMTP login + TLS first.
 
 ## Pitfalls (learned the hard way)
-- `DEMO.md` is deleted in the working tree on Koze's Mac (not by Claude, not committed). Restore with `git restore DEMO.md` if that was a mistake.
 - Docker Desktop + external disk: after stopping a container with a bind mount on /Volumes, it may refuse to start
   again ("file exists"). Restart Docker Desktop.
 - **Save is not Publish** in n8n 2.x. The site's chat runs the *published* version; Save only changes the draft.
@@ -45,4 +44,6 @@ n8n = invoice e-mail, renewal reminder, chat assistant.
 - Free-tier limits change often: check the provider's page before blaming the workflow.
 
 ## Blocked / needs Koze
-- Restart Docker Desktop (step 1 above). Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.
+- Confirm the n8n re-import + publish (step 1 above).
+- Issue #6 (Chatbot) is still open on GitHub although #22 built the chat assistant: close it or note what's missing.
+- Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.
