@@ -270,3 +270,19 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
 - **Learn:** `IEmailSender` is an interface in DI; swapping `N8nNotifier` for `LoginEmailSender` is one line in
   Program.cs, like giving a WPF ViewModel another `IDialogService`. TempData survives exactly one redirect (PRG): the
   sender sets a flag, the next page shows it.
+
+## 2026-10-20 — #31 Full course catalogue (60) + cross-check report  (PR #PR31, open)
+- **What:** `Data/Seed/course-catalogue.csv` = export of the full `course catalogue.xlsx` (60: 53 live, 4 retired,
+  3 draft). `CourseCsvImporter` runs at every start and updates by title (Ids kept, nothing deleted), with new
+  cleaning rules (bare-number durations, `dd.MM.yyyy`, `d-M-yy`, month-first dates). Cross-check report
+  `docs/analysis/course-catalogue-crosscheck.md` (+ read-only script) of catalogue vs Vimeo vs old website page names.
+- **Why / decisions:** importer instead of a migration/seed SQL, so all cleaning rules and logs still apply. Fixes are
+  logged only for new/changed rows (a normal start is silent). "24 okt" (no year) → null, not guessed; "8-1-20" read
+  day-first like the rest of the file. Skipped: /Admin page for the check (the Vimeo export and website stay in the
+  Dropbox copy, never committed) and durations from Vimeo (report's conclusion).
+- **Tests:** 154 (+3: full CSV counts, messy values + logs, update-by-title/Ids/quiet second run). Real dev db:
+  "45 added, 0 updated", /Courses 53, API 53, restart logs nothing, chat finds "Telegram bots", not the retired "Excel to API".
+- **Manual steps for Koze:** none; the site imports the new courses on its next start. Read the report's conclusion
+  for the analysis part of the assignment.
+- **Learn:** `db.Entry(x).CurrentValues.SetValues(y)` copies values and lets EF's change tracker mark only the
+  columns that really changed (`State == Modified`): like `INotifyPropertyChanged` raising only when a value differs.

@@ -1,7 +1,7 @@
 # Handover: where things stand
 
 For whoever picks this up next (Koze, Claude Code, Cowork). Update this file at the end of every working session.
-Last update: **20/10/2026.**
+Last update: **20/10/2026** (#31).
 
 ## Done and merged on `main`
 | Issue | PR | What |
@@ -17,6 +17,11 @@ Last update: **20/10/2026.**
 Rule + full table: `docs/decisions/0001-n8n-or-code.md`. In short: code = money, data, security, must-always-work;
 n8n = invoice e-mail, renewal reminder, chat assistant.
 
+## Open PRs (review + merge; #30 = #29 chat links, on its own branch)
+| Issue | PR | What |
+|---|---|---|
+| #31 Full course catalogue (60) + cross-check | #PR31 | 53 live courses on the site/API/chat; importer updates by title; `docs/analysis/course-catalogue-crosscheck.md`. Review + merge |
+
 ## Next steps
 1. **n8n re-import (to check):** Docker is fixed (n8n + Mailpit running again on 20/10). Still to check: re-import +
    publish "LoopCasts e-mails" (docs/n8n.md §2) so n8n loses the old `email` branch (harmless until then: the site
@@ -31,6 +36,9 @@ n8n = invoice e-mail, renewal reminder, chat assistant.
    Prompt changes go in **both** `n8n/knowledge/system-prompt.md` and the workflow JSON (a test checks), then import
    + publish + restart, run the eval again.
 3. #8 Deploy to Azure: also set `Smtp:*` as App Service settings; `LoginEmailSender` needs SMTP login + TLS first.
+
+Course data (#31): durations in the catalogue are too short for most courses (cross-check report). Fix in the xlsx →
+export again (spec 31) → restart the site: the importer updates by title. Or calculate them from Vimeo (not built).
 
 ## Pitfalls (learned the hard way)
 - Docker Desktop + external disk: after stopping a container with a bind mount on /Volumes, it may refuse to start

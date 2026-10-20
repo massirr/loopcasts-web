@@ -44,7 +44,8 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 |---|---|
 | `Models/` | `Course`, `Order`, `Invoice`, `Account` (DB entities); `Plan`/`Plans`, `Countries` (fixed lists in code) |
 | `Data/AppDbContext.cs` | `IdentityDbContext`; unique indexes on `Invoice.Number` and `Invoice.OrderId` |
-| `Data/CourseCsvImporter.cs` | Seeds courses from `Data/Seed/course-catalogue.csv` (cleans messy values, logs fixes) |
+| `Data/CourseCsvImporter.cs` | Loads `Data/Seed/course-catalogue.csv` (export of the full 60-course xlsx) at every start: update by title, Ids kept, nothing deleted; cleans messy values, logs fixes for new/changed rows only (#31) |
+| `docs/analysis/` | Analysis evidence, e.g. course catalogue vs Vimeo vs old website (`course-catalogue-crosscheck.mjs`, read-only) |
 | `Data/AdminSeeder.cs` | Creates Admin role + admin users from config `SeedAdmins:N:Email/Password` (**user-secrets**) |
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
 | `Services/MollieService.cs` | Mollie REST (typed HttpClient): create payment, `SyncAsync` re-fetches status → `MarkPaidAsync`. Webhook `POST /webhooks/mollie` in Program.cs |
