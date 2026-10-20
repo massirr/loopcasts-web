@@ -16,3 +16,5 @@ jobs:
       # Building the test project also builds the website (project reference)
       - run: dotnet build tests/LoopCastsWeb.Tests -c Release
       - run: dotnet test tests/LoopCastsWeb.Tests -c Release --no-build
+      # The chat's "Check answer" Code node (n8n workflow JSON) on sample answers (#29)
+      - run: node n8n/eval/check-answer.test.mjs

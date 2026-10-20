@@ -13,8 +13,9 @@ services:
       TZ: Europe/Brussels
       N8N_SECURE_COOKIE: "false"         # plain http on localhost
       N8N_DIAGNOSTICS_ENABLED: "false"
-      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"   # the workflows read the two LOOPCASTS_ values below
-      LOOPCASTS_SITE_URL: ${LOOPCASTS_SITE_URL:-http://host.docker.internal:5180}
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"   # the workflows read the LOOPCASTS_ values below
+      LOOPCASTS_SITE_URL: ${LOOPCASTS_SITE_URL:-http://host.docker.internal:5180}   # the site, as n8n reaches it
+      LOOPCASTS_PUBLIC_URL: ${LOOPCASTS_PUBLIC_URL:-http://localhost:5180}          # the site, as a visitor's browser reaches it (chat links)
       LOOPCASTS_SECRET: ${LOOPCASTS_SECRET:?Set LOOPCASTS_SECRET in .env (same value as the site's N8n:Secret)}
     extra_hosts:
       - "host.docker.internal:host-gateway"   # the site runs on this computer (dotnet watch, port 5180)
