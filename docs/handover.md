@@ -1,7 +1,7 @@
 # Handover: where things stand
 
 For whoever picks this up next (Koze, Claude Code, Cowork). Update this file at the end of every working session.
-Last update: **15/10/2026, evening.**
+Last update: **20/10/2026** (evening, #29).
 
 ## Done and merged on `main`
 | Issue | PR | What |
@@ -13,27 +13,22 @@ Last update: **15/10/2026, evening.**
 | #26 AI evaluation (Groq) | — (045b25b, directly on main) | Gemini → Groq `openai/gpt-oss-120b`; 14/15 auto, 15/15 on review (docs/ai-evaluation.md) |
 | #27 Login e-mails by the site | #28 | "Forgot password?"/"Change e-mail" over SMTP from the site, not n8n; ADR 0001 |
 
+## Open PR
+| #29 Chat answers: clickable links, no JSON | #30 | *Check answer* node, full URLs in the public API, prompt review fixes; eval 17/17. Already imported + published in local n8n. Review + merge |
+
 ## Where each automation runs
 Rule + full table: `docs/decisions/0001-n8n-or-code.md`. In short: code = money, data, security, must-always-work;
 n8n = invoice e-mail, renewal reminder, chat assistant.
 
 ## Next steps
-1. **Docker Desktop:** n8n doesn't start since `docker compose stop n8n` on 15/10 ("mkdir /host_mnt/Volumes/Koze_disk:
-   file exists"). Quit + reopen Docker Desktop, then `docker compose up -d`. Then re-import + publish "LoopCasts
-   e-mails" (docs/n8n.md §2) so n8n loses the old `email` branch (harmless until then: the site no longer sends it).
-2. Chat prompt follow-ups from the #26 review (not done yet, new issue when picked up):
-   - eval check: accept `'` and `’` in `n8n/eval/questions.json` (question 9);
-   - VAT wording: rename/drop `priceInclBelgianVat` in `Api/PublicApi.cs` (+ test), prompt line "VAT depends on
-     country and company, see the FAQ";
-   - off-topic: "I only help with LoopCasts" without sending people to support@;
-   - never share card details in the chat; renewing = ordering again via /Pricing;
-   - decide whether "I'm an AI assistant" goes in every first answer.
-   Prompt changes go in **both** `n8n/knowledge/system-prompt.md` and the workflow JSON (a test checks), then import
-   + publish + restart, run the eval again.
+1. Review + merge PR #30 (#29). Done on 20/10: "LoopCasts e-mails" re-imported + published (no `email` branch in
+   n8n any more), #6 closed.
+2. Small chat wording left (docs/ai-evaluation.md, #29 review): q3 says "see the VAT section of our FAQ" but there is
+   no FAQ page on the site. Either a /Faq page (the markdown is already there) or leave it.
 3. #8 Deploy to Azure: also set `Smtp:*` as App Service settings; `LoginEmailSender` needs SMTP login + TLS first.
+   n8n on a server: `LOOPCASTS_PUBLIC_URL` = the public site (same as `App:BaseUrl`), Chat Trigger *Allowed origins*.
 
 ## Pitfalls (learned the hard way)
-- `DEMO.md` is deleted in the working tree on Koze's Mac (not by Claude, not committed). Restore with `git restore DEMO.md` if that was a mistake.
 - Docker Desktop + external disk: after stopping a container with a bind mount on /Volumes, it may refuse to start
   again ("file exists"). Restart Docker Desktop.
 - **Save is not Publish** in n8n 2.x. The site's chat runs the *published* version; Save only changes the draft.
@@ -43,6 +38,11 @@ n8n = invoice e-mail, renewal reminder, chat assistant.
 - Credential ids differ per n8n install: the repo JSON points to the key-less placeholders in `n8n/credentials/`;
   never import those placeholders over a credential that already has a key.
 - Free-tier limits change often: check the provider's page before blaming the workflow.
+- Groq free = 8 000 tokens/minute: questions sent fast get "the assistant isn't available" (the *Check answer*
+  fallback). The eval waits 20 s between questions for that reason.
+- Two site addresses in n8n: `LOOPCASTS_SITE_URL` (how n8n reaches the site, host.docker.internal) and
+  `LOOPCASTS_PUBLIC_URL` (how a visitor's browser does; used for chat links). Don't mix them up.
 
 ## Blocked / needs Koze
-- Restart Docker Desktop (step 1 above). Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.
+- Review + merge PR #30.
+- Keys live only in n8n (Groq) and `.env` / user-secrets (`N8n:Secret`), never in the repo.

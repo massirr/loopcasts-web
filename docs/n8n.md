@@ -15,7 +15,8 @@ nobody gets locked out when n8n is down (#27). What goes where, and why: [ADR 00
 | Mailpit (all sent e-mails) | http://localhost:8025 |
 | SMTP for n8n | `mailpit:1025` (inside Docker) |
 | SMTP for the site (login e-mails) | `localhost:1025` (`Smtp:*` in appsettings.Development.json) |
-| The site, seen from n8n | `http://host.docker.internal:5180` |
+| The site, seen from n8n | `http://host.docker.internal:5180` (`LOOPCASTS_SITE_URL`) |
+| The site, seen by a visitor (chat links) | `http://localhost:5180` (`LOOPCASTS_PUBLIC_URL`; on a server: the public address = the site's `App:BaseUrl`) |
 | Workflows / credentials | `n8n/workflows/*.json`, `n8n/credentials/*.json` (no secrets: the Groq key is added in the UI) |
 | Chat assistant (FAQ, prompt, tests) | `n8n/knowledge/`, `n8n/eval/`, `docs/ai-evaluation.md` |
 
@@ -93,6 +94,17 @@ with **Model (swap here)** (Groq `openai/gpt-oss-120b`, temperature 0.2, max 200
 credential "Groq"), **Chat memory (per session)**
 (last 10 messages of that chat) and three tools that call the site's read-only public API:
 `courses` → `/api/public/courses`, `plans` → `/api/public/plans`, `faq` → `/api/public/faq` (= `n8n/knowledge/faq.md`).
+→ **Check answer** (Code node, #29), the safety net after the AI:
+- no answer (the model call failed: bad key, quota, timeout; the agent is set to *continue on error*) → "Sorry, the
+  assistant isn't available right now. See courses or prices, or mail support@…";
+- JSON or a code block → "Sorry, I couldn't answer that properly. See courses or prices, or mail support@…";
+- a bare `/Pricing`, `/Order?plan=…`, `/Identity/…` path, a relative link or a link to another host → a markdown link
+  on `LOOPCASTS_PUBLIC_URL`.
+
+The Chat Trigger answers with the output of the **last node** (Respond: *When Last Node Finishes*), so the visitor
+gets the checked text, not the agent's raw answer. Every URL the site's API gives is already full (`App:BaseUrl`):
+`url`, `pricingUrl`, `orderUrl`, and the paths in the FAQ. Test the node without n8n: `node n8n/eval/check-answer.test.mjs`
+(also runs in CI).
 
 The site shows the n8n chat widget bottom-right (`Pages/Shared/_Chat.cshtml`) only when `Chat:Url` is set, with
 "Answers by an AI assistant" under the input. Another site address? Change *Allowed origins* in the Chat Trigger
