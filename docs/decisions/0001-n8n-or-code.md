@@ -27,6 +27,7 @@ and does the bookkeeping (e.g. `reminded`).
 | Order → paid → invoice (number, VAT) → account, in one save (`PaymentService`) | code | 1, 2 |
 | Mollie payment + webhook + status check (`MollieService`) | code | 1 (Mollie is outside, but the money rule wins) |
 | VAT rules (`VatCalculator`) | code | 1 |
+| VAT number check: format + EU VIES register (`VatNumber`, `ViesClient`, ADR 0002) | code | 1, 4 |
 | Customer login without password + setup code (`MemberService`) | code | 2, 3 |
 | Team seats (`TeamSeats`) | code | 2, 3 |
 | Accounts past `EndsOn` switched off, every 24 h (`AccountExpiry`) | code | 2, 3: a schedule, but it decides access |

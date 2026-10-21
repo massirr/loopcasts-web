@@ -55,7 +55,8 @@ process, as the teacher asked. Built by Koze, who is **learning ASP.NET**.
 | `docs/decisions/` | ADRs. **0001 n8n or code**: code = money, data, security, must-always-work; n8n = outside services, schedules, notifications, texts the business changes, AI. Check it before placing a new automation |
 | `docker-compose.yml`, `n8n/` | Local n8n + Mailpit (only mail server, SMTP also on `localhost:1025` for the site); workflows "LoopCasts e-mails" + "Renewal reminder" as JSON. `.env` = `LOOPCASTS_SECRET` (git-ignored). See `docs/n8n.md` |
 | `Api/PublicApi.cs`, `Pages/Shared/_Chat.cshtml` | Chat assistant (#22): public read-only `/api/public/courses|plans|faq` for the n8n "LoopCasts assistant" (Groq `openai/gpt-oss-120b`; was Gemini); widget only when `Chat:Url` is set. FAQ/prompt in `n8n/knowledge/`, eval in `n8n/eval/` + `docs/ai-evaluation.md`. Only public data goes to the model |
-| `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VAT nr 0% reverse charge, non-EU 0%) |
+| `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VIES-valid VAT nr 0% reverse charge, non-EU 0%) |
+| `Services/VatNumber.cs`, `ViesClient.cs` | VAT number format + BE checksum; EU VIES check (`Vies:BaseUrl`, test service in Development). VIES down → 21% + "not verified" (ADR 0002, #33) |
 | `Services/MemberService.cs` | Customer logins: Identity user, role **Member**, no password → password-setup code |
 | `Services/CustomerData.cs` | "Which rows belong to this e-mail?" in one place (used by /My and /Invoice) |
 | `Services/TeamSeats.cs` | Team licence: buyer adds/removes colleagues on /My (`Plan.Seats`), seat = Account on the team order |

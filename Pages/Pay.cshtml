@@ -21,6 +21,15 @@
         <h1>@(Model.Plan?.Name ?? o.PlanCode)</h1>
         <p class="pay-total num">@($"€{Model.Total:0.00}")</p>
         <p class="muted small">Incl. VAT (@($"€{o.Price:0.00}") excl. VAT)</p>
+        @if (o.VatCheckResult == VatCheck.Valid)
+        {
+            <p class="muted small">No VAT: reverse charge, VAT number confirmed by the EU register.</p>
+        }
+        else if (o.VatCheckResult == VatCheck.NotVerified)
+        {
+            @* #33: no proof, no 0%. Marieke checks the number later (Admin → Orders). *@
+            <p class="small">We couldn't check your VAT number with the EU register right now, so 21% VAT is included. We check it afterwards.</p>
+        }
         <p class="muted small wrap-any">Invoice and login go to @o.Email</p>
 
         <form method="post" asp-route-id="@o.Id" asp-route-key="@o.AccessKey">

@@ -6,14 +6,15 @@ namespace LoopCastsWeb.Services;
 /// LoopCasts VAT rules from the handbook (chapter 1), so nobody needs a phone calculator:
 ///  - Belgium: 21%
 ///  - other EU, private person: 21%
-///  - other EU, company WITH a VAT number: 0% + "VAT reverse charged" on the invoice
+///  - other EU, company with a VAT number that VIES confirmed (#33): 0% + "VAT reverse charged" on the invoice;
+///    not checked / VIES down → 21%: never 0% without proof
 ///  - outside the EU: 0%
 /// </summary>
 public static class VatCalculator
 {
     public record Result(decimal Rate, decimal VatAmount, decimal Total, bool ReverseCharge);
 
-    public static Result Calculate(decimal amountExclVat, string? countryCode, bool isCompany, string? vatNumber)
+    public static Result Calculate(decimal amountExclVat, string? countryCode, bool isCompany, VatCheck? vatCheck)
     {
         var country = Countries.Find(countryCode);
         decimal rate;
@@ -25,7 +26,7 @@ public static class VatCalculator
         }
         else if (country.InEu)
         {
-            if (isCompany && !string.IsNullOrWhiteSpace(vatNumber))
+            if (isCompany && vatCheck == VatCheck.Valid)
             {
                 rate = 0m;
                 reverseCharge = true;

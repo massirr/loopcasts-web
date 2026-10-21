@@ -138,6 +138,15 @@ namespace LoopCastsWeb.Migrations
                     b.Property<decimal>("VatAmount")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("VatCheckName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VatCheckResult")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("VatCheckedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("VatRate")
                         .HasColumnType("TEXT");
 
@@ -163,9 +172,11 @@ namespace LoopCastsWeb.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Address")
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Company")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Country")
@@ -177,6 +188,7 @@ namespace LoopCastsWeb.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
+                        .HasMaxLength(254)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsCompany")
@@ -190,6 +202,7 @@ namespace LoopCastsWeb.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("PaidAt")
@@ -202,7 +215,17 @@ namespace LoopCastsWeb.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("VatCheckName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VatCheckResult")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("VatCheckedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("VatNumber")
+                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
