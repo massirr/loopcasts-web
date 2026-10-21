@@ -7,7 +7,7 @@ Last update: **21/10/2026**.
 | PR | Issue | State |
 |---|---|---|
 | #34 | #33 VAT numbers checked before 0% VAT | CI green, waiting for Koze's review + merge |
-| #35 | #35 Keep agent context small | stacked on #34 (base `feat/33-vat-number-check`); after #34 is merged, set its base to `main` |
+| #36 | #35 Keep agent context small | stacked on #34 (base `feat/33-vat-number-check`); after #34 is merged, set its base to `main` |
 
 `main` = #31 (full course catalogue). Everything before is in `docs/log/2026-10.md`.
 
