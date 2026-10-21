@@ -305,3 +305,18 @@ What the coding agent did, per issue. Newest at the bottom. Format: see `.claude
   for the analysis part of the assignment.
 - **Learn:** `db.Entry(x).CurrentValues.SetValues(y)` copies values and lets EF's change tracker mark only the
   columns that really changed (`State == Modified`): like `INotifyPropertyChanged` raising only when a value differs.
+
+## 2026-10-21 — #33 VAT numbers are checked before 0% VAT is given  (PR #34, merged)
+- **What:** `VatNumber` (clean + per-country format + Belgian mod-97), `ViesClient` (EU VIES REST, 5 s timeout) only for
+  EU companies outside Belgium; `VatCalculator` gives 0% only with `VatCheck.Valid`; proof (result, checked at, VIES name)
+  copied onto the invoice (migration `VatCheck`). VIES down → 21% + "VAT number not verified" in Admin → Orders.
+  Order form trims + limits name/e-mail/company/address; e-mail needs a dot in the domain (also colleague e-mails).
+- **Why / decisions:** ADR 0002: money + checkout → code; no proof → 21% (overpaid VAT is fixable, missing VAT costs
+  LoopCasts). VIES reports errors as HTTP 200 + `actionSucceed:false` (found by calling it, not in the swagger).
+  Test service only knows 100/200/300/301 → 3-digit numbers pass the format check only against that endpoint.
+  Old-data import treats old VAT numbers as accepted (history, not re-checked). Skipped: automatic re-check, credit notes.
+- **Tests:** VatNumberTests, ViesClientTests (fake VIES: valid/invalid/down/500/non-JSON/timeout/network),
+  VatCalculator + invoice snapshot. 200/200, CI green. Browser on the test service: screenshots `33-*.png`.
+- **Manual steps for Koze:** Admin → Orders: order an NL company with VAT `301` and check the badge (needs your admin login).
+- **Learn:** typed HttpClient (`AddHttpClient<ViesClient>`): like injecting a service into a ViewModel's constructor in
+  WPF, but the framework also manages the connection pool and timeout.
