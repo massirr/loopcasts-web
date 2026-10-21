@@ -36,3 +36,8 @@ Re-run manually: GitHub → Actions → Deploy → Re-run.
   Set the Mollie test key before sharing the URL.
 - **Roll back:** re-run the Deploy workflow of an older green commit, or `git revert` + push.
 - **Remove everything:** `az group delete -n $RG`.
+
+## Also before going live
+- App Service settings `Smtp:Host`/`Smtp:Port`/`Smtp:From` for the login e-mails; `LoginEmailSender` needs SMTP login + TLS first.
+- `Vies:BaseUrl` is already the real VIES endpoint in `appsettings.json` (Development overrides it with the test service).
+- n8n on a server: docs/n8n.md §6 (`LOOPCASTS_PUBLIC_URL` = the public site, Chat Trigger *Allowed origins*).

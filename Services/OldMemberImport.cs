@@ -9,7 +9,7 @@ using static LoopCastsWeb.Services.OldDataImport;
 namespace LoopCastsWeb.Services;
 
 /// <summary>
-/// One-time import of the old website's members table (phpMyAdmin export of `users`, spec docs/specs/20-…).
+/// One-time import of the old website's members table (phpMyAdmin export of `users`, spec docs/specs/done/20-…).
 /// The password column (MD5) is skipped character by character while reading: its value is never copied into a
 /// string, so it can't be stored, shown or logged. After reading, only e-mail, product, dates and active remain.
 /// Parse() cleans and reports (no database); ApplyAsync() writes an Account + a Member login without password.
