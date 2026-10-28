@@ -8,11 +8,11 @@ As someone finding LoopCastsWeb on GitHub, I want a clear and accurate project R
 - [x] `CLAUDE.md` no longer says the repository must remain private; publication requires a clean full-history audit.
 - [x] Tracked files, ignore rules, workflows, documentation, and all Git history were audited for material that should not be public; secret values were not printed.
 - [x] The historical screenshot URL was assessed with the security review: it is a local Mailpit demo reset link targeting `localhost`, with a 24-hour lifetime; the screenshot's commit date is 2026-10-07, so it is expired. It is not a live credential or customer data.
-- [x] Repository identity and visibility were verified; no visibility change was made.
+- [x] Verified repository identity and changed `massirr/loopcasts-web` to public after the audit clarification was reviewed and merged.
 - [x] `main` protection requires PRs, `build-test`, and resolved review conversations; force pushes and branch deletion are prevented.
 - [x] No approval count is required because only the repository owner is available; manual human review remains documented without preventing merges.
 - [x] Handover is current and under 60 lines; append to the monthly log without reading it.
-- [ ] After issue #41's audit correction is reviewed and merged, make the repository public and verify visibility and branch protection.
+- [x] After issue #41's audit correction was reviewed and merged, made the repository public and re-verified visibility and branch protection.
 
 ## Design
 - Data/model changes (migration name): none.
