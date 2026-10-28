@@ -11,7 +11,7 @@ subscriptions). Goal: **remove manual steps** from their order → invoice → a
    LoopCasts Dropbox copy (`../LoopCasts`: passwords, customer e-mails). Check `git status` before every commit.
 4. **Never edit a committed migration** (`Migrations/*`). Change the model → `dotnet ef migrations add <Name>`.
    Only a migration that is not yet on `main` may be removed (`dotnet ef migrations remove`).
-5. **The GitHub repo stays private** (`massirr/loopcasts-web`). Never change visibility, never force-push `main`.
+5. **Public visibility is approved only after the full publication audit passes.** Never make the repo public while any sensitive material remains in tracked files or Git history; never force-push `main`.
 6. Never trust the browser: prices from `Plans`, plan/country/ownership checked server-side.
 
 ## Working habits

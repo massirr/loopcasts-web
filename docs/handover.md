@@ -3,17 +3,19 @@
 Replaced at the end of each session; max ~60 lines. History: `docs/log/`. Plans: `docs/architecture.md`.
 Last update: **28/10/2026**.
 
-## Current GitHub state
-- Repository: `massirr/loopcasts-web` (private); default branch `main`.
-- `main` is at #36. No open PRs were reported when work started.
-- #37 header width is implemented on `feat/37-header-width`; PR #38 is open and `build-test` is green; human review is pending.
-- Only `massirr` is a repository collaborator. Keep the manual human-review-before-merge rule; do not require an approval count that prevents merging.
+## Current state
+- Repository: `massirr/loopcasts-web`, default branch `main`, currently private.
+- `main` includes merged PR #38 (header width), commit `6e9feaf`.
+- Issue #39 is active on `feat/39-public-readme-protection`; README and public-policy updates are in progress.
+- Only the owner is listed as collaborator. Preserve manual human review; do not require an approval count that prevents merging.
+- `main` is protected: PR required; `build-test` required; review conversations must be resolved; admins included; force push and deletion disabled; 0 approvals required.
+
+## Publication blocker
+- A password-reset URL token appears in tracked screenshot `docs/design/screenshots/before-my-1320.png` and Git history. Do not make the repository public.
+- Before publication, invalidate/rotate the token as applicable, replace or remove the screenshot, and purge its blob from all Git history. `main` history rewrite is prohibited by the current hard rule; resolve that policy and coordinate cleanup before publication.
+- The repository is still private. No visibility change has been made.
 
 ## Next steps
-1. Review and merge the #37 header PR after CI is green and a human has reviewed it; delete its local and remote branch.
-2. Add the verified root README, update the private-repository rule, complete the full public-history audit, and configure `main` protection in a separate issue/PR.
-3. Change repository visibility only if the tracked-file and full-history audit finds no sensitive material.
-
-## Notes
-- No open issues from the former handover remain in progress; #34 and #36 are merged.
-- Keep secrets in `dotnet user-secrets`, environment variables, or App Service settings. Never commit databases or customer exports.
+1. Finish and review the README/security-policy PR for #39; wait for green CI and human review before merge.
+2. Re-verify the requested `main` protection settings after PR review.
+3. Keep issue #39 open and visibility private until the historical token has been remediated and a clean publication audit passes.
