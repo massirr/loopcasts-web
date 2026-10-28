@@ -159,3 +159,12 @@ The site needs its own `Smtp:Host`/`Smtp:Port`/`Smtp:From` (App Service settings
 server also needs a login + TLS, which `LoginEmailSender` doesn't do yet.
 
 Optional: an *HTML → PDF* node (e.g. Gotenberg) on `invoiceUrl` to attach a PDF. The link is enough for the prototype.
+
+## 7. Pitfalls (learned the hard way)
+- Docker Desktop + external disk: a stopped container with a bind mount on /Volumes may refuse to start again
+  ("file exists"). Restart Docker Desktop.
+- Changed a workflow in the editor? Export it to the repo (§2), or the repo and n8n drift apart.
+- Credential ids differ per n8n install: the repo JSON points to the key-less placeholders in `n8n/credentials/`;
+  never import those placeholders over a credential that already has a key.
+- Free-tier limits change often: check the provider's page before blaming the workflow.
+- Save vs Publish, reloading the editor tab, Groq's tokens/minute: §5. The two site addresses: the table at the top.

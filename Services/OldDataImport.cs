@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LoopCastsWeb.Services;
 
 /// <summary>
-/// One-time import of the old Excel exports: orders-2026.csv + invoice-register.csv (spec: docs/specs/7-…).
+/// One-time import of the old Excel exports: orders-2026.csv + invoice-register.csv (spec: docs/specs/done/7-…).
 /// Parse() only reads and cleans (no database) → a list of rows + a report of every fix, like CourseCsvImporter.
 /// ApplyAsync() writes the rows. Invoices keep their old number and amounts: they were already sent to customers.
 /// </summary>
