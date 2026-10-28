@@ -6,7 +6,7 @@ Last update: **28/10/2026**.
 ## Current GitHub state
 - Repository: `massirr/loopcasts-web` (private); default branch `main`.
 - `main` is at #36. No open PRs were reported when work started.
-- #37 header width is implemented on `feat/37-header-width`; tests pass, PR/CI and human review pending.
+- #37 header width is implemented on `feat/37-header-width`; PR #38 is open and `build-test` is green; human review is pending.
 - Only `massirr` is a repository collaborator. Keep the manual human-review-before-merge rule; do not require an approval count that prevents merging.
 
 ## Next steps
