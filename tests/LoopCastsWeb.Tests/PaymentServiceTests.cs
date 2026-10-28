@@ -81,12 +81,15 @@ public class PaymentServiceTests
         var (db, service) = Setup();
         var order = NewOrder("team", "NL");
         order.IsCompany = true; order.Company = "Acme BV"; order.VatNumber = "NL123456789B01";
+        var checkedAt = new DateTime(2026, 10, 21, 9, 0, 0, DateTimeKind.Utc);
+        order.VatCheckResult = VatCheck.Valid; order.VatCheckedAt = checkedAt; order.VatCheckName = "ACME B.V.";
         var id = await AddOrder(db, order);
 
         await service.MarkPaidAsync(id);
 
         var inv = await db.Invoices.SingleAsync();
         Assert.Equal("Acme BV", inv.BillingCompany);
+        Assert.Equal((VatCheck.Valid, checkedAt, "ACME B.V."), (inv.VatCheckResult, inv.VatCheckedAt, inv.VatCheckName));   // proof for 0%
         Assert.Equal(599m, inv.Total);
         Assert.True(inv.ReverseCharge);
         var acc = await db.Accounts.SingleAsync();

@@ -1,7 +1,7 @@
 # Handover: where things stand
 
 For whoever picks this up next (Koze, Claude Code, Cowork). Update this file at the end of every working session.
-Last update: **20/10/2026** (evening, #29 + #31 merged).
+Last update: **21/10/2026** (#33 merged).
 
 ## Done and merged on `main`
 | Issue | PR | What |
@@ -14,6 +14,7 @@ Last update: **20/10/2026** (evening, #29 + #31 merged).
 | #27 Login e-mails by the site | #28 | "Forgot password?"/"Change e-mail" over SMTP from the site, not n8n; ADR 0001 |
 | #29 Chat answers: clickable links, no JSON | #30 | *Check answer* node, full URLs in the public API, prompt review fixes; eval 17/17 |
 | #31 Full course catalogue (60) + cross-check | #32 | 53 live courses on site/API/chat; importer updates by title; `docs/analysis/course-catalogue-crosscheck.md` |
+| #33 VAT number check | #34 | Format + BE checksum + EU VIES; VIES down → 21% + "not verified" in Admin → Orders (ADR 0002) |
 
 ## Where each automation runs
 Rule + full table: `docs/decisions/0001-n8n-or-code.md`. In short: code = money, data, security, must-always-work;

@@ -36,7 +36,7 @@ public class MollieService
 
     /// What the customer pays: price incl. VAT, the same calculation as the invoice.
     public static decimal Total(Order order) =>
-        VatCalculator.Calculate(order.Price, order.Country, order.IsCompany, order.VatNumber).Total;
+        VatCalculator.Calculate(order.Price, order.Country, order.IsCompany, order.VatCheckResult).Total;
 
     private static string Money(decimal amount) => amount.ToString("0.00", CultureInfo.InvariantCulture);
 

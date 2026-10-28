@@ -143,7 +143,9 @@ public class OldDataImport
     private Invoice BuildInvoice(Order order, Plan plan, RegisterRow reg, string where)
     {
         var at = $"{where} / invoice {reg.Number}";
-        var rules = VatCalculator.Calculate(reg.Amount, order.Country, order.IsCompany, order.VatNumber);
+        // ponytail: old orders are history, not re-checked at VIES: a VAT number on the sheet counts as accepted back then
+        var oldCheck = string.IsNullOrWhiteSpace(order.VatNumber) ? (VatCheck?)null : VatCheck.Valid;
+        var rules = VatCalculator.Calculate(reg.Amount, order.Country, order.IsCompany, oldCheck);
 
         if (reg.Customer != (order.Company ?? order.Name))
             Add(Level.Warning, at, $"register says '{reg.Customer}', order says '{order.Company ?? order.Name}'");

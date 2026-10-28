@@ -1,3 +1,4 @@
+using LoopCastsWeb.Models;
 using LoopCastsWeb.Services;
 
 namespace LoopCastsWeb.Tests;
@@ -5,16 +6,18 @@ namespace LoopCastsWeb.Tests;
 public class VatCalculatorTests
 {
     [Theory]
-    [InlineData("BE", false, null)]          // Belgium, private
-    [InlineData("BE", true, "BE0123456789")] // Belgium, company: still 21%
-    [InlineData("NL", false, null)]          // other EU, private
-    [InlineData("NL", true, null)]           // other EU, company WITHOUT VAT number
-    [InlineData("NL", true, "  ")]           // blank VAT number counts as none
-    [InlineData(null, false, null)]          // unknown country (old free-text orders)
-    [InlineData("ZZ", false, null)]
-    public void Calculate_Charges21Percent(string? country, bool isCompany, string? vatNumber)
+    [InlineData("BE", false, null)]                    // Belgium, private
+    [InlineData("BE", true, VatCheck.Valid)]           // Belgium, company: still 21%
+    [InlineData("NL", false, null)]                    // other EU, private
+    [InlineData("NL", true, null)]                     // other EU, company, number never checked
+    [InlineData("NL", true, VatCheck.NotVerified)]     // #33: VIES down → no proof → never 0%
+    [InlineData("NL", true, VatCheck.Invalid)]
+    [InlineData("NL", false, VatCheck.Valid)]          // a valid check doesn't turn a private person into a company
+    [InlineData(null, false, null)]                    // unknown country (old free-text orders)
+    [InlineData("ZZ", true, VatCheck.Valid)]
+    public void Calculate_Charges21Percent(string? country, bool isCompany, VatCheck? check)
     {
-        var r = VatCalculator.Calculate(149m, country, isCompany, vatNumber);
+        var r = VatCalculator.Calculate(149m, country, isCompany, check);
 
         Assert.Equal(0.21m, r.Rate);
         Assert.Equal(31.29m, r.VatAmount);
@@ -23,9 +26,9 @@ public class VatCalculatorTests
     }
 
     [Fact]
-    public void Calculate_EuCompanyWithVatNumber_ReverseCharge()
+    public void Calculate_EuCompanyWithValidVatCheck_ReverseCharge()
     {
-        var r = VatCalculator.Calculate(599m, "NL", true, "NL123456789B01");
+        var r = VatCalculator.Calculate(599m, "NL", true, VatCheck.Valid);
 
         Assert.Equal(0m, r.Rate);
         Assert.Equal(0m, r.VatAmount);
@@ -49,7 +52,7 @@ public class VatCalculatorTests
     [Fact]
     public void Calculate_CountryCodeIsCaseAndSpaceInsensitive()
     {
-        Assert.True(VatCalculator.Calculate(10m, " nl ", true, "NL1").ReverseCharge);
+        Assert.True(VatCalculator.Calculate(10m, " nl ", true, VatCheck.Valid).ReverseCharge);
     }
 
     [Fact]

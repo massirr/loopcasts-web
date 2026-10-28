@@ -37,6 +37,13 @@ builder.Services.AddHttpClient<MollieService>(client =>
     if (builder.Configuration["Mollie:ApiKey"] is { Length: > 0 } key)
         client.DefaultRequestHeaders.Authorization = new("Bearer", key);
 });
+// EU VIES register for VAT numbers (#33). Vies:BaseUrl = test service in Development, the real one in Production.
+// Short timeout: the customer is waiting on the order form; no answer → 21% + "not verified", never 0%.
+builder.Services.AddHttpClient<ViesClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Vies:BaseUrl"]!);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
 // n8n webhook for the invoice e-mail (N8n:WebhookUrl)
 builder.Services.AddHttpClient<N8nNotifier>(client => client.Timeout = TimeSpan.FromSeconds(10));
 // Login e-mails ("Forgot password?") go straight over SMTP (Smtp:*), so they work without n8n (#27)

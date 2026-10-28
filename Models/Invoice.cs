@@ -17,4 +17,8 @@ public class Invoice
     public decimal VatAmount { get; set; }
     public decimal Total { get; set; }
     public bool ReverseCharge { get; set; }
+    // Proof for reverse charge (#33): copy of the order's VIES check at that moment
+    public VatCheck? VatCheckResult { get; set; }
+    public DateTime? VatCheckedAt { get; set; }
+    public string? VatCheckName { get; set; }
 }

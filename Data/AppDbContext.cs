@@ -21,6 +21,9 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
         modelBuilder.Entity<Course>()
             .Property(c => c.Level)
             .HasConversion<string>();
+        // "Valid" / "NotVerified" in the database instead of 0 / 2: readable in a DB browser
+        modelBuilder.Entity<Order>().Property(o => o.VatCheckResult).HasConversion<string>();
+        modelBuilder.Entity<Invoice>().Property(i => i.VatCheckResult).HasConversion<string>();
 
         // The database itself refuses duplicates: no invoice number twice, max. one invoice per order
         modelBuilder.Entity<Invoice>().HasIndex(i => i.Number).IsUnique();

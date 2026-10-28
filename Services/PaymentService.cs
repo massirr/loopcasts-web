@@ -67,7 +67,7 @@ public class PaymentService
 
         // 2. Invoice — every billing field is COPIED from the order (snapshot, see the ERD page)
         var plan = Plans.Find(order.PlanCode);
-        var vat = VatCalculator.Calculate(order.Price, order.Country, order.IsCompany, order.VatNumber);
+        var vat = VatCalculator.Calculate(order.Price, order.Country, order.IsCompany, order.VatCheckResult);
         var invoice = new Invoice
         {
             OrderId = order.Id,
@@ -84,6 +84,9 @@ public class PaymentService
             VatAmount = vat.VatAmount,
             Total = vat.Total,
             ReverseCharge = vat.ReverseCharge,
+            VatCheckResult = order.VatCheckResult,
+            VatCheckedAt = order.VatCheckedAt,
+            VatCheckName = order.VatCheckName,
         };
         _db.Invoices.Add(invoice);
 

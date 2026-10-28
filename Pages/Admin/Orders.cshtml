@@ -35,6 +35,11 @@
                                 @if (o.IsCompany)
                                 {
                                     <br /><span class="small">@o.Company</span> <span class="small muted">@o.VatNumber</span>
+                                    @if (o.VatCheckResult == VatCheck.NotVerified)
+                                    {
+                                        @* #33: VIES was down → 21% charged. Check the number by hand later. *@
+                                        <br /><span class="status status-warn" title="VIES was down when ordering, 21% VAT charged">VAT number not verified</span>
+                                    }
                                 }
                             </td>
                             <td>@(Plans.Find(o.PlanCode)?.Name ?? o.PlanCode)</td>

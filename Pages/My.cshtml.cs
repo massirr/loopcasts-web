@@ -2,7 +2,6 @@ using LoopCastsWeb.Data;
 using LoopCastsWeb.Models;
 using LoopCastsWeb.Services;
 using Microsoft.AspNetCore.Authorization;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -52,7 +51,7 @@ public class MyModel : PageModel
 
     public async Task<IActionResult> OnPostAddSeatAsync(int orderId, string? email)
     {
-        if (string.IsNullOrWhiteSpace(email) || !new EmailAddressAttribute().IsValid(email.Trim()))
+        if (!Input.IsEmail(email))
         {
             Error = "Enter a valid e-mail address.";
             return RedirectToPage();
