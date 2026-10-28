@@ -5,8 +5,8 @@ Last update: **28/10/2026**.
 
 ## Current state
 - Repository: `massirr/loopcasts-web`, default branch `main`, public.
-- `main` includes PR #38 (header width), PR #40 (README and repository settings), and PR #42 (publication audit); all merged after green `build-test` and human review.
-- Issue #39 remains open until the current-state update in issue #43 is reviewed and merged. Issue #41's audit correction is complete.
+- `main` includes PR #38 (header width), PR #40 (README and repository settings), PR #42 (publication audit), PR #44 (public launch record), and PR #46 (final handover); all merged after green `build-test` and human review.
+- LoopCasts presentation demo prep is complete; no follow-up items remain from that work.
 - Only the owner is listed as collaborator. Preserve manual human review; do not require an approval count that prevents merging.
 - `main` is protected: PR required; `build-test` required; review conversations must be resolved; admins included; force push and deletion disabled; 0 approvals required.
 
@@ -15,5 +15,4 @@ Last update: **28/10/2026**.
 - The full tracked-file and history audit found no live credentials, customer data, or databases. The repository was made public after the reviewed audit clarification was merged.
 
 ## Next steps
-1. Review and merge the issue #43 handover correction after green CI and human review.
-2. Close issues #39 and #43 after verifying the handover on `main`.
+1. Continue with the next planned work in `docs/architecture.md`.
