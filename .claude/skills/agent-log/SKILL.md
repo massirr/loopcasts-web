@@ -19,5 +19,4 @@ cat >> "$f" <<'EOF'
 - **Learn:** one ASP.NET concept used (compare to WPF/MVVM when useful).
 EOF
 ```
-Short and factual (max ~12 lines). No secrets. In the same PR: move the issue's spec to `docs/specs/done/` and
-replace `docs/handover.md`.
+Short and factual (max ~12 lines). No secrets. Part of skill `spec-close` (the other finish steps live there).
