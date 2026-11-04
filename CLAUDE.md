@@ -18,10 +18,9 @@ subscriptions). Goal: **remove manual steps** from their order → invoice → a
 - **One issue per session** = one branch `feat/<issue>-<slug>` = one PR. CI (build + test) green before merge.
 - **Read only the files you need.** Never load `docs/log/`, `docs/ai-evaluation.md` or `../cowork` unless the task
   is about them. Find code via the map below, not by reading whole folders.
-- Non-trivial feature: write `docs/specs/<issue>-<slug>.md` from `docs/specs/_template.md` before coding.
-- Skill `security-check` before every commit.
-- Finish an issue in its PR: skill `agent-log` (append only), move the spec to `docs/specs/done/`, **replace**
-  `docs/handover.md` (current state only, max ~60 lines).
+- Non-trivial issue: skill `spec` **before coding** (from intent, no code reading). Before the PR: agent `reviewer`.
+- Skill `security-check` before every commit. Finish an issue in its PR: skill `spec-close`.
+- **Local first:** test with `dotnet watch` / `dotnet test`; deploy only what needs the server (F1 = 60 CPU-min/day).
 - **One fact, one place**: link instead of copying. Where a doc must match the code, add a test (`DocsTests`).
 
 ## Map

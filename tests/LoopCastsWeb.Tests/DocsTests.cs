@@ -43,4 +43,21 @@ public class DocsTests
 
         Assert.True(active.Count <= 1, $"Move merged specs to docs/specs/done/: {string.Join(", ", active)}");
     }
+
+    // Skill spec-close ticks every criterion before the move (#51). ponytail: specs closed before #51 are
+    // grandfathered by name instead of rewritten; the list only shrinks.
+    private static readonly string[] ClosedBefore51 =
+        ["1-customer-login.md", "22-chat-assistant.md", "33-vat-number-check.md", "35-context-budget.md", "43-public-launch-handover.md"];
+
+    [Fact]
+    public void DoneSpecs_HaveNoUntickedCriteria()
+    {
+        var unticked = Directory.GetFiles(Path.Combine(Root, "docs", "specs", "done"), "*.md")
+            .Where(f => !Path.GetFileName(f).StartsWith("._") && !ClosedBefore51.Contains(Path.GetFileName(f)))
+            .Where(f => File.ReadAllLines(f).Any(l => Regex.IsMatch(l, @"^\s*(-|\d+\.)\s+\[ \]")))
+            .Select(Path.GetFileName)
+            .ToList();
+
+        Assert.True(unticked.Count == 0, $"Tick the criteria (skill spec-close) in: {string.Join(", ", unticked)}");
+    }
 }
