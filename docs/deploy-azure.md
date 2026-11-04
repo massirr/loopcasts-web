@@ -3,7 +3,7 @@
 One-time setup (`az login` first). Names are examples; the app name must be globally unique.
 
 ```bash
-RG=loopcasts-rg; PLAN=loopcasts-plan; APP=loopcasts-koze; LOC=westeurope
+RG=loopcasts-rg; PLAN=loopcasts-plan; APP=loopcasts-koze; LOC=belgiumcentral  # Azure for Students allows only: belgiumcentral, spaincentral, polandcentral, austriaeast, italynorth
 
 az group create -n $RG -l $LOC
 az appservice plan create -g $RG -n $PLAN --sku F1 --is-linux
