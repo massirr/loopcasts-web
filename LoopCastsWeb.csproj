@@ -40,4 +40,9 @@
     <Content Include="n8n/knowledge/faq.md" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- Read at every start by CourseCsvImporter; .csv is not content by default, so ship it explicitly. -->
+  <ItemGroup>
+    <None Update="Data/Seed/course-catalogue.csv" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
