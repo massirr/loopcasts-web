@@ -33,6 +33,10 @@ Re-run manually: GitHub → Actions → Deploy → Re-run.
   Back up: `az webapp ssh` → copy the file, or Kudu (https://$APP.scm.azurewebsites.net) → File manager.
 - **Run from package:** `WEBSITE_RUN_FROM_PACKAGE=1` mounts the uploaded zip read-only instead of copying files one by one (a stalled copy on F1 left a half-deployed site that crashed on a missing `libe_sqlite3.so`). The app only writes to `/home/data`.
 - **F1 limits:** 60 CPU-minutes/day, no "Always On" → the app sleeps; the 24 h expiry job runs at every start.
+  Quota used up → app state `QuotaExceeded`, site 403 until 00:00 UTC (Portal: App Service plan → Quotas).
+  A crash loop burns the quota fast: on a startup crash run `az webapp stop` first, fix, then start.
+- **Portal Deployment Center** shows "not configured": expected, we deploy with our own `deploy.yml` and a publish
+  profile. Don't click *Authorize*/*Save* there; it would add a second workflow to the repo.
 - **Mock payment:** without `Mollie__ApiKey` the public site gives free access via the test checkout.
   Set the Mollie test key before sharing the URL.
 - **Roll back:** re-run the Deploy workflow of an older green commit, or `git revert` + push.

@@ -16,7 +16,7 @@ Implemented:
 
 Planned or not configured for production:
 
-- Azure App Service deployment and production SMTP settings.
+- Production SMTP settings and the Mollie test key on the hosted site.
 - Monthly recurring billing, credit notes, and a QR-code flow for authenticator setup.
 - More complete account-data export and anonymization workflows.
 
@@ -79,4 +79,4 @@ CI runs on pull requests and pushes to `main`.
 
 ## Deployment status
 
-The Azure deployment workflow is present but inactive: the repository has no `AZURE_WEBAPP_NAME` variable or `AZURE_WEBAPP_PUBLISH_PROFILE` secret, and its recent deployment runs were skipped. No Azure deployment is confirmed. See [the deployment guide](docs/deploy-azure.md) for the setup checklist.
+Live on Azure App Service (Free F1, Linux): https://loopcasts-koze.azurewebsites.net. Every green CI run on `main` deploys automatically; history is under GitHub **Deployments → production**. Setup, settings and roll back: [the deployment guide](docs/deploy-azure.md).

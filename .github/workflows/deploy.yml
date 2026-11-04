@@ -12,6 +12,9 @@ jobs:
   deploy:
     if: github.event.workflow_run.conclusion == 'success' && vars.AZURE_WEBAPP_NAME != ''
     runs-on: ubuntu-latest
+    environment:   # shows each deploy under "Deployments → production" on GitHub
+      name: production
+      url: https://${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net
     steps:
       - uses: actions/checkout@v5
         with:
