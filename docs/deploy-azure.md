@@ -14,7 +14,7 @@ az webapp update -g $RG -n $APP --https-only true
 az webapp config appsettings set -g $RG -n $APP --settings \
   "ConnectionStrings__Default=Data Source=/home/data/loopcasts.db" \
   "App__BaseUrl=https://$APP.azurewebsites.net" \
-  "ASPNETCORE_FORWARDEDHEADERS_ENABLED=true" \
+  "ASPNETCORE_FORWARDEDHEADERS_ENABLED=true" "WEBSITE_RUN_FROM_PACKAGE=1" \
   "SeedAdmins__0__Email=<you@…>" "SeedAdmins__0__Password=<strong password>"
 # later: Mollie__ApiKey, Mollie__WebhookBaseUrl=https://$APP.azurewebsites.net, N8n__WebhookUrl, N8n__Secret
 
@@ -31,6 +31,7 @@ Re-run manually: GitHub → Actions → Deploy → Re-run.
 ## Notes
 - **Database:** `/home/data/loopcasts.db` is on persistent storage; migrations run at startup.
   Back up: `az webapp ssh` → copy the file, or Kudu (https://$APP.scm.azurewebsites.net) → File manager.
+- **Run from package:** `WEBSITE_RUN_FROM_PACKAGE=1` mounts the uploaded zip read-only instead of copying files one by one (a stalled copy on F1 left a half-deployed site that crashed on a missing `libe_sqlite3.so`). The app only writes to `/home/data`.
 - **F1 limits:** 60 CPU-minutes/day, no "Always On" → the app sleeps; the 24 h expiry job runs at every start.
 - **Mock payment:** without `Mollie__ApiKey` the public site gives free access via the test checkout.
   Set the Mollie test key before sharing the URL.
