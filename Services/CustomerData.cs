@@ -19,10 +19,15 @@ public static class CustomerData
         var e = email.ToLower();
         var rows = await db.Accounts
             .Where(a => a.Email.ToLower() == e)
-            .Select(a => new { a, PlanCode = a.PlanCode ?? db.Orders.Where(o => o.Id == a.OrderId).Select(o => o.PlanCode).FirstOrDefault() ?? "" })
+            .Select(a => new
+            {
+                a,
+                PlanCode = a.PlanCode ?? db.Orders.Where(o => o.Id == a.OrderId).Select(o => o.PlanCode).FirstOrDefault() ?? "",
+                Course = db.Orders.Where(o => o.Id == a.OrderId).Select(o => o.Course!.Title).FirstOrDefault(),   // single course (#56)
+            })
             .OrderByDescending(x => x.a.StartsOn)
             .ToListAsync();
-        return rows.Select(x => new Subscription(x.a, Plans.Find(x.PlanCode)?.Name ?? x.PlanCode)).ToList();
+        return rows.Select(x => new Subscription(x.a, Plans.Describe(x.PlanCode, x.Course))).ToList();
     }
 
     /// Invoices by the e-mail of the order that was paid (the buyer).

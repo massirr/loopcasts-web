@@ -22,7 +22,8 @@
 
     <section class="card">
         <p class="muted small">Order @o.Id at LoopCasts BV</p>
-        <h1>@(Model.Plan?.Name ?? o.PlanCode)</h1>
+        <h1 class="wrap-any">@o.ProductName</h1>
+        <p class="muted small">@Model.Plan?.Detail</p>
         <p class="pay-total num">@($"€{Model.Total:0.00}")</p>
         <p class="muted small">Incl. VAT (@($"€{o.Price:0.00}") excl. VAT)</p>
         @if (o.VatCheckResult == VatCheck.Valid)

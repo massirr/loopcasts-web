@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 
 namespace LoopCastsWeb.Models;
@@ -35,6 +36,9 @@ public class Order
     [BindNever] public DateTime? VatCheckedAt { get; set; }
     [BindNever] public string? VatCheckName { get; set; }     // company name VIES returned, if the country shares it
     public string PlanCode { get; set; } = "";
+    // Single-course plan only: which course (#56). Checked in Order.cshtml.cs: must be a live course, else null.
+    public int? CourseId { get; set; }
+    [BindNever, ValidateNever] public Course? Course { get; set; }
     [BindNever] public decimal Price { get; set; }
     [BindNever] public DateTime CreatedAt { get; set; }
     [BindNever] public bool IsPaid { get; set; }
@@ -47,6 +51,9 @@ public class Order
     [BindNever] public string? PaymentId { get; set; }
 
     public bool Opens(string? key) => AccessKey.Length > 0 && key == AccessKey;
+
+    /// What the customer bought, as shown everywhere: "Single course: <title>" or the plan name. Needs Course loaded.
+    public string ProductName => Plans.Describe(PlanCode, Course?.Title);
 
 }
 

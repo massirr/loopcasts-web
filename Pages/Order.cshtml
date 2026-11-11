@@ -23,11 +23,30 @@
                 <span asp-validation-for="Order.Name"></span>
             </div>
 
-            <div class="field">
-                <label asp-for="Order.Email">E-mail <span class="field-hint">your login and where the invoice goes</span></label>
-                <input asp-for="Order.Email" type="email" autocomplete="email" />
-                <span asp-validation-for="Order.Email"></span>
-            </div>
+            @if (Model.ChoosesCourse)
+            {
+                <div class="field">
+                    <label asp-for="Order.CourseId">Course</label>
+                    <select asp-for="Order.CourseId" asp-items="Model.CourseOptions">
+                        <option value="">Choose a course…</option>
+                    </select>
+                    <span asp-validation-for="Order.CourseId"></span>
+                </div>
+            }
+
+            @if (Model.AccountEmail is { } email)
+            {
+                @* Logged in: the server uses the login's e-mail, so there is nothing to type *@
+                <p class="small">Ordering as <strong class="wrap-any">@email</strong>. The invoice goes there too.</p>
+            }
+            else
+            {
+                <div class="field">
+                    <label asp-for="Order.Email">E-mail <span class="field-hint">your login and where the invoice goes</span></label>
+                    <input asp-for="Order.Email" type="email" autocomplete="email" />
+                    <span asp-validation-for="Order.Email"></span>
+                </div>
+            }
 
             <div class="field">
                 <label asp-for="Order.Country">Country</label>
@@ -78,6 +97,10 @@
             <h2 class="h-small">@plan.Name</h2>
             <p class="price num">@($"€{plan.Price:0}") <span class="muted small">excl. VAT</span></p>
             <p class="muted small">@plan.Detail</p>
+            @if (Model.ChoosesCourse)
+            {
+                <p class="small wrap-any"><strong id="chosen-course" aria-live="polite">@(Model.CourseOptions.FirstOrDefault(c => c.Selected)?.Text ?? "Choose your course in the form.")</strong></p>
+            }
             <p class="small">VAT depends on your country and whether you order as a company. You see the total before you pay.</p>
             <a class="small" asp-page="/Pricing">Choose another plan</a>
         </aside>
@@ -93,6 +116,14 @@
         const fields = document.getElementById("company-fields");
         if (box && box.type === "checkbox") {
             box.addEventListener("change", () => { fields.hidden = !box.checked; });
+        }
+        // Single course: the summary shows the course picked in the dropdown
+        const pick = document.getElementById("Order_CourseId");
+        const chosen = document.getElementById("chosen-course");
+        if (pick && chosen) {
+            pick.addEventListener("change", () => {
+                chosen.textContent = pick.value ? pick.options[pick.selectedIndex].text : "Choose your course in the form.";
+            });
         }
     </script>
 }

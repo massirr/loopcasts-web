@@ -31,7 +31,7 @@ public class PaymentService
     /// Returns false when the order doesn't exist.
     public async Task<bool> MarkPaidAsync(int orderId)
     {
-        var order = await _db.Orders.FindAsync(orderId);
+        var order = await _db.Orders.Include(o => o.Course).FirstOrDefaultAsync(o => o.Id == orderId);
         if (order is null) return false;
 
         // paid twice (double click, webhook sent twice)? no 2nd invoice, no 2nd e-mail
@@ -73,7 +73,7 @@ public class PaymentService
             OrderId = order.Id,
             Number = await NextInvoiceNumberAsync(today.Year),
             IssuedOn = today,
-            Description = plan?.Name ?? order.PlanCode,
+            Description = order.ProductName,   // "Single course: <title>" or the plan name
             BillingName = order.Name,
             BillingCompany = order.Company,
             BillingVatNumber = order.VatNumber,
