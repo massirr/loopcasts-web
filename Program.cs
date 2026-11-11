@@ -30,11 +30,11 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<TeamSeats>();   // one instance per request, like the DbContext
-// Mollie REST API. The key comes from user-secrets (Mollie:ApiKey); without a key /Pay stays a mock.
-builder.Services.AddHttpClient<MollieService>(client =>
+// Stripe REST API. The key comes from user-secrets (Stripe:SecretKey); without a key /Pay stays a mock.
+builder.Services.AddHttpClient<StripeService>(client =>
 {
-    client.BaseAddress = new Uri("https://api.mollie.com/v2/");
-    if (builder.Configuration["Mollie:ApiKey"] is { Length: > 0 } key)
+    client.BaseAddress = new Uri("https://api.stripe.com/v1/");
+    if (builder.Configuration["Stripe:SecretKey"] is { Length: > 0 } key)
         client.DefaultRequestHeaders.Authorization = new("Bearer", key);
 });
 // EU VIES register for VAT numbers (#33). Vies:BaseUrl = test service in Development, the real one in Production.
@@ -84,13 +84,15 @@ app.UseAuthentication();   // who are you? (reads the login cookie)
 app.UseAuthorization();    // are you allowed? (checks the AdminOnly policy)
 
 app.MapStaticAssets();
-// Mollie calls this when a payment changes. The body only holds "id=tr_..."; MollieService asks Mollie for the
-// real status, so a fake call can't mark anything paid. Not a Razor Page: Mollie can't send an antiforgery token.
-app.MapPost("/webhooks/mollie", async (HttpRequest request, MollieService mollie) =>
+// Stripe calls this when a checkout session changes (endpoint set once in the Stripe dashboard). We only take the
+// session id from the event; StripeService asks Stripe for the real status, so a fake call can't mark anything paid.
+// Not a Razor Page: Stripe can't send an antiforgery token.
+app.MapPost("/webhooks/stripe", async (HttpRequest request, StripeService stripe) =>
 {
-    if (!request.HasFormContentType) return Results.BadRequest();
-    var form = await request.ReadFormAsync();
-    await mollie.SyncAsync(form["id"].ToString());
+    // Stripe events are a few KB; refuse big bodies instead of reading them (a fake call could send MBs)
+    if (request.ContentLength > 64 * 1024) return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
+    using var reader = new StreamReader(request.Body);
+    await stripe.SyncAsync(StripeService.SessionIdFromEvent(await reader.ReadToEndAsync()));
     return Results.Ok();
 });
 

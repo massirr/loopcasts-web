@@ -32,7 +32,7 @@ public class OrdersModel : PageModel
     // POST /Admin/Orders?handler=MarkPaid&id=3 → fallback for customers who pay by bank transfer
     public async Task<IActionResult> OnPostMarkPaidAsync(int id)
     {
-        // Your 4 lines now live in Services/PaymentService.cs, shared with /Pay (and later the Mollie webhook)
+        // Your 4 lines now live in Services/PaymentService.cs, shared with /Pay (and the Stripe webhook)
         if (!await _payments.MarkPaidAsync(id)) return NotFound();
         return RedirectToPage();   // back to the list (Post-Redirect-Get)
     }
