@@ -16,7 +16,7 @@ az webapp config appsettings set -g $RG -n $APP --settings \
   "App__BaseUrl=https://$APP.azurewebsites.net" \
   "ASPNETCORE_FORWARDEDHEADERS_ENABLED=true" "WEBSITE_RUN_FROM_PACKAGE=1" \
   "SeedAdmins__0__Email=<you@…>" "SeedAdmins__0__Password=<strong password>"
-# later: Mollie__ApiKey, Mollie__WebhookBaseUrl=https://$APP.azurewebsites.net, N8n__WebhookUrl, N8n__Secret
+# later: Stripe__SecretKey (+ webhook https://$APP.azurewebsites.net/webhooks/stripe in the Stripe dashboard), N8n__WebhookUrl, N8n__Secret
 
 # GitHub Actions deploy (publish profile needs basic-auth publishing enabled)
 az resource update -g $RG --namespace Microsoft.Web --resource-type basicPublishingCredentialsPolicies \
@@ -37,12 +37,12 @@ Re-run manually: GitHub → Actions → Deploy → Re-run.
   A crash loop burns the quota fast: on a startup crash run `az webapp stop` first, fix, then start.
 - **Portal Deployment Center** shows "not configured": expected, we deploy with our own `deploy.yml` and a publish
   profile. Don't click *Authorize*/*Save* there; it would add a second workflow to the repo.
-- **Mock payment:** without `Mollie__ApiKey` the public site gives free access via the test checkout.
-  Set the Mollie test key before sharing the URL.
+- **Mock payment:** without `Stripe__SecretKey` the public site gives free access via the test checkout.
+  Set the Stripe test key before sharing the URL.
 - **Roll back:** re-run the Deploy workflow of an older green commit, or `git revert` + push.
 - **Remove everything:** `az group delete -n $RG`.
 
 ## Also before going live
-- App Service settings `Smtp:Host`/`Smtp:Port`/`Smtp:From` for the login e-mails; `LoginEmailSender` needs SMTP login + TLS first.
+- E-mail and n8n stay local by choice: see `docs/architecture.md` (Known limits).
 - `Vies:BaseUrl` is already the real VIES endpoint in `appsettings.json` (Development overrides it with the test service).
-- n8n on a server: docs/n8n.md §6 (`LOOPCASTS_PUBLIC_URL` = the public site, Chat Trigger *Allowed origins*).
+- If n8n ever moves to a server: docs/n8n.md §6 (`LOOPCASTS_PUBLIC_URL` = the public site, Chat Trigger *Allowed origins*).

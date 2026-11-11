@@ -25,7 +25,7 @@ and does the bookkeeping (e.g. `reminded`).
 | Automation | Runs in | Why (rule #) |
 |---|---|---|
 | Order → paid → invoice (number, VAT) → account, in one save (`PaymentService`) | code | 1, 2 |
-| Mollie payment + webhook + status check (`MollieService`) | code | 1 (Mollie is outside, but the money rule wins) |
+| Stripe payment + webhook + status check (`StripeService`, was Mollie, ADR 0003) | code | 1 (Stripe is outside, but the money rule wins) |
 | VAT rules (`VatCalculator`) | code | 1 |
 | VAT number check: format + EU VIES register (`VatNumber`, `ViesClient`, ADR 0002) | code | 1, 4 |
 | Customer login without password + setup code (`MemberService`) | code | 2, 3 |

@@ -11,7 +11,7 @@ namespace LoopCastsWeb.Services;
 ///   3. create the account (with an end date)
 /// All three are saved with ONE SaveChangesAsync → one database transaction:
 /// either everything is saved, or nothing (no "paid but no invoice" half-states).
-/// Called by: the mock checkout (/Pay), the admin fallback button, and later the Mollie webhook.
+/// Called by: the mock checkout (/Pay), the admin fallback button, and the Stripe webhook.
 /// </summary>
 public class PaymentService
 {

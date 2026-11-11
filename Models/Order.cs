@@ -43,8 +43,8 @@ public class Order
     // Secret part of the /Pay and /OrderThanks URLs: ids are 1, 2, 3..., so without it anyone could open other orders
     [BindNever] public string AccessKey { get; set; } = "";
 
-    // Mollie's id for the payment of this order ("tr_..."), set when the customer goes to Mollie's checkout
-    [BindNever] public string? MolliePaymentId { get; set; }
+    // The payment provider's id for this order (Stripe Checkout session "cs_..."), set when the customer goes to checkout
+    [BindNever] public string? PaymentId { get; set; }
 
     public bool Opens(string? key) => AccessKey.Length > 0 && key == AccessKey;
 

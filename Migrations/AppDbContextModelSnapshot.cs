@@ -197,15 +197,15 @@ namespace LoopCastsWeb.Migrations
                     b.Property<bool>("IsPaid")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MolliePaymentId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PaymentId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PlanCode")

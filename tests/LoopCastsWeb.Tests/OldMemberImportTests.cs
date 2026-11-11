@@ -112,7 +112,7 @@ public class OldMemberImportTests
     [Fact]
     public async Task Apply_AccountsAndLoginsWithoutPassword_SkipsExisting_NoEmails()
     {
-        var n8n = new FakeMollie(HttpStatusCode.OK, "{}");
+        var n8n = new FakeApi(HttpStatusCode.OK, "{}");
         var sp = TestDb.Services(n8n: n8n, config: new() { ["N8n:WebhookUrl"] = "https://n8n.test/x" });
         var db = sp.GetRequiredService<AppDbContext>();
         db.Accounts.Add(new Account { OrderId = 99, Email = "ann@example.com", StartsOn = Today });   // e.g. from an imported order

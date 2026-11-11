@@ -14,9 +14,9 @@ public static class TestDb
     public static AppDbContext Create() => Services().GetRequiredService<AppDbContext>();
 
     /// The app's services (Identity, PaymentService, ...) on an in-memory database, like Program.cs registers them.
-    /// mollie / n8n: fake HTTP endpoints (null = not configured, like a dev machine without user-secrets).
+    /// stripe / n8n: fake HTTP endpoints (null = not configured, like a dev machine without user-secrets).
     /// config: extra settings, e.g. { ["N8n:WebhookUrl"] = "https://n8n.test/webhook/x" }.
-    public static ServiceProvider Services(HttpMessageHandler? mollie = null, HttpMessageHandler? n8n = null,
+    public static ServiceProvider Services(HttpMessageHandler? stripe = null, HttpMessageHandler? n8n = null,
         Dictionary<string, string?>? config = null)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
@@ -36,12 +36,12 @@ public static class TestDb
         services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(config ?? []).Build());
         var n8nClient = services.AddHttpClient<N8nNotifier>();
         if (n8n is not null) n8nClient.ConfigurePrimaryHttpMessageHandler(() => n8n);
-        var client = services.AddHttpClient<MollieService>(c =>
+        var client = services.AddHttpClient<StripeService>(c =>
         {
-            c.BaseAddress = new Uri("https://api.mollie.com/v2/");
-            if (mollie is not null) c.DefaultRequestHeaders.Authorization = new("Bearer", "test_fake");
+            c.BaseAddress = new Uri("https://api.stripe.com/v1/");
+            if (stripe is not null) c.DefaultRequestHeaders.Authorization = new("Bearer", "sk_test_fake");
         });
-        if (mollie is not null) client.ConfigurePrimaryHttpMessageHandler(() => mollie);
+        if (stripe is not null) client.ConfigurePrimaryHttpMessageHandler(() => stripe);
 
         var provider = services.BuildServiceProvider();
         provider.GetRequiredService<AppDbContext>().Database.EnsureCreated();

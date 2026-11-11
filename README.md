@@ -8,7 +8,7 @@ Implemented:
 
 - A catalogue of 60 video courses and four subscription plans.
 - Individual and company orders, VAT calculation, and EU VAT-number checks through VIES.
-- A mock checkout for local development, with an optional Mollie payment integration.
+- A mock checkout for local development, with an optional Stripe payment integration (test mode).
 - Customer accounts, course access, printable invoices, and five-seat team licences.
 - Admin pages for orders, invoices, accounts, and importing legacy data.
 - Password setup and recovery e-mails, two-factor login, and renewal reminders.
@@ -16,7 +16,7 @@ Implemented:
 
 Planned or not configured for production:
 
-- Production SMTP settings and the Mollie test key on the hosted site.
+- The Stripe test key on the hosted site. E-mails stay local by choice (see `docs/architecture.md`, Known limits).
 - Monthly recurring billing, credit notes, and a QR-code flow for authenticator setup.
 - More complete account-data export and anonymization workflows.
 
@@ -50,11 +50,11 @@ Without `SeedAdmins` settings, the public course and ordering pages can still ru
 
 ## Configuration and secrets
 
-Do not commit passwords, API keys, database files, or `.env` files. Use .NET user-secrets for local development and environment variables or App Service settings on a server. ASP.NET configuration uses double underscores in environment-variable names, for example `Mollie__ApiKey` and `N8n__Secret`.
+Do not commit passwords, API keys, database files, or `.env` files. Use .NET user-secrets for local development and environment variables or App Service settings on a server. ASP.NET configuration uses double underscores in environment-variable names, for example `Stripe__SecretKey` and `N8n__Secret`.
 
 Optional settings include:
 
-- `Mollie:ApiKey` and `Mollie:WebhookBaseUrl` for Mollie payments. Without the API key, checkout uses the mock flow.
+- `Stripe:SecretKey` for Stripe payments. Without the key, checkout uses the mock flow.
 - `N8n:WebhookUrl` and `N8n:Secret` for invoice e-mails and renewal workflows.
 - `Chat:Url` for the n8n course assistant.
 - `Smtp:Host`, `Smtp:Port`, and `Smtp:From` for Identity e-mails.

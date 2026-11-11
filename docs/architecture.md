@@ -11,7 +11,7 @@ Read this when you need to find code or understand a rule. Not loaded by default
 | `docs/analysis/` | Analysis evidence, e.g. course catalogue vs Vimeo vs old website (`course-catalogue-crosscheck.mjs`, read-only) |
 | `Data/AdminSeeder.cs` | Creates Admin role + admin users from config `SeedAdmins:N:Email/Password` (**user-secrets**) |
 | `Services/PaymentService.cs` | `MarkPaidAsync`: paid → invoice (number + VAT, snapshot) → account, in ONE SaveChanges |
-| `Services/MollieService.cs` | Mollie REST (typed HttpClient): create payment, `SyncAsync` re-fetches status → `MarkPaidAsync`. Webhook `POST /webhooks/mollie` in Program.cs |
+| `Services/StripeService.cs` | Stripe Checkout REST (typed HttpClient, no package): create session, `SyncAsync` re-fetches status → `MarkPaidAsync`. Webhook `POST /webhooks/stripe` in Program.cs. Replaced Mollie (ADR 0003) |
 | `Services/N8nNotifier.cs` | Event `invoice.created` to the n8n webhook (invoice e-mail). Never throws. See `docs/n8n.md` |
 | `Services/LoginEmailSender.cs` | Identity's `IEmailSender` (Forgot password, Change e-mail): straight over SMTP (`Smtp:Host/Port/From`, `System.Net.Mail`), NOT via n8n (#27). Our wording lives here. Never throws; SMTP down → log + TempData `LoginEmailNotSent` (shown by `_Flash`, only when logged in) |
 | `Services/RenewalReminders.cs`, `Api/AutomationApi.cs` | Renewal reminders for n8n: `GET /api/automation/expiring?days=14`, `POST /api/automation/reminded` (header `X-LoopCasts-Secret` = `N8n:Secret`) |
@@ -40,24 +40,26 @@ Read this when you need to find code or understand a rule. Not loaded by default
 
 ## Flow
 Pricing → `/Order?plan=…` (validation, VAT number check, company fields only for companies, team licence = company only)
-→ `/Pay?id=&key=` (mock payment, or Mollie when configured) → `PaymentService.MarkPaidAsync` → `/OrderThanks?id=&key=`
+→ `/Pay?id=&key=` (mock payment, or Stripe when configured) → `PaymentService.MarkPaidAsync` → `/OrderThanks?id=&key=`
 (invoice nr, access end date, "Set your password" link on the e-mail's first paid order).
 `key` = `Order.AccessKey` (random): order ids are guessable, so Pay/OrderThanks always check `Order.Opens(key)`.
 
 ## Design rules
 - **Snapshots**: `Order.Price`, `Order.CreatedAt`, all `Invoice.Billing*`/amount/VAT-check fields are copies at that
   moment and never change. Live data (`Plans`, later `Customer`) may change.
-- **One place for "order paid"**: always `PaymentService.MarkPaidAsync` (mock checkout, admin button, Mollie). Idempotent.
+- **One place for "order paid"**: always `PaymentService.MarkPaidAsync` (mock checkout, admin button, Stripe). Idempotent.
 - **No proof, no 0% VAT**: `VatCalculator` gives reverse charge only with `VatCheck.Valid` (ADR 0002).
 - Money is `decimal` (TEXT in SQLite). Dates without time are `DateOnly`. Times are UTC.
 - `Program.cs` applies migrations at startup. Post-Redirect-Get after every POST.
 - Where an automation runs (code or n8n): ADR 0001.
 
 ## Known limits (by area)
-- **Login e-mails** (#27): `LoginEmailSender` has no SMTP login/TLS yet (needed on a real server, #8).
+- **E-mail only locally** (decision 11/11/2026): the live site sends no e-mails (no SMTP, n8n runs on Koze's laptop).
+  No real users, so Mailpit + n8n locally are enough to show them. Invoices stay visible on /My; only "Forgot
+  password" has no way back live. Real users later → SMTP login/TLS in `LoginEmailSender` (#27), or Google login.
   Set-password link: on OrderThanks for the first paid order only, and e-mailed via n8n when `N8n:WebhookUrl` is set.
-- **Mollie** (#3): active only with user-secret `Mollie:ApiKey` (test_…), else /Pay is the mock.
-  Without `Mollie:WebhookBaseUrl` (public URL) the status is checked when the customer returns.
+- **Stripe** (#53): active only with user-secret `Stripe:SecretKey` (sk_test_…), else /Pay is the mock.
+  Webhook endpoint is set in the Stripe dashboard; without it the status is checked when the customer returns.
 - **VAT check** (#33): "not verified" orders are not re-checked automatically; no credit notes yet.
 - **Team seats** (#4): colleague setup link shown to the buyer once, only for a NEW login (else takeover risk).
   Imported old team rows (#20) are single seats without a buyer: not manageable on /My.

@@ -16,7 +16,7 @@ public class N8nNotifierTests
         ["App:BaseUrl"] = "https://shop.test/",
     };
 
-    private static async Task<(IServiceProvider Sp, int OrderId)> PaidOrder(FakeMollie n8n, Dictionary<string, string?>? config = null)
+    private static async Task<(IServiceProvider Sp, int OrderId)> PaidOrder(FakeApi n8n, Dictionary<string, string?>? config = null)
     {
         var sp = TestDb.Services(n8n: n8n, config: config ?? Config);
         var db = sp.GetRequiredService<AppDbContext>();
@@ -30,7 +30,7 @@ public class N8nNotifierTests
     [Fact]
     public async Task Paid_SendsInvoiceEventOnce_WithLinksAndSecret()
     {
-        var n8n = new FakeMollie(HttpStatusCode.OK, "{}");
+        var n8n = new FakeApi(HttpStatusCode.OK, "{}");
         var (sp, id) = await PaidOrder(n8n);
         await sp.GetRequiredService<PaymentService>().MarkPaidAsync(id);   // webhook retry: no 2nd e-mail
 
@@ -45,7 +45,7 @@ public class N8nNotifierTests
     [Fact]
     public async Task ReturningCustomerWithPassword_NoSetupLink()
     {
-        var n8n = new FakeMollie(HttpStatusCode.OK, "{}");
+        var n8n = new FakeApi(HttpStatusCode.OK, "{}");
         var (sp, _) = await PaidOrder(n8n);
         var users = sp.GetRequiredService<UserManager<IdentityUser>>();
         await users.AddPasswordAsync((await users.FindByEmailAsync("ann@example.com"))!, "Test-pass1!");
@@ -63,7 +63,7 @@ public class N8nNotifierTests
     [Fact]
     public async Task N8nDown_PaymentStillSucceeds()
     {
-        var (sp, id) = await PaidOrder(new FakeMollie(HttpStatusCode.InternalServerError, "boom"));
+        var (sp, id) = await PaidOrder(new FakeApi(HttpStatusCode.InternalServerError, "boom"));
 
         Assert.True((await sp.GetRequiredService<AppDbContext>().Orders.FindAsync(id))!.IsPaid);
         Assert.Single(sp.GetRequiredService<AppDbContext>().Invoices);
@@ -72,7 +72,7 @@ public class N8nNotifierTests
     [Fact]
     public async Task NotConfigured_SendsNothing()
     {
-        var n8n = new FakeMollie(HttpStatusCode.OK, "{}");
+        var n8n = new FakeApi(HttpStatusCode.OK, "{}");
         await PaidOrder(n8n, config: []);
 
         Assert.Empty(n8n.Requests);

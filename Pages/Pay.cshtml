@@ -7,9 +7,13 @@
 
 <div class="narrow">
     <partial name="_Progress" model="2" />
-    @if (!Model.UsesMollie)
+    @if (!Model.UsesStripe)
     {
         <p class="flash flash-info"><span><strong>Test payment.</strong> No real money moves: the button marks your order as paid.</span></p>
+    }
+    @if (Model.NotCompleted)
+    {
+        <p class="flash flash-info"><span><strong>Payment not completed.</strong> Nothing was charged. You can try again.</span></p>
     }
     @if (Model.Error is not null)
     {
@@ -34,7 +38,7 @@
 
         <form method="post" asp-route-id="@o.Id" asp-route-key="@o.AccessKey">
             <button type="submit" class="btn-sign btn-wide" data-busy-text="Paying…">
-                Pay @($"€{Model.Total:0.00}") @(Model.UsesMollie ? "with Mollie" : "(test)")
+                Pay @($"€{Model.Total:0.00}") @(Model.UsesStripe ? "with Stripe" : "(test)")
             </button>
         </form>
     </section>

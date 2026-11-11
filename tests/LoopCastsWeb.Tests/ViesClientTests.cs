@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LoopCastsWeb.Tests;
 
-/// VIES never really called: FakeMollie answers like VIES did when we tried the official test service.
+/// VIES never really called: FakeApi answers like VIES did when we tried the official test service.
 public class ViesClientTests
 {
     private const string TestService = "https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-test-service";
@@ -16,7 +16,7 @@ public class ViesClientTests
     [Fact]
     public async Task Check_Valid_ReturnsNameAndSendsCountrySeparately()
     {
-        var fake = new FakeMollie(HttpStatusCode.OK, """{"countryCode":"NL","vatNumber":"100","valid":true,"name":"John Doe","address":"123 Main St"}""");
+        var fake = new FakeApi(HttpStatusCode.OK, """{"countryCode":"NL","vatNumber":"100","valid":true,"name":"John Doe","address":"123 Main St"}""");
 
         var answer = await Client(fake).CheckAsync("NL100");
 
@@ -29,7 +29,7 @@ public class ViesClientTests
     [Fact]
     public async Task Check_ValidWithoutSharedName_NameIsNull()
     {
-        var fake = new FakeMollie(HttpStatusCode.OK, """{"valid":true,"name":"---"}""");
+        var fake = new FakeApi(HttpStatusCode.OK, """{"valid":true,"name":"---"}""");
         Assert.Equal(new ViesClient.Answer(VatCheck.Valid), await Client(fake).CheckAsync("DE123456789"));
     }
 
@@ -38,7 +38,7 @@ public class ViesClientTests
     [InlineData("""{"actionSucceed":false,"errorWrappers":[{"error":"INVALID_INPUT"}]}""")]
     public async Task Check_Invalid(string json)
     {
-        Assert.Equal(VatCheck.Invalid, (await Client(new FakeMollie(HttpStatusCode.OK, json)).CheckAsync("NL200")).Result);
+        Assert.Equal(VatCheck.Invalid, (await Client(new FakeApi(HttpStatusCode.OK, json)).CheckAsync("NL200")).Result);
     }
 
     // VIES down: it says so with HTTP 200 (300 = SERVICE_UNAVAILABLE, 301 = MS_UNAVAILABLE on the test service),
@@ -50,7 +50,7 @@ public class ViesClientTests
     [InlineData(HttpStatusCode.OK, "<html>maintenance</html>")]
     public async Task Check_Down_NotVerified(HttpStatusCode status, string json)
     {
-        Assert.Equal(VatCheck.NotVerified, (await Client(new FakeMollie(status, json)).CheckAsync("NL301")).Result);
+        Assert.Equal(VatCheck.NotVerified, (await Client(new FakeApi(status, json)).CheckAsync("NL301")).Result);
     }
 
     [Fact]
