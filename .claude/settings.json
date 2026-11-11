@@ -28,5 +28,10 @@
       "Edit(../LoopCasts/**)",
       "Write(../LoopCasts/**)"
     ]
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
   }
 }
