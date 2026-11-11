@@ -2,10 +2,12 @@ using System.Security.Cryptography;
 using LoopCastsWeb.Data;
 using LoopCastsWeb.Models;
 using LoopCastsWeb.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoopCastsWeb.Pages;
 
@@ -13,30 +15,49 @@ public class OrderModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly ViesClient _vies;
+    private readonly UserManager<IdentityUser> _users;
 
-    public OrderModel(AppDbContext db, ViesClient vies)
+    public OrderModel(AppDbContext db, ViesClient vies, UserManager<IdentityUser> users)
     {
         _db = db;
         _vies = vies;
+        _users = users;
     }
 
     [BindProperty]                        // form fields → this object, on POST
     public Order Order { get; set; } = new();
 
     public Plan? SelectedPlan { get; set; }
+    public bool ChoosesCourse => SelectedPlan?.Code == "single";
+    public List<SelectListItem> CourseOptions { get; set; } = [];
+    public string? AccountEmail { get; set; }    // logged in: the order goes to this login, no e-mail field (#56)
 
     // Dropdown items for the country field (a fixed list instead of free text)
     public IEnumerable<SelectListItem> CountryOptions =>
         Countries.All.Select(c => new SelectListItem(c.Name, c.Code));
 
-    public IActionResult OnGet(string? plan)     // ?plan=monthly arrives here
+    public async Task<IActionResult> OnGetAsync(string? plan, int? course)   // ?plan=single&course=12 arrives here
     {
         SelectedPlan = Plans.Find(plan);
         if (SelectedPlan is null) return RedirectToPage("/Pricing");
 
         Order.PlanCode = SelectedPlan.Code;
         Order.IsCompany = SelectedPlan.CompanyOnly;      // team licence: company fields shown from the start
+        if (ChoosesCourse) Order.CourseId = course;      // from the course card; checked again on POST
+        await LoadChoicesAsync();
+        if (AccountEmail is not null)                    // returning customer: name from their last PAID order (an unpaid one could be typed by anyone)
+            Order.Name = await _db.Orders.Where(o => o.Email == AccountEmail && o.IsPaid).OrderByDescending(o => o.Id)
+                .Select(o => o.Name).FirstOrDefaultAsync() ?? "";
         return Page();
+    }
+
+    // Course list + the login's e-mail: needed on GET and again when the form comes back with errors
+    private async Task LoadChoicesAsync()
+    {
+        AccountEmail = User.Identity?.IsAuthenticated == true ? (await _users.GetUserAsync(User))?.Email : null;
+        if (!ChoosesCourse) return;
+        CourseOptions = await _db.Courses.Where(c => c.Status == "live").OrderBy(c => c.Title)
+            .Select(c => new SelectListItem(c.Title, c.Id.ToString(), c.Id == Order.CourseId)).ToListAsync();
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -46,6 +67,20 @@ public class OrderModel : PageModel
 
         if (Countries.Find(Order.Country) is null)               // never trust the browser: only codes from our list
             ModelState.AddModelError("Order.Country", "Choose your country from the list.");
+
+        // Single course: must be a course you can watch today; other plans never carry a course
+        if (!ChoosesCourse)
+            Order.CourseId = null;
+        else if (Order.CourseId is null || !await _db.Courses.AnyAsync(c => c.Id == Order.CourseId && c.Status == "live"))
+            ModelState.AddModelError("Order.CourseId", "Choose the course you want.");
+
+        // Logged in: the order belongs to this login, whatever the browser sent
+        await LoadChoicesAsync();
+        if (AccountEmail is not null)
+        {
+            Order.Email = AccountEmail;
+            ModelState.Remove("Order.Email");
+        }
 
         // " Ann " and "Ann" are the same customer: trim before saving ([Required] already refuses only-spaces)
         Order.Name = Order.Name?.Trim() ?? "";        // empty field → null from the model binder

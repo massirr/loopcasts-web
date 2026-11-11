@@ -183,6 +183,9 @@ namespace LoopCastsWeb.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -229,6 +232,8 @@ namespace LoopCastsWeb.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Orders");
                 });
@@ -427,6 +432,15 @@ namespace LoopCastsWeb.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("LoopCastsWeb.Models.Order", b =>
+                {
+                    b.HasOne("LoopCastsWeb.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId");
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

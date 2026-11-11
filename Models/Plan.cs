@@ -21,4 +21,8 @@ public static class Plans
     ];
 
     public static Plan? Find(string? code) => All.FirstOrDefault(p => p.Code == code);
+
+    /// What the customer bought, as shown everywhere (#56): "Single course: <title>" or the plan name.
+    public static string Describe(string planCode, string? courseTitle) =>
+        (Find(planCode)?.Name ?? planCode) + (courseTitle is null ? "" : $": {courseTitle}");
 }

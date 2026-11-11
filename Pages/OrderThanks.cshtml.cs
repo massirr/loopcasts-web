@@ -30,18 +30,23 @@ public class OrderThanksModel : PageModel
     public Account? Account { get; set; }
     public string? PasswordSetupUrl { get; set; }   // first order: "choose your password"
     public bool HasLogin { get; set; }              // returning customer: "log in"
+    public bool SignedInAsBuyer { get; set; }       // already logged in with the order's e-mail: straight to /My (#56)
 
     // The invoice e-mail only goes out when the n8n webhook is configured (#5): don't claim it otherwise
     public bool EmailSent => Invoice is not null && !string.IsNullOrEmpty(_config["N8n:WebhookUrl"]);
 
     public async Task<IActionResult> OnGetAsync(int id, string? key)
     {
-        Order = await _db.Orders.FindAsync(id);   // SELECT ... WHERE Id = @id
+        Order = await _db.Orders.Include(o => o.Course).FirstOrDefaultAsync(o => o.Id == id);   // + JOIN Courses
         if (Order is null || !Order.Opens(key)) return NotFound();
 
         Plan = Plans.Find(Order.PlanCode);
         Invoice = await _db.Invoices.FirstOrDefaultAsync(i => i.OrderId == id);
         Account = await _db.Accounts.FirstOrDefaultAsync(a => a.OrderId == id);
+
+        var signedIn = User.Identity?.IsAuthenticated == true ? await _users.GetUserAsync(User) : null;
+        SignedInAsBuyer = Order.IsPaid && string.Equals(signedIn?.Email, Order.Email, StringComparison.OrdinalIgnoreCase);
+        if (SignedInAsBuyer) return Page();   // no "log in" or "set your password" for someone who is logged in
 
         var user = Order.IsPaid ? await _users.FindByEmailAsync(Order.Email) : null;
         if (user is null) return Page();

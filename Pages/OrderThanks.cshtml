@@ -17,7 +17,7 @@
     <ol class="steps" data-sequence aria-label="What happened">
         <li class="step @(o.IsPaid ? "on" : "off")">
             <b>Paid</b>
-            <span>@(o.IsPaid ? $"€{(Model.Invoice?.Total ?? o.Price):0.00}, {Model.Plan?.Name ?? o.PlanCode}" : "waiting")</span>
+            <span>@(o.IsPaid ? $"€{(Model.Invoice?.Total ?? o.Price):0.00}, {o.ProductName}" : "waiting")</span>
         </li>
         <li class="step @(Model.Invoice is null ? "off" : "on")">
             <b>Invoice</b>
@@ -37,7 +37,7 @@
         <section class="card" aria-labelledby="order-title">
             <h2 id="order-title" class="h-small">Order @o.Id</h2>
             <dl class="facts">
-                <dt>Product</dt><dd>@(Model.Plan?.Name ?? o.PlanCode)</dd>
+                <dt>Product</dt><dd class="wrap-any">@o.ProductName</dd>
                 <dt>Price</dt><dd>@($"€{o.Price:0.00}") excl. VAT</dd>
                 @if (!string.IsNullOrWhiteSpace(o.Company))
                 {
@@ -57,7 +57,15 @@
             </dl>
         </section>
 
-        @if (Model.PasswordSetupUrl is not null)
+        @if (Model.SignedInAsBuyer)
+        {
+            <section class="card">
+                <h2 class="h-small">Start watching</h2>
+                <p>Your new access is on My courses.</p>
+                <div><a class="btn-sign" asp-page="/My">Go to My courses</a></div>
+            </section>
+        }
+        else if (Model.PasswordSetupUrl is not null)
         {
             <section class="card" aria-labelledby="login-title">
                 <h2 id="login-title" class="h-small">Your login is ready</h2>

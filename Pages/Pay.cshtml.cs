@@ -3,6 +3,7 @@ using LoopCastsWeb.Models;
 using LoopCastsWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoopCastsWeb.Pages;
 
@@ -30,7 +31,7 @@ public class PayModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(int id, string? key)
     {
-        Order = await _db.Orders.FindAsync(id);
+        Order = await _db.Orders.Include(o => o.Course).FirstOrDefaultAsync(o => o.Id == id);
         if (Order is null || !Order.Opens(key)) return NotFound();
 
         // Back from Stripe? Ask Stripe for the status (works without a webhook, e.g. on localhost)
@@ -50,7 +51,7 @@ public class PayModel : PageModel
 
     public async Task<IActionResult> OnPostAsync(int id, string? key)
     {
-        var order = await _db.Orders.FindAsync(id);
+        var order = await _db.Orders.Include(o => o.Course).FirstOrDefaultAsync(o => o.Id == id);
         if (order is null || !order.Opens(key)) return NotFound();
         if (order.IsPaid) return RedirectToPage("/OrderThanks", new { id, key });
 

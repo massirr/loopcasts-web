@@ -1,4 +1,5 @@
 @model Course
+@{ var single = Plans.Find("single"); }
 @* Same order on every card: thumbnail → title → meta → who recorded it (only once there are several instructors) *@
 <article class="course">
     <partial name="_WorkflowThumb" model="Model" />
@@ -14,5 +15,16 @@
             <partial name="_PersonChip" model="Model.Instructor" view-data="@(new ViewDataDictionary(ViewData) { ["Small"] = true })" />
             <span>Recorded by @Model.Instructor.Split(' ')[0]</span>
         </p>
+    }
+    @if (single is not null)
+    {
+        @* Outline, not yellow: many cards per screen, and the yellow button is the one main action (loopcasts-ui §1) *@
+        <a class="btn-outline btn-small course-buy" asp-page="/Order" asp-route-plan="single" asp-route-course="@Model.Id">
+            <span>Buy<span class="visually-hidden"> @Model.Title</span> for @($"€{single.Price:0}")</span>
+        </a>
+    }
+    else
+    {
+        <a class="btn-outline btn-small course-buy" asp-page="/Pricing">See plans</a>
     }
 </article>

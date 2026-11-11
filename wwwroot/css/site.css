@@ -173,6 +173,7 @@ input[readonly] { background: var(--thumb); }
 .course { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; transition: border-color var(--fast) var(--ease); }
 .course:hover, .course:focus-within { border-color: var(--ink); }
 .course h3 { font-size: 1.05rem; line-height: 1.2; overflow-wrap: anywhere; }
+.course-buy { justify-self: start; }
 .meta { display: flex; gap: 4px 12px; flex-wrap: wrap; font-size: .875rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .by { display: flex; align-items: center; gap: 8px; font-size: .875rem; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 10px; }
 
