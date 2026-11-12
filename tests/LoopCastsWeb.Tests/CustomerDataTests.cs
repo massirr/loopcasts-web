@@ -70,6 +70,16 @@ public class CustomerDataTests
         Assert.Equal(name, await CustomerData.NameAsync(db, email));
     }
 
+    [Fact]   // #57: a newer unpaid order (anyone can type your e-mail on /Order) never renames your account button
+    public async Task Name_IgnoresUnpaidOrders()
+    {
+        var db = await Seed();
+        db.Orders.Add(new Order { Name = "TTT", Email = "ann@example.com", Country = "BE", PlanCode = "yearly" });
+        await db.SaveChangesAsync();
+
+        Assert.Equal("Ann@Example.com", await CustomerData.NameAsync(db, "ann@example.com"));
+    }
+
     [Fact]
     public async Task MoveToEmail_OrdersSeatsAndInvoicesFollow()
     {

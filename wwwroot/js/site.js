@@ -41,6 +41,7 @@ document.addEventListener("submit", e => {
   button.classList.add("is-busy");
   button.setAttribute("aria-disabled", "true");
   if (button.dataset.busyText) button.textContent = button.dataset.busyText;
+  document.getElementById("busy-status").textContent = button.dataset.busyText || "One moment…";
 });
 // Back button brings the page back from the browser cache: make the buttons usable again
 addEventListener("pageshow", e => {
@@ -51,6 +52,7 @@ addEventListener("pageshow", e => {
     b.removeAttribute("aria-disabled");
     if (b.dataset.label) b.textContent = b.dataset.label;
   });
+  document.getElementById("busy-status").textContent = "";
 });
 document.querySelectorAll("[data-busy-text]").forEach(b => b.dataset.label = b.textContent);
 

@@ -26,10 +26,15 @@
             },
         });
         // "Answers by an AI assistant" under the input. The footer only exists while the chat window is open.
+        // While the orb turns (n8n's typing message, restyled in site.css) screen readers hear "Thinking…" (#57).
+        const status = document.getElementById("busy-status");
         new MutationObserver(() => {
             const footer = document.querySelector("#n8n-chat .chat-footer");
             if (footer && !footer.querySelector(".chat-ai-note"))
                 footer.insertAdjacentHTML("beforeend", '<p class="chat-ai-note">Answers by an AI assistant</p>');
-        }).observe(document.body, { childList: true, subtree: true });
+            const text = document.querySelector("#n8n-chat .chat-message-typing") ? "Thinking…" : "";
+            // only clear what the chat itself said: a button's "Paying…" in the same region stays
+            if (status.textContent !== text && (text || status.textContent === "Thinking…")) status.textContent = text;
+        }).observe(document.getElementById("n8n-chat") ?? document.body, { childList: true, subtree: true });
     </script>
 }

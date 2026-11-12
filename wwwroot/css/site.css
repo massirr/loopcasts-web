@@ -110,7 +110,12 @@ input[readonly] { background: var(--thumb); }
 }
 /* busy (the form was sent): stays readable, shows a ring, can't be pressed twice (site.js) */
 :is(.btn-sign, .btn-ink, .btn-outline, .btn-quiet, .btn-danger, .menu-item).is-busy { opacity: .85; cursor: progress; }
-.is-busy::before { content: ""; width: 14px; height: 14px; flex: none; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; }
+/* loader (#57): a dotted orb in the style of thinking-orbs (MIT, github.com/RareFormLabs/thinking-orbs), drawn as a
+   CSS mask so it takes the text colour. ponytail: the real package is a Vue canvas component; use it only if we ever build with npm. */
+.is-busy::before, #n8n-chat .chat-message-typing-body::before {
+  content: ""; width: 16px; height: 16px; flex: none; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='2.8' r='2.1'/%3E%3Ccircle cx='14.23' cy='4.18' r='1.96' fill-opacity='.92'/%3E%3Ccircle cx='16.85' cy='7.78' r='1.82' fill-opacity='.83'/%3E%3Ccircle cx='16.85' cy='12.22' r='1.68' fill-opacity='.74'/%3E%3Ccircle cx='14.23' cy='15.82' r='1.54' fill-opacity='.66'/%3E%3Ccircle cx='10' cy='17.2' r='1.4' fill-opacity='.57'/%3E%3Ccircle cx='5.77' cy='15.82' r='1.26' fill-opacity='.49'/%3E%3Ccircle cx='3.15' cy='12.22' r='1.12' fill-opacity='.4'/%3E%3Ccircle cx='3.15' cy='7.78' r='.98' fill-opacity='.32'/%3E%3Ccircle cx='5.77' cy='4.18' r='.84' fill-opacity='.23'/%3E%3Ccircle cx='10' cy='10' r='1.6' fill-opacity='.5'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='2.8' r='2.1'/%3E%3Ccircle cx='14.23' cy='4.18' r='1.96' fill-opacity='.92'/%3E%3Ccircle cx='16.85' cy='7.78' r='1.82' fill-opacity='.83'/%3E%3Ccircle cx='16.85' cy='12.22' r='1.68' fill-opacity='.74'/%3E%3Ccircle cx='14.23' cy='15.82' r='1.54' fill-opacity='.66'/%3E%3Ccircle cx='10' cy='17.2' r='1.4' fill-opacity='.57'/%3E%3Ccircle cx='5.77' cy='15.82' r='1.26' fill-opacity='.49'/%3E%3Ccircle cx='3.15' cy='12.22' r='1.12' fill-opacity='.4'/%3E%3Ccircle cx='3.15' cy='7.78' r='.98' fill-opacity='.32'/%3E%3Ccircle cx='5.77' cy='4.18' r='.84' fill-opacity='.23'/%3E%3Ccircle cx='10' cy='10' r='1.6' fill-opacity='.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 .is-done { box-shadow: inset 0 0 0 2px var(--ok); }
 
 /* cards */
@@ -272,7 +277,7 @@ input[readonly] { background: var(--thumb); }
   .btn-sign:active, .btn-ink:active, .btn-outline:active, .btn-quiet:active, .btn-danger:active { transform: translateY(1px); opacity: 1; }
   .btn-sign:active { box-shadow: inset 0 -1px 0 rgb(0 0 0 / .18); }
   .menu-item:active, .icon-btn:active, .account-btn:active, .settings-nav a:active { transform: scale(.98); }
-  .is-busy::before { animation: spin .7s linear infinite; }
+  .is-busy::before, #n8n-chat .chat-message-typing-body::before { animation: spin 1.1s linear infinite; }
   @keyframes spin { to { transform: rotate(1turn); } }
 
   /* course card: data flows along the edges while you look at it */
@@ -375,7 +380,8 @@ input[readonly] { background: var(--thumb); }
 }
 
 .footer { border-top: 1px solid var(--line); background: var(--surface); }
-.footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; padding-block: 20px; font-size: .9rem; color: var(--ink-2); }
+.footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; padding: 20px var(--gutter); font-size: .9rem; color: var(--ink-2); }
+body:has(#n8n-chat) .footer-inner { padding-right: calc(var(--gutter) + 80px); }   /* room for the round chat button */
 .footer-inner .row { gap: 4px 16px; }
 
 /* running text in a card (privacy) */
@@ -397,8 +403,19 @@ body {
   --chat--footer--background: var(--surface); --chat--footer--color: var(--ink-2); --chat--footer--border-top: 1px solid var(--line);
   --chat--input--send--button--color: var(--ink); --chat--input--send--button--color-hover: var(--enamel);
   --chat--heading--font-size: 1.35rem;
+  /* #57: n8n computes these on :root from its own radius, so set them here. Rounder than cards: it floats. */
+  --chat--window--border-radius: 16px; --chat--message--border-radius: 12px; --chat--button--border-radius: var(--r-btn);
+  /* never taller than the screen (zoom, phone, landscape): 64px button + 3 × 16px spacing stay visible */
+  --chat--window--height: min(600px, calc(100dvh - 112px));
 }
 .chat-heading h1 { font-family: var(--font-display); }
+#n8n-chat .chat-message-typing-body::before { width: 28px; height: 28px; color: var(--ink); }
+#n8n-chat .chat-message-typing-circle { display: none; }
+@media (max-height: 560px) {   /* short screen or zoomed in: a one-line header leaves room for the messages */
+  body { --chat--header--padding: 8px 16px; --chat--heading--font-size: 1.1rem; }
+  #n8n-chat .chat-header { gap: 0; }
+  #n8n-chat .chat-header p { display: none; }
+}
 .chat-ai-note { margin: 0; padding: 6px 12px 10px; font-size: .8125rem; color: var(--ink-2); background: var(--surface); }
 @media print { #n8n-chat { display: none !important; } }
 
