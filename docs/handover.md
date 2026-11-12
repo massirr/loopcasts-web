@@ -14,6 +14,7 @@ Last update: **12/11/2026**.
   Locally works with user-secret `Stripe:SecretKey` (test card `4242 4242 4242 4242`).
 - **E-mail only locally** by choice (Mailpit + n8n on Koze's laptop): `docs/architecture.md`, Known limits.
 - **Checkout** (#56): single course chosen per order (`Order.CourseId`); logged-in buyers skip e-mail/login steps.
+- **UI polish** (#57): chat fits on zoom/phone, orb loader (chat + busy buttons), footer full width, chip name from paid orders.
 - Spec flow (#51): skill `spec` (intent first) → build → agent `reviewer` → skill `spec-close`.
 
 ## Open on the live site
@@ -26,7 +27,5 @@ Last update: **12/11/2026**.
    `https://loopcasts-koze.azurewebsites.net/webhooks/stripe` (event `checkout.session.completed`); one live test
    payment → Admin/Orders shows it paid.
 2. Decide: block the mock checkout in Production when no key is set (follow-up from #53).
-3. **#57 UI** (Koze's phone test 11/11): chat window does not fit on zoom/phone, rounder corners; footer not full
-   width; account chip shows "TTT" instead of name/initials; loaders (thinking-orbs, check licence) in the chat
-   and on slow buttons (Pay, Order), no full-page loader.
+3. Optional: hide "Buy for €39" on course cards for active subscribers (ask Koze).
 4. Later (free tools): Sentry, UptimeRobot, custom domain via Combell (needs B1, Azure credit).

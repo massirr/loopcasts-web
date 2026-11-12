@@ -28,12 +28,14 @@
     </main>
 
     <footer class="footer">
-        <div class="container footer-inner">
+        <div class="footer-inner">
             <span class="row"><span>&copy; LoopCasts BV, Ghent</span><a asp-area="" asp-page="/Privacy">Privacy</a></span>
             <partial name="_SupportLine" />
         </div>
     </footer>
 
+    @* One live region for "busy" news (#57): screen readers hear "Paying…" or "Thinking…" while the loader turns *@
+    <p id="busy-status" class="visually-hidden" role="status"></p>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <partial name="_Chat" />
     @await RenderSectionAsync("Scripts", required: false)
