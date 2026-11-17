@@ -40,12 +40,13 @@ public static class CustomerData
             .ToListAsync();
     }
 
-    /// The name for the account button: the name on the newest order, else the e-mail before the @ ("ann.peeters" → "Ann").
+    /// The name for the account button: the name on the newest PAID order (an unpaid one could be typed by anyone
+    /// with your e-mail, #57), else the e-mail before the @ ("ann.peeters" → "Ann").
     /// Identity only stores the e-mail; staff and colleagues on a team seat never ordered themselves.
     public static async Task<string> NameAsync(AppDbContext db, string email)
     {
         var e = email.ToLower();
-        var name = await db.Orders.Where(o => o.Email.ToLower() == e)
+        var name = await db.Orders.Where(o => o.Email.ToLower() == e && o.IsPaid)
             .OrderByDescending(o => o.Id).Select(o => o.Name).FirstOrDefaultAsync();
         if (!string.IsNullOrWhiteSpace(name)) return name.Trim();
         var part = email.Split('@')[0].Split('.', '_', '-', '+')[0];
