@@ -1,5 +1,6 @@
 @page
 @model PayModel
+@inject IConfiguration Config
 @{
     ViewData["Title"] = "Payment";
     var o = Model.Order!;
@@ -7,7 +8,13 @@
 
 <div class="narrow">
     <partial name="_Progress" model="2" />
-    @if (!Model.UsesStripe)
+    @if (Model.Unavailable)
+    {
+        @* #60: no Stripe key on the live site → no fake payment. Order stays unpaid; admin marks it paid after the transfer. *@
+        <p class="flash flash-info" role="status"><span><strong>Online payment is not available right now.</strong>
+            Your order is saved. Mail us at @Config["Seller:SupportEmail"] to pay by bank transfer.</span></p>
+    }
+    else if (!Model.UsesStripe)
     {
         <p class="flash flash-info"><span><strong>Test payment.</strong> No real money moves: the button marks your order as paid.</span></p>
     }
@@ -37,10 +44,13 @@
         }
         <p class="muted small wrap-any">Invoice and login go to @o.Email</p>
 
+        @if (!Model.Unavailable)
+        {
         <form method="post" asp-route-id="@o.Id" asp-route-key="@o.AccessKey">
             <button type="submit" class="btn-sign btn-wide" data-busy-text="Paying…">
                 Pay @($"€{Model.Total:0.00}") @(Model.UsesStripe ? "with Stripe" : "(test)")
             </button>
         </form>
+        }
     </section>
 </div>

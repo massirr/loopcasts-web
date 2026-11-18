@@ -1,7 +1,7 @@
 # Handover: current state
 
 Replaced at the end of each session; max ~60 lines. History: `docs/log/`. Plans: `docs/architecture.md`.
-Last update: **12/11/2026**.
+Last update: **18/11/2026**.
 
 ## Current state
 - Repository: `massirr/loopcasts-web`, default branch `main`, public. `main` protected (PR + green `build-test`).
@@ -15,10 +15,13 @@ Last update: **12/11/2026**.
 - **E-mail only locally** by choice (Mailpit + n8n on Koze's laptop): `docs/architecture.md`, Known limits.
 - **Checkout** (#56): single course chosen per order (`Order.CourseId`); logged-in buyers skip e-mail/login steps.
 - **UI polish** (#57): chat fits on zoom/phone, orb loader (chat + busy buttons), footer full width, chip name from paid orders.
+- **No fake payments** (#60): no Stripe key → mock checkout only in Development; live /Pay asks for a bank transfer
+  and the order stays unpaid (admin marks it paid). One startup warning when the key is missing.
 - Spec flow (#51): skill `spec` (intent first) → build → agent `reviewer` → skill `spec-close`.
 
 ## Open on the live site
-- No Stripe key on Azure yet → mock checkout gives free access: do **not** share the URL.
+- No Stripe key on Azure yet → online payment is off (#60): orders stay unpaid, no free access.
+- `Seller:SupportEmail` is still the placeholder `support@loopcasts.example` (shown on /Pay and the support line).
 - Old fictional data: Koze imports via `/Admin/Import` (orders + invoice register, then users `.sql`); when copying
   the DB for a check, include `loopcasts.db-wal`.
 
@@ -26,6 +29,6 @@ Last update: **12/11/2026**.
 1. **After merging #53:** App Service setting `Stripe__SecretKey`; in the Stripe sandbox add webhook endpoint
    `https://loopcasts-koze.azurewebsites.net/webhooks/stripe` (event `checkout.session.completed`); one live test
    payment → Admin/Orders shows it paid.
-2. Decide: block the mock checkout in Production when no key is set (follow-up from #53).
+2. Set `Seller__SupportEmail` in the App Service settings once a real inbox exists.
 3. Optional: hide "Buy for €39" on course cards for active subscribers (ask Koze).
 4. Later (free tools): Sentry, UptimeRobot, custom domain via Combell (needs B1, Azure credit).

@@ -58,7 +58,8 @@ Pricing → `/Order?plan=…` (validation, VAT number check, company fields only
   No real users, so Mailpit + n8n locally are enough to show them. Invoices stay visible on /My; only "Forgot
   password" has no way back live. Real users later → SMTP login/TLS in `LoginEmailSender` (#27), or Google login.
   Set-password link: on OrderThanks for the first paid order only, and e-mailed via n8n when `N8n:WebhookUrl` is set.
-- **Stripe** (#53): active only with user-secret `Stripe:SecretKey` (sk_test_…), else /Pay is the mock.
+- **Stripe** (#53): active only with `Stripe:SecretKey` (sk_test_…). No key: /Pay is the mock in Development only;
+  elsewhere it refuses payment and asks for a bank transfer, order stays unpaid (#60).
   Webhook endpoint is set in the Stripe dashboard; without it the status is checked when the customer returns.
 - **VAT check** (#33): "not verified" orders are not re-checked automatically; no credit notes yet.
 - **Team seats** (#4): colleague setup link shown to the buyer once, only for a NEW login (else takeover risk).

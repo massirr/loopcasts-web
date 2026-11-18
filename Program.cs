@@ -66,6 +66,10 @@ using (var scope = app.Services.CreateScope())
     var csvPath = Path.Combine(app.Environment.ContentRootPath, "Data", "Seed", "course-catalogue.csv");
     await CourseCsvImporter.SeedAsync(db, csvPath, logger);
     await AdminSeeder.SeedAsync(scope.ServiceProvider, app.Configuration, logger);
+
+    // #60: outside Development no key means /Pay refuses payments (no mock). Say so once; never log the key itself.
+    if (!app.Environment.IsDevelopment() && string.IsNullOrEmpty(app.Configuration["Stripe:SecretKey"]))
+        logger.LogWarning("Stripe:SecretKey is not set: online payment is off, orders stay unpaid until marked paid by an admin.");
 }
 
 // Configure the HTTP request pipeline.
