@@ -15,7 +15,7 @@ Read this when you need to find code or understand a rule. Not loaded by default
 | `Services/N8nNotifier.cs` | Event `invoice.created` to the n8n webhook (invoice e-mail). Never throws. See `docs/n8n.md` |
 | `Services/LoginEmailSender.cs` | Identity's `IEmailSender` (Forgot password, Change e-mail): straight over SMTP (`Smtp:Host/Port/From`, `System.Net.Mail`), NOT via n8n (#27). Our wording lives here. Never throws; SMTP down → log + TempData `LoginEmailNotSent` (shown by `_Flash`, only when logged in) |
 | `Services/RenewalReminders.cs`, `Api/AutomationApi.cs` | Renewal reminders for n8n: `GET /api/automation/expiring?days=14`, `POST /api/automation/reminded` (header `X-LoopCasts-Secret` = `N8n:Secret`) |
-| `docs/decisions/` | ADRs. **0001 n8n or code**: code = money, data, security, must-always-work; n8n = outside services, schedules, notifications, texts the business changes, AI. Check it before placing a new automation |
+| `docs/decisions/` | ADRs (0004: Stripe webhook direct, no Event Grid). **0001 n8n or code**: code = money, data, security, must-always-work; n8n = outside services, schedules, notifications, texts the business changes, AI. Check it before placing a new automation |
 | `docker-compose.yml`, `n8n/` | Local n8n + Mailpit (only mail server, SMTP also on `localhost:1025` for the site); workflows "LoopCasts e-mails" + "Renewal reminder" as JSON. `.env` = `LOOPCASTS_SECRET` (git-ignored). See `docs/n8n.md` |
 | `Api/PublicApi.cs`, `Pages/Shared/_Chat.cshtml` | Chat assistant (#22): public read-only `/api/public/courses|plans|faq` for the n8n "LoopCasts assistant" (Groq `openai/gpt-oss-120b`; was Gemini); widget only when `Chat:Url` is set. FAQ/prompt in `n8n/knowledge/`, eval in `n8n/eval/` + `docs/ai-evaluation.md`. Only public data goes to the model |
 | `Services/VatCalculator.cs` | Handbook VAT rules (BE 21%, EU private 21%, EU company with VIES-valid VAT nr 0% reverse charge, non-EU 0%) |
@@ -58,7 +58,8 @@ Pricing → `/Order?plan=…` (validation, VAT number check, company fields only
   No real users, so Mailpit + n8n locally are enough to show them. Invoices stay visible on /My; only "Forgot
   password" has no way back live. Real users later → SMTP login/TLS in `LoginEmailSender` (#27), or Google login.
   Set-password link: on OrderThanks for the first paid order only, and e-mailed via n8n when `N8n:WebhookUrl` is set.
-- **Stripe** (#53): active only with user-secret `Stripe:SecretKey` (sk_test_…), else /Pay is the mock.
+- **Stripe** (#53): active only with `Stripe:SecretKey` (sk_test_…). No key: /Pay is the mock in Development only;
+  elsewhere it refuses payment and asks for a bank transfer, order stays unpaid (#60).
   Webhook endpoint is set in the Stripe dashboard; without it the status is checked when the customer returns.
 - **VAT check** (#33): "not verified" orders are not re-checked automatically; no credit notes yet.
 - **Team seats** (#4): colleague setup link shown to the buyer once, only for a NEW login (else takeover risk).

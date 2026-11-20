@@ -8,15 +8,18 @@ using Microsoft.EntityFrameworkCore;
 namespace LoopCastsWeb.Pages;
 
 // Checkout. With a Stripe key: redirect to Stripe Checkout, Stripe sends the customer back here (and calls the webhook).
-// Without a key: MOCK checkout, the button marks the order paid directly.
+// Without a key: MOCK checkout (button marks the order paid directly), but ONLY in Development (#60).
+// Anywhere else without a key the order stays unpaid and the customer is asked to pay by bank transfer.
 public class PayModel : PageModel
 {
     private readonly AppDbContext _db;
     private readonly PaymentService _payments;
     private readonly StripeService _stripe;
+    private readonly IHostEnvironment _env;
 
-    public PayModel(AppDbContext db, PaymentService payments, StripeService stripe)
+    public PayModel(AppDbContext db, PaymentService payments, StripeService stripe, IHostEnvironment env)
     {
+        _env = env;
         _db = db;
         _payments = payments;
         _stripe = stripe;
@@ -26,6 +29,7 @@ public class PayModel : PageModel
     public Plan? Plan { get; set; }
     public decimal Total { get; set; }
     public bool UsesStripe => _stripe.Enabled;
+    public bool Unavailable => !_stripe.Enabled && !_env.IsDevelopment();   // no key on the live site: no fake payments
     public string? Error { get; set; }
     public bool NotCompleted { get; set; }   // came back from Stripe without paying ("back" on Stripe's page)
 
@@ -54,6 +58,14 @@ public class PayModel : PageModel
         var order = await _db.Orders.Include(o => o.Course).FirstOrDefaultAsync(o => o.Id == id);
         if (order is null || !order.Opens(key)) return NotFound();
         if (order.IsPaid) return RedirectToPage("/OrderThanks", new { id, key });
+
+        if (Unavailable)   // checked here too: a direct POST (curl) must not get past a hidden button
+        {
+            Order = order;
+            Plan = Plans.Find(order.PlanCode);
+            Total = StripeService.Total(order);
+            return Page();
+        }
 
         if (!_stripe.Enabled)
         {
