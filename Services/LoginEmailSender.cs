@@ -8,7 +8,8 @@ namespace LoopCastsWeb.Services;
 
 /// <summary>
 /// Identity's e-mail sender: "Forgot password?" and "Change e-mail". The site sends these itself over SMTP
-/// (config Smtp:Host / Smtp:Port / Smtp:From; locally Mailpit), NOT via n8n: getting back into your account must work
+/// (config Smtp:Host / Smtp:Port / Smtp:From, + Smtp:User / Smtp:Password on the live site; locally Mailpit),
+/// NOT via n8n: getting back into your account must work
 /// even when n8n is down (#27, docs/decisions/0001-n8n-or-code.md). Built-in System.Net.Mail, no package.
 /// SMTP down? Logged + a message on the next page, never thrown: Identity's pages (in the package) don't catch it.
 /// </summary>
@@ -41,8 +42,7 @@ public class LoginEmailSender : IEmailSender
             {
                 IsBodyHtml = true,
             };
-            // ponytail: no login/TLS (Mailpit needs none). A real server (#8): add Smtp:User/Password + EnableSsl here.
-            using var smtp = new SmtpClient(host, _config.GetValue("Smtp:Port", 25));
+            using var smtp = Client(_config, host);
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             await smtp.SendMailAsync(message, timeout.Token);
         }
@@ -54,6 +54,19 @@ public class LoginEmailSender : IEmailSender
             if (_http.HttpContext is { User.Identity.IsAuthenticated: true } context)
                 _tempData.GetTempData(context)[NotSentKey] = true;
         }
+    }
+
+    // Smtp:User set (Mailtrap sandbox on the live site, #64) → log in, and only over TLS (STARTTLS): a password is never
+    // sent in plain text. No user (Mailpit locally) → no login, no TLS, as before.
+    public static SmtpClient Client(IConfiguration config, string host)
+    {
+        var smtp = new SmtpClient(host, config.GetValue("Smtp:Port", 25));
+        if (config["Smtp:User"] is { Length: > 0 } user)
+        {
+            smtp.Credentials = new NetworkCredential(user, config["Smtp:Password"]);
+            smtp.EnableSsl = true;
+        }
+        return smtp;
     }
 
     // Identity writes its own e-mails ("Please reset your password by <a href='…'>clicking here</a>.").
