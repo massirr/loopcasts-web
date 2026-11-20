@@ -18,6 +18,13 @@ az webapp config appsettings set -g $RG -n $APP --settings \
   "SeedAdmins__0__Email=<you@…>" "SeedAdmins__0__Password=<strong password>"
 # later: Stripe__SecretKey (+ webhook https://$APP.azurewebsites.net/webhooks/stripe in the Stripe dashboard), N8n__WebhookUrl, N8n__Secret
 
+# Login e-mails (#64): Mailtrap Email Testing sandbox = a hosted Mailpit, nothing reaches a real inbox.
+# Values: Mailtrap → Sandboxes → your inbox → Integration → SMTP. A user name switches on login + TLS (STARTTLS).
+# The password ends up in shell history: or type it in Portal → Environment variables instead.
+az webapp config appsettings set -g $RG -n $APP --settings \
+  "Smtp__Host=sandbox.smtp.mailtrap.io" "Smtp__Port=2525" "Smtp__From=LoopCasts <support@loopcasts.example>" \
+  "Smtp__User=<from Mailtrap>" "Smtp__Password=<from Mailtrap>"
+
 # GitHub Actions deploy (publish profile needs basic-auth publishing enabled)
 az resource update -g $RG --namespace Microsoft.Web --resource-type basicPublishingCredentialsPolicies \
   --parent sites/$APP -n scm --set properties.allow=true
@@ -43,6 +50,6 @@ Re-run manually: GitHub → Actions → Deploy → Re-run.
 - **Remove everything:** `az group delete -n $RG`.
 
 ## Also before going live
-- E-mail and n8n stay local by choice: see `docs/architecture.md` (Known limits).
+- Login e-mails: Mailtrap sandbox (above). Invoice/reminder mails need n8n: still local, see `docs/architecture.md` (Known limits).
 - `Vies:BaseUrl` is already the real VIES endpoint in `appsettings.json` (Development overrides it with the test service).
 - If n8n ever moves to a server: docs/n8n.md §6 (`LOOPCASTS_PUBLIC_URL` = the public site, Chat Trigger *Allowed origins*).

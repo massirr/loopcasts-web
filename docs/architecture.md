@@ -54,9 +54,10 @@ Pricing → `/Order?plan=…` (validation, VAT number check, company fields only
 - Where an automation runs (code or n8n): ADR 0001.
 
 ## Known limits (by area)
-- **E-mail only locally** (decision 11/11/2026): the live site sends no e-mails (no SMTP, n8n runs on Koze's laptop).
-  No real users, so Mailpit + n8n locally are enough to show them. Invoices stay visible on /My; only "Forgot
-  password" has no way back live. Real users later → SMTP login/TLS in `LoginEmailSender` (#27), or Google login.
+- **E-mail live** (#64): login e-mails go over SMTP to the **Mailtrap sandbox** (a hosted Mailpit: every mail lands
+  in its inbox, nobody real gets mail). `Smtp:User` set → login + TLS. Invoice and reminder mails go via n8n, which
+  still runs on Koze's laptop: plan = host n8n; demo fallback = Tailscale Funnel to the laptop. Real users later →
+  a real provider is only `Smtp__*` settings.
   Set-password link: on OrderThanks for the first paid order only, and e-mailed via n8n when `N8n:WebhookUrl` is set.
 - **Stripe** (#53): active only with `Stripe:SecretKey` (sk_test_…). No key: /Pay is the mock in Development only;
   elsewhere it refuses payment and asks for a bank transfer, order stays unpaid (#60).

@@ -83,6 +83,37 @@ public class LoginEmailSenderTests
         Assert.True(tempData.GetTempData(http).ContainsKey(LoginEmailSender.NotSentKey));
     }
 
+    private static IConfiguration Config(string? user, string? password = null) =>
+        new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Smtp:Port"] = "2525",
+            ["Smtp:User"] = user,
+            ["Smtp:Password"] = password,
+        }).Build();
+
+    [Fact]   // #64: Mailtrap sandbox on the live site
+    public void WithUser_LogsInOverTls()
+    {
+        using var smtp = LoginEmailSender.Client(Config("demo-user", "demo-pass"), "sandbox.smtp.mailtrap.io");
+
+        Assert.True(smtp.EnableSsl);   // STARTTLS: the password never goes over the wire in plain text
+        var login = Assert.IsType<NetworkCredential>(smtp.Credentials);
+        Assert.Equal("demo-user", login.UserName);
+        Assert.Equal("demo-pass", login.Password);
+        Assert.Equal(2525, smtp.Port);
+    }
+
+    [Theory]   // #64: Mailpit locally needs neither
+    [InlineData(null)]
+    [InlineData("")]
+    public void WithoutUser_NoLoginNoTls(string? user)
+    {
+        using var smtp = LoginEmailSender.Client(Config(user), "localhost");
+
+        Assert.False(smtp.EnableSsl);
+        Assert.Null(smtp.Credentials);
+    }
+
     private static int UnusedPort()
     {
         var listener = new TcpListener(IPAddress.Loopback, 0);
